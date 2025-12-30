@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RWA · Mustree</title>
+  <meta name="description" content="IPFS · MetaMask 연동으로 실물자산(RWA)을 온체인 토큰으로 발행합니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="page">
+  <div id="site-nav"></div>
+
+<main>
+  <!-- HERO -->
+  <section class="hero hero--subpage">
+    <div class="hero-bg"></div>
+    <div class="container hero-inner">
+      <p class="eyebrow">Real World Asset</p>
+      <h1>RWA 토큰 생성 페이지</h1>
+      <p class="sub">
+        IPFS · MetaMask 연동으로<br/>
+        실물 자산 이미지를 온체인 RWA로 발행합니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- 네트워크 선택 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">네트워크 선택</h2>
+
+      <div class="field">
+        <label>네트워크 선택</label>
+        <select id="netSelect"></select>
+      </div>
+
+      <div class="card mono" style="margin-top:12px; padding:12px;">
+        <div><b>네트워크 이름:</b> <span id="netName"></span></div>
+        <div><b>RPC URL:</b> <span id="netRpc"></span></div>
+        <div><b>Chain ID:</b> <span id="netChain"></span></div>
+        <div><b>Symbol:</b> <span id="netSymbol"></span></div>
+        <div><b>RWA 컨트랙트:</b> <span id="netContract"></span></div>
+      </div>
+
+      <p class="small" id="mmStatus" style="margin-top:8px;"></p>
+    </div>
+  </section>
+
+  <!-- RWA 파일 업로드 & CID 생성 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">1. RWA 원본 파일 업로드 (NAS4 → IPFS)</h2>
+
+      <div class="card" style="padding:16px;">
+        <div class="field">
+          <label>자산 파일 (이미지 / PDF 등)</label>
+          <input id="fileInput" type="file" />
+        </div>
+
+        <button id="uploadBtn" class="btn primary" style="margin-top:12px;">
+          파일 업로드 &amp; CID 생성
+        </button>
+        <div id="uploadProgressBox" style="display:none; margin-top:12px;">
+          <div style="background:#222; height:10px; width:100%; border-radius:8px;">
+            <div id="uploadProgress" style="background:#4ade80; width:0%; height:10px; border-radius:8px;"></div>
+          </div>
+          <p id="uploadPercent" class="small"></p>
+        </div>
+
+
+        <p class="small" style="margin-top:8px;">
+          ※ 현재 API 엔드포인트: <code id="apiEndpointLabel"></code><br/>
+          (&lt;script&gt; 내 <code>UPLOAD_ENDPOINT</code> 상수로 변경 가능)
+        </p>
+
+        <div class="card mono" style="margin-top:16px; padding:12px;">
+          <div><b>CID:</b> <span id="cidOut"></span></div>
+          <div><b>IPFS URI:</b> <span id="ipfsOut"></span></div>
+          <div><b>Gateway URL:</b> <span id="gwOut"></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RWA 코드 자동 생성 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">2. Solidity &amp; 스크립트 코드 자동 생성</h2>
+
+      <div class="form">
+        <div class="field">
+          <label>받는 지갑 주소 (to)</label>
+          <input id="toAddr" placeholder="0xRecipient..." />
+        </div>
+      </div>
+
+      <button id="codeGenBtn" class="btn" style="margin-top:8px;">
+        코드 스니펫 생성
+      </button>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>생성된 Solidity / ethers.js 코드</h3>
+        <pre id="codeOut" class="mono" style="white-space:pre-wrap;"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- RWA 실제 민팅 -->
+  <section class="section">
+    <div class="container">
+      <h2 class="section-title">3. RWA 온체인 민팅 (MetaMask)</h2>
+
+      <button id="mintBtn" class="btn primary">
+        RWA 민팅 실행 (mintRWA)
+      </button>
+
+      <div class="card" style="margin-top:16px;">
+        <h3>트랜잭션 로그</h3>
+        <pre id="logOut" class="mono" style="white-space:pre-wrap;"></pre>
+      </div>
+    </div>
+  </section>
+	<!-- IPFS CID 기반 원본 파일 다운로드 -->
+  <section class="section">
+	<div class="container">
+		<h2 class="section-title">4. IPFS 원본 파일 다운로드</h2>
+
+		<div class="card" style="padding:16px;">
+		<div class="field">
+			<label>CID 입력</label>
+			<input id="downloadCidInput" placeholder="Qm... 또는 bafy..." />
+		</div>
+
+		<button id="downloadBtn" class="btn" style="margin-top:12px;">
+			원본 파일 다운로드
+		</button>
+
+		<p class="small" style="margin-top:8px;">
+			Gateway: <code>https://rwa-gw.mst3.site/ipfs/&lt;CID&gt;</code>
+		</p>
+		</div>
+	</div>
+  </section>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script src="site.js"></script>
+<script src="script.js"></script>
+
+<script>
+/* ================================
+   0) 환경 설정
+================================ */
+const UPLOAD_ENDPOINT = "https://api.mst3.site/upload";
+// 필요시 nginx 리버스프록시로 /rwa-upload 등으로 변경 가능
+
+document.getElementById("apiEndpointLabel").textContent = UPLOAD_ENDPOINT;
+
+/* ================================
+   1) 네트워크 정보 & 컨트랙트 매핑
+================================ */
+const networks = [
+  { name:"Mustree",    rpc:"https://block.mst3.site",     chain:7601, symbol:"MST" },
+  { name:"JKK-TMZ",    rpc:"https://jkk.mst2.site",       chain:7707, symbol:"TMZ" },
+  { name:"KukminBank", rpc:"https://rpc.mstblock.com",    chain:1213, symbol:"KBB" },
+  { name:"NABIZAM",    rpc:"https://nbmst.mst2.site",     chain:7602, symbol:"NBZ" },
+  { name:"MDPCD",      rpc:"https://mdpcd.mst2.site",     chain:7603, symbol:"MDP" }
+];
+
+const RWA_CONTRACTS = {
+  "Mustree":    "0x44FDE9228ED16B64Af6C4Bf8f4f985079184c639",
+  "JKK-TMZ":    "0xB30821a1BF6C15E2C08036984D56f50706b1FFcB",
+  "KukminBank": "0x0000000000000000000000000000000000000003",
+  "NABIZAM":    "0x65b2C826E206b4691ffA94BfFF0a2d8dDc270ffD",
+  "MDPCD":      "0xd153a0fCF7147CB9503c527875f7395e35f3185B"
+};
+
+/* 최소 RWA ABI (필요시 전체 ABI로 교체 가능) */
+const RWA_ABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "ERC721IncorrectOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC721InsufficientApproval",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "approver",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidApprover",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidOperator",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "receiver",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidReceiver",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidSender",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC721NonexistentToken",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "approved",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "ApprovalForAll",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "cid",
+				"type": "string"
+			}
+		],
+		"name": "mintRWA",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "data",
+				"type": "bytes"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "setApprovalForAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "getApproved",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			}
+		],
+		"name": "isApprovedForAll",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "nextId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerOf",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenURI",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+
+/* ================================
+   2) 네트워크 셀렉트 & MetaMask
+================================ */
+const netSelect   = document.getElementById("netSelect");
+const netName     = document.getElementById("netName");
+const netRpc      = document.getElementById("netRpc");
+const netChain    = document.getElementById("netChain");
+const netSymbol   = document.getElementById("netSymbol");
+const netContract = document.getElementById("netContract");
+const mmStatus    = document.getElementById("mmStatus");
+
+networks.forEach(n => {
+  const opt = document.createElement("option");
+  opt.value = n.name;
+  opt.textContent = n.name;
+  netSelect.appendChild(opt);
+});
+
+function getSelectedNet() {
+  return networks.find(n => n.name === netSelect.value);
+}
+
+function updateNetworkInfo() {
+  const n = getSelectedNet();
+  if (!n) return;
+  netName.textContent     = n.name;
+  netRpc.textContent      = n.rpc;
+  netChain.textContent    = n.chain;
+  netSymbol.textContent   = n.symbol;
+  netContract.textContent = RWA_CONTRACTS[n.name] || "(설정되지 않음)";
+}
+
+async function switchToNetwork(net) {
+  if (!window.ethereum) {
+    mmStatus.textContent = "❌ MetaMask가 감지되지 않았습니다.";
+    return;
+  }
+  const chainHex = "0x" + net.chain.toString(16);
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: chainHex }]
+    });
+  } catch (err) {
+    // 네트워크가 없으면 추가
+    if (err.code === 4902) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: chainHex,
+          chainName: net.name,
+          rpcUrls: [net.rpc],
+          nativeCurrency: {
+            name: net.symbol,
+            symbol: net.symbol,
+            decimals: 18
+          }
+        }]
+      });
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainHex }]
+      });
+    } else {
+      mmStatus.textContent = "네트워크 전환 실패: " + (err.message || err);
+    }
+  }
+}
+
+netSelect.addEventListener("change", async () => {
+  updateNetworkInfo();
+  const n = getSelectedNet();
+  await switchToNetwork(n);
+});
+
+updateNetworkInfo();
+
+// MetaMask 상태 안내 초기화
+if (window.ethereum) {
+  mmStatus.textContent = "✅ MetaMask 감지됨. 네트워크를 선택 후 사용해주세요.";
+} else {
+  mmStatus.textContent = "❌ MetaMask가 설치되지 않았습니다.";
+}
+
+/* ================================
+   3) RWA 업로드 (파일 → NAS4 → IPFS)
+================================ */
+const fileInput   = document.getElementById("fileInput");
+const uploadBtn   = document.getElementById("uploadBtn");
+const cidOut      = document.getElementById("cidOut");
+const ipfsOut     = document.getElementById("ipfsOut");
+const gwOut       = document.getElementById("gwOut");
+const logOut      = document.getElementById("logOut");
+const codeOut     = document.getElementById("codeOut");
+const toAddrInput = document.getElementById("toAddr");
+
+let CURRENT_CID      = null;
+let CURRENT_IPFS_URI = null;
+let CURRENT_GW       = null;
+
+async function uploadFileAndGetCid() {
+  const file = fileInput.files[0];
+  if (!file) {
+    logOut.textContent = "❌ 업로드할 파일을 선택해주세요.";
+    return;
+  }
+
+  // 진행률 바 초기화
+  document.getElementById("uploadProgressBox").style.display = "block";
+  const bar = document.getElementById("uploadProgress");
+  const percentText = document.getElementById("uploadPercent");
+  bar.style.width = "0%";
+  percentText.textContent = "0%";
+
+  const form = new FormData();
+  form.append("file", file);
+
+  try {
+    const xhr = new XMLHttpRequest();
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        bar.style.width = percent + "%";
+        percentText.textContent = percent + "%";
+      }
+    };
+
+    const res = await new Promise((resolve, reject) => {
+      xhr.open("POST", UPLOAD_ENDPOINT);
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.responseText);
+          else reject(xhr.responseText);
+        }
+      };
+      xhr.send(form);
+    });
+
+    const data = JSON.parse(res);
+
+    CURRENT_CID      = data.cid;
+    CURRENT_IPFS_URI = data.ipfs;
+    CURRENT_GW       = data.gateway;
+
+    cidOut.textContent  = CURRENT_CID;
+    ipfsOut.textContent = CURRENT_IPFS_URI;
+    gwOut.textContent   = CURRENT_GW;
+
+    logOut.textContent =
+      "✅ 업로드 & CID 생성 성공\n" +
+      "CID: " + CURRENT_CID + "\n" +
+      "IPFS URI: " + CURRENT_IPFS_URI + "\n" +
+      "Gateway: " + CURRENT_GW;
+
+  } catch (err) {
+    logOut.textContent = "❌ 업로드 실패: " + err;
+  }
+}
+
+
+uploadBtn.addEventListener("click", uploadFileAndGetCid);
+
+/* ================================
+   4) 코드 스니펫 자동 생성
+================================ */
+const codeGenBtn = document.getElementById("codeGenBtn");
+
+function genCodeSnippet() {
+  const to = toAddrInput.value.trim();
+  if (!CURRENT_IPFS_URI || !CURRENT_CID) {
+    codeOut.textContent = "❌ 먼저 파일 업로드를 통해 CID/IPFS URI를 생성해주세요.";
+    return;
+  }
+  if (!to) {
+    codeOut.textContent = "❌ 받는 지갑 주소(to)를 입력해주세요.";
+    return;
+  }
+
+  const n = getSelectedNet();
+  const contractAddr = RWA_CONTRACTS[n.name];
+
+  const solSnippet = `
+/** RWAToken.sol (모두 발행 가능 버전) */
+function mintExample(address rwa, address to, string memory cid) external {
+    RWAToken(rwa).mintRWA(to, cid);
+}
+
+// 사용 예:
+// mintExample(${JSON.stringify(contractAddr)}, ${JSON.stringify(to)}, ${JSON.stringify(CURRENT_IPFS_URI)});
+  `.trim();
+
+  const jsSnippet = `
+import { ethers } from "ethers";
+
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer   = await provider.getSigner();
+
+const rwa = new ethers.Contract(
+  "${contractAddr}",
+  RWA_ABI, // 실제 ABI 배열
+  signer
+);
+
+const tx = await rwa.mintRWA(
+  "${to}",
+  "${CURRENT_IPFS_URI}"   // IPFS URI (예: ipfs://${CURRENT_CID})
+);
+
+console.log("TX Hash:", tx.hash);
+  `.trim();
+
+  codeOut.textContent =
+    "/* Solidity 예시 */\n" + solSnippet + "\n\n" +
+    "/* ethers.js 예시 */\n" + jsSnippet;
+}
+
+codeGenBtn.addEventListener("click", genCodeSnippet);
+
+/* ================================
+   5) MetaMask로 실제 RWA 민팅
+================================ */
+const mintBtn = document.getElementById("mintBtn");
+
+async function mintRwaOnChain() {
+  if (!window.ethereum) {
+    logOut.textContent = "❌ MetaMask가 감지되지 않습니다.";
+    return;
+  }
+  if (!CURRENT_IPFS_URI) {
+    logOut.textContent = "❌ 먼저 파일을 업로드해서 CID/IPFS URI를 생성해주세요.";
+    return;
+  }
+  const to = toAddrInput.value.trim();
+  if (!to) {
+    logOut.textContent = "❌ 받는 지갑 주소를 입력해주세요.";
+    return;
+  }
+
+  const net = getSelectedNet();
+  const contractAddr = RWA_CONTRACTS[net.name];
+  if (!contractAddr) {
+    logOut.textContent = `❌ ${net.name} 네트워크에 설정된 RWA 컨트랙트 주소가 없습니다.`;
+    return;
+  }
+
+  try {
+    logOut.textContent = "⏳ MetaMask 연결 중...";
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer   = await provider.getSigner();
+    const rwa = new ethers.Contract(contractAddr, RWA_ABI, signer);
+
+    // 다음 tokenId 미리 가져오기
+    const nextId = await rwa.nextId();
+    const predictedTokenId = Number(nextId);
+
+    logOut.textContent =
+      "⏳ 트랜잭션 전송 중...\n" +
+      "to: " + to + "\n" +
+      "cid: " + CURRENT_IPFS_URI + "\n" +
+      "예상 Token ID: " + predictedTokenId + "\n";
+
+    const tx = await rwa.mintRWA(to, CURRENT_IPFS_URI);
+
+    logOut.textContent +=
+      "\nTX 생성됨!\n" +
+      "TX Hash: " + tx.hash + "\n컨펌 대기 중...";
+
+    const receipt = await tx.wait();
+
+    logOut.textContent =
+      "🎉 RWA 민팅 성공!\n" +
+      "Token ID: " + predictedTokenId + "\n" +
+      "TX Hash: " + receipt.hash + "\n" +
+      "Block: " + receipt.blockNumber + "\n" +
+      "Contract: " + contractAddr + "\n" +
+      "CID: " + CURRENT_CID + "\n" +
+      "IPFS: " + CURRENT_IPFS_URI;
+
+  } catch (err) {
+    logOut.textContent = "❌ 민팅 에러: " + (err?.message || err);
+  }
+}
+
+
+mintBtn.addEventListener("click", mintRwaOnChain);
+
+/* ================================
+   6) CID 기반 IPFS 원본 다운로드
+================================ */
+const downloadBtn = document.getElementById("downloadBtn");
+const downloadCidInput = document.getElementById("downloadCidInput");
+
+downloadBtn.addEventListener("click", () => {
+  const cid = downloadCidInput.value.trim();
+  if (!cid) {
+    alert("CID를 입력해주세요.");
+    return;
+  }
+
+  const gatewayUrl = `https://rwa-gw.mst3.site/ipfs/${cid}`;
+
+  // 새 탭에서 다운로드 (브라우저 기본 처리)
+  window.open(gatewayUrl, "_blank");
+});
+
+
+</script>
+
+</body>
+</html>

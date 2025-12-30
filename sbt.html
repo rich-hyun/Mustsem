@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SBT · Mustree</title>
+  <meta name="description" content="지갑에 영구 귀속되는 SoulBound Token(SBT) 발급 페이지" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <!-- 브라우저에서 바로 컨트랙트 호출을 위한 ethers.js 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="page">
+  <div id="site-nav"></div>
+
+<main>
+<section class="hero hero--subpage">
+    <div class="hero-bg"></div>
+    <div class="container hero-inner">
+      <p class="eyebrow">SoulBound Token</p>
+      <h1>SoulBound Token 생성 페이지</h1>
+      <p class="sub">지갑에 영구 귀속되는 신뢰 기반 SBT 발급 시스템</p>
+    </div>
+</section>
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">네트워크 선택</h2>
+
+    <div class="field">
+      <label>네트워크 선택</label>
+      <select id="netSelect"></select>
+    </div>
+
+    <div class="card mono" style="margin-top:12px; padding:12px;">
+      <div><b>네트워크 이름:</b> <span id="netName"></span></div>
+      <div><b>RPC URL:</b> <span id="netRpc"></span></div>
+      <div><b>Chain ID:</b> <span id="netChain"></span></div>
+      <div><b>Symbol:</b> <span id="netSymbol"></span></div>
+    </div>
+
+    <!-- 메타마스크 상태 안내 -->
+    <p class="small" id="mmStatus" style="margin-top:8px;"></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">SBT 코드 자동 생성 & 실행</h2>
+
+    <div class="form">
+
+      <div class="field">
+        <label>지갑 주소</label>
+        <input id="owner" placeholder="0x..." />
+      </div>
+
+      <div class="field">
+        <label>SBT 이름</label>
+        <input id="sbtName" placeholder="예: Certification" />
+      </div>
+
+      <div class="field">
+        <label>가디언(1명)</label>
+        <input id="guardian" placeholder="0xGuardian" />
+      </div>
+
+    </div>
+
+    <!-- 기존: 코드 생성 버튼 -->
+    <button id="codeGen" class="btn primary" style="margin-top:12px;">
+      코드 생성
+    </button>
+
+    <!-- 실제 컨트랙트 실행 버튼 -->
+    <button id="txExec" class="btn" style="margin-top:8px; margin-left:8px;">
+      SBT 발행 실행 (MetaMask)
+    </button>
+
+    <div class="card" style="margin-top:16px;">
+      <h3>생성된 Solidity 코드 / 트랜잭션 로그</h3>
+      <pre id="solOut" class="mono" style="white-space:pre-wrap;"></pre>
+    </div>
+  </div>
+</section>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="site.js"></script>
+<script src="script.js"></script>
+
+
+<script>
+/* ---------------------------
+   1) 네트워크 정보 정의
+--------------------------- */
+const networks = [
+  { name:"Mustree", rpc:"https://block.mst3.site", chain:7601, symbol:"MST" },
+  { name:"JKK-TMZ", rpc:"https://jkk.mst2.site", chain:7707, symbol:"TMZ" },
+  { name:"KukminBank", rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
+  { name:"NABIZAM", rpc:"https://nbmst.mst2.site", chain:7602, symbol:"NBZ" },
+  { name:"MDPCD", rpc:"https://mdpcd.mst2.site", chain:7603, symbol:"MDP" }
+];
+
+// Mustree 고정 + 나머지 알파벳 정렬
+const sorted = [
+  networks.find(n => n.name === "Mustree"),
+  ...networks.filter(n => n.name !== "Mustree").sort((a,b)=>a.name.localeCompare(b.name))
+];
+
+/* ---------------------------
+   2) 셀렉트 박스 채우기
+--------------------------- */
+const netSelect = document.getElementById("netSelect");
+sorted.forEach(n => {
+  const opt = document.createElement("option");
+  opt.value = n.name;
+  opt.textContent = n.name;
+  netSelect.appendChild(opt);
+});
+
+/* 공통 DOM 캐시 (기존 코드 보완) */
+// solOut, mmStatus 캐싱
+const solOut = document.getElementById("solOut");
+const mmStatus = document.getElementById("mmStatus");
+
+/* ---------------------------
+   3) 네트워크 선택 시 정보 표시
+--------------------------- */
+function getSelectedNet() {
+  return sorted.find(n => n.name === netSelect.value);
+}
+
+function updateNetworkInfo() {
+  const selected = getSelectedNet();
+  document.getElementById("netName").textContent = selected.name;
+  document.getElementById("netRpc").textContent = selected.rpc;
+  document.getElementById("netChain").textContent = selected.chain;
+  document.getElementById("netSymbol").textContent = selected.symbol;
+}
+
+/* MetaMask 네트워크 전환 함수 */
+async function switchToNetwork(net) {
+  const chainHex = "0x" + net.chain.toString(16);
+
+  try {
+    // 우선 전환 시도
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: chainHex }]
+    });
+
+    // 실제 전환 검증
+    const current = await window.ethereum.request({ method: "eth_chainId" });
+    if (current.toLowerCase() !== chainHex.toLowerCase()) {
+      throw new Error("Switch failed, re-adding network...");
+    }
+
+    console.log("Network switched:", current);
+
+  } catch (err) {
+    console.log("Switch error:", err);
+
+    // 네트워크가 없으면 추가
+    if (err.code === 4902 || err.message.includes("re-adding")) {
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: chainHex,
+          chainName: net.name,
+          rpcUrls: [net.rpc],
+          nativeCurrency: {
+            name: net.symbol,
+            symbol: net.symbol,
+            decimals: 18
+          }
+        }]
+      });
+
+      // 추가 후 다시 전환
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainHex }]
+      });
+
+    } else {
+      alert("네트워크 전환 실패: " + err.message);
+    }
+  }
+}
+
+
+// 네트워크 선택 시, 정보 갱신 + MetaMask 전환
+netSelect.addEventListener("change", async () => {
+  updateNetworkInfo();
+  const selected = getSelectedNet();
+  await switchToNetwork(selected);
+});
+
+// 초기 표시
+updateNetworkInfo();
+
+/* ---------------------------
+   4) Solidity 코드 자동 생성 (기존 기능 유지)
+--------------------------- */
+document.getElementById("codeGen").addEventListener("click", () => {
+  const owner = document.getElementById("owner").value.trim();
+  const sbtName = document.getElementById("sbtName").value.trim();
+  const guardian = document.getElementById("guardian").value.trim();
+
+  if (!owner || !sbtName || !guardian) {
+    solOut.textContent = "모든 항목을 입력해야 코드가 생성됩니다.";
+    return;
+  }
+
+  const net = getSelectedNet();
+
+  const code = `
+pragma solidity ^0.8.20;
+
+interface ISBTVault {
+    function mintSBT(
+        address to,
+        string memory label,
+        address guardian,
+        uint256 unlockTime,
+        string memory metadata
+    ) external;
+}
+
+contract SBT_Mint_${net.name} {
+
+    address constant VAULT = 0xYourVaultContractAddress; 
+    ISBTVault constant vault = ISBTVault(VAULT);
+
+    function createSBT() external {
+        vault.mintSBT(
+            ${JSON.stringify(owner)},
+            ${JSON.stringify(sbtName)},
+            ${JSON.stringify(guardian)},
+            0,
+            "{}"
+        );
+    }
+}
+  `.trim();
+
+  solOut.textContent = code;
+});
+
+/* ---------------------------
+   5) MetaMask로 실제 SBT 발행 실행
+--------------------------- */
+
+/* 실제 컨트랙트 주소 (네트워크별로 다르면, 나중에 map으로 분기 가능) */
+const CONTRACTS = {
+  "Mustree": "0x58EA439b075e01E7a681b7798e3d8022e619eAD8",
+  "JKK-TMZ": "0xcc2E2778a0F2148f9C09D38C6917b0FcD6728bf0",
+  "KukminBank": "0x0000000000000000000000000000000000000001",
+  "NABIZAM": "0xe02bF2Df1919f4dA20e10a2304648072fBD34E94",
+  "MDPCD": "0xf6fF21b1860541DD781F5E36801906Aa207bEB03"
+};
+
+
+const VAULT_ABI = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "approved",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "ApprovalForAll",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "label",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "guardian",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "unlockTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "metadata",
+				"type": "string"
+			}
+		],
+		"name": "Minted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "label",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "guardian",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "unlockTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "metadata",
+				"type": "string"
+			}
+		],
+		"name": "mintSBT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "getApproved",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			}
+		],
+		"name": "isApprovedForAll",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "isUnlocked",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerOf",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "",
+				"type": "bytes"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "sbts",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "guardian",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "unlockTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "metadata",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"name": "setApprovalForAll",
+		"outputs": [],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenURI",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [],
+		"stateMutability": "pure",
+		"type": "function"
+	}
+]
+async function execMintTx() {
+  if (!window.ethereum) {
+    solOut.textContent = "MetaMask가 감지되지 않습니다.";
+    return;
+  }
+
+  const owner = document.getElementById("owner").value.trim();
+  const sbtName = document.getElementById("sbtName").value.trim();
+  const guardian = document.getElementById("guardian").value.trim();
+
+  if (!owner || !sbtName || !guardian) {
+    solOut.textContent = "모든 항목을 입력해야 합니다.";
+    return;
+  }
+
+  try {
+    await ethereum.request({ method: "eth_requestAccounts" });
+
+    const selected = getSelectedNet();
+    if (!selected) {
+      solOut.textContent = "❌ 네트워크를 선택해주세요.";
+      return;
+    }
+    const CONTRACT_ADDRESS = CONTRACTS[selected.name];
+
+    if (!CONTRACT_ADDRESS || CONTRACT_ADDRESS.length !== 42) {
+      solOut.textContent = `❌ ${selected.name} 네트워크 컨트랙트 주소가 잘못되었습니다.`;
+      return;
+    }
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, VAULT_ABI, signer);
+
+    solOut.textContent = "트랜잭션 전송 중...";
+
+    // Mustree 보안 정책 때문에 이벤트 로그는 못 읽음 → callStatic로 tokenId 사전 계산
+    const tokenId = await contract.mintSBT.staticCall(
+      owner,
+      sbtName,
+      guardian,
+      0,
+      "{}"
+    );
+
+    const txResponse = await contract.mintSBT(
+      owner, sbtName, guardian, 0, "{}"
+    );
+
+    solOut.textContent =
+      `TX 생성됨!\n` +
+      `TX Hash: ${txResponse.hash}\n` +
+      `Token ID (예상): ${tokenId}\n컨펌 대기 중...`;
+
+    const receipt = await txResponse.wait();
+
+    solOut.textContent =
+      `🎉 SBT 발행 성공!\n` +
+      `Token ID: ${tokenId}\n` +
+      `TX Hash: ${receipt.hash}\n` +
+      `Block: ${receipt.blockNumber}`;
+
+  } catch (err) {
+    solOut.textContent = "실행 오류: " + (err?.message || err);
+  }
+}
+
+// 실행 버튼에 핸들러 연결
+document.getElementById("txExec").addEventListener("click", execMintTx);
+
+</script>
+
+</body>
+</html>

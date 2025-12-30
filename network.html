@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>네트워크 생성 · Mustree</title>
+  <meta name="description" content="GT 2,000개/체인, MST 담보형 PT 발행, C=10 글로벌 담보 정책으로 전용 PoA 네트워크를 개설하세요." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="page">
+  <div id="site-nav"></div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero hero--subpage">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-inner">
+        <p class="eyebrow">Network</p>
+        <h1>귀사 전용 네트워크를<br> 최대 24시간 내 개설합니다</h1>
+        <p class="sub">
+          MST 코인을 담보로 귀사 전용 네트워크를 개설합니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- 신청 폼 Section -->
+    <section class="section" id="apply">
+      <div class="container">
+        <h2 class="section-title">네트워크 생성 신청</h2>
+        <p class="lead">아래 정보를 입력하시면 내부 확인 후 <strong>24시간 이내</strong> 생성이 진행됩니다.</p>
+
+        <form id="applyForm" class="card" style="max-width:640px;margin:0 auto;">
+          <div class="field">
+            <label for="company">회사명</label>
+            <input type="text" id="company" name="company" required placeholder="예: (주)머스트리테크" />
+          </div>
+
+          <div class="field">
+            <label for="contact">연락처 / 이메일</label>
+            <input type="text" id="contact" name="contact" required placeholder="예: 010-1234-5678 또는 example@company.com" />
+          </div>
+
+          <div class="field">
+            <label for="mstAmount">예치할 MST 수량</label>
+            <input type="number" id="mstAmount" name="mstAmount" required placeholder="예: 1000" min="1" />
+          </div>
+
+          <div class="field">
+            <label for="memo">기타 요청사항 (선택)</label>
+            <textarea id="memo" name="memo" rows="3" placeholder="도메인, 네트워크명 등 추가 요청사항을 입력하세요."></textarea>
+          </div>
+
+          <div class="cta-row" style="justify-content:center;">
+            <button type="submit" class="btn primary">신청 정보 저장 및 생성 요청</button>
+          </div>
+        </form>
+
+        <p id="applyResult" class="small" style="text-align:center;margin-top:12px;color:#7dd3fc;"></p>
+      </div>
+    </section>
+
+    <!-- 정책 요약 Section -->
+    <section class="section">
+      <div class="container grid cols-2">
+        <article class="card">
+          <h3>서비스 개요</h3>
+          <ul class="small">
+            <li>예치된 MST를 담보로 <strong>1:1000 비율</strong> 네이티브 코인 발행</li>
+            <li>GT(거버넌스 토큰)은 원하는 경우 추가 발행 가능</li>
+            <li>모든 수수료 및 확장 비용은 MST로 결제</li>
+            <li>신청 후 24시간 이내 생성 완료</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>정책</h3>
+          <ul class="small">
+            <li><strong>글로벌 담보정책</strong> — 무담보 발행 없음</li>
+            <li>다운사이드 감액 금지(Non-Decreasing Collateral)</li>
+            <li>락업된 MST는 네트워크 운영 기간 동안 담보 유지</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="site.js"></script>
+  <script src="script.js"></script>
+
+  <!-- ===== 신청 폼 스크립트 ===== -->
+  <script>
+    const form = document.getElementById('applyForm');
+    const result = document.getElementById('applyResult');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        company: form.company.value,
+        contact: form.contact.value,
+        mst: form.mstAmount.value,
+        memo: form.memo.value
+      };
+      console.log('신청 정보:', data);
+      result.textContent =
+        `✅ 신청이 완료되었습니다. ${data.company} 네트워크는 1시간 내 개설 후 안내드릴 예정입니다.`;
+      form.reset();
+    });
+  </script>
+</body>
+</html>

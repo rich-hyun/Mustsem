@@ -15,8 +15,9 @@
   <div id="site-nav"></div>
 
 <main>
-  <section class="hero">
-    <div class="container">
+  <section class="hero hero--subpage">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container hero-inner">
       <p class="eyebrow">Bridge</p>
       <h1>자체 네트워크 코인으로 <br>wMST를 구입하세요!</h1>
       <p class="sub">MST 코인과 wMST 코인은 1대 1 비율을 유지하며 wMST 코인은 스테이킹 등의 기능을 지원합니다.</p>
@@ -24,15 +25,15 @@
   </section>
 
   <section class="section">
-    <div class="container grid cols-2">
+    <div class="container grid cols-2" style="gap:24px;">
       <article class="card">
         <h3>1. 지갑 연결 (TMZ)</h3>
-        <div class="wallet-status">
+        <div class="wallet-status" style="margin:16px 0;">
           <div>상태: <span id="walletStatus" class="mono">연결 안 됨</span></div>
           <div>주소: <span id="walletAddress" class="mono">-</span></div>
           <div>체인 ID: <span id="chainId" class="mono">-</span></div>
         </div>
-        <div class="cta-row">
+        <div class="cta-row" style="margin-top:20px;">
           <button class="btn primary" id="btnConnect">지갑 연결</button>
           <button class="btn" id="btnSwitchTMZ">TMZ 네트워크 전환</button>
         </div>
@@ -40,46 +41,50 @@
 
       <article class="card">
         <h3>지갑 잔액 (체인 분리 조회)</h3>
-        <ul class="mono">
+        <ul class="mono" style="margin:16px 0; line-height:1.8;">
           <li>TMZ (native): <span id="balTMZ">-</span></li>
           <li>wTMZ (TMZ): <span id="balWTMZ">-</span></li>
           <li>wMST (MST): <span id="balWMST">-</span></li>
         </ul>
-        <button class="btn" id="btnRefresh">잔액 새로고침</button>
+        <button class="btn" id="btnRefresh" style="margin-bottom:12px;">잔액 새로고침</button>
         <p class="small">* wMST 잔액은 MST 체인 RPC로 별도 조회됩니다.</p>
       </article>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" style="padding-top:24px;">
     <div class="container">
-      <article class="card">
+      <article class="card" style="max-width:640px;margin:0 auto;">
         <h3>2. TMZ → wTMZ (래핑)</h3>
-        <div class="form">
+        <div class="form" style="margin:20px 0;">
           <div class="field">
             <label>래핑 수량 (TMZ)</label>
             <input id="wrapAmount" type="number" min="0" step="any" placeholder="예: 1" />
           </div>
         </div>
-        <button class="btn primary" id="btnWrap">wTMZ로 변환</button>
-        <p id="wrapResult" class="small mono"></p>
+        <div class="cta-row">
+          <button class="btn primary" id="btnWrap">wTMZ로 변환</button>
+        </div>
+        <p id="wrapResult" class="small mono" style="margin-top:12px;"></p>
       </article>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" style="padding-top:24px;">
     <div class="container">
-      <article class="card">
+      <article class="card" style="max-width:640px;margin:0 auto;">
         <h3>3. wTMZ → wMST (브릿지 요청)</h3>
-        <div class="form">
+        <div class="form" style="margin:20px 0;">
           <div class="field">
             <label>브릿지 수량 (wTMZ)</label>
             <input id="bridgeAmount" type="number" min="0" step="any" placeholder="예: 1" />
           </div>
         </div>
-        <button class="btn" id="btnApproveWTMZ">wTMZ 승인</button>
-        <button class="btn primary" id="btnRequestBridge">브릿지 요청</button>
-        <p id="bridgeResult" class="small mono"></p>
+        <div class="cta-row">
+          <button class="btn" id="btnApproveWTMZ">wTMZ 승인</button>
+          <button class="btn primary" id="btnRequestBridge">브릿지 요청</button>
+        </div>
+        <p id="bridgeResult" class="small mono" style="margin-top:12px;"></p>
       </article>
     </div>
   </section>

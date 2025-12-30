@@ -222,6 +222,16 @@ img {
   z-index: 1100;
 }
 
+/* 드롭다운 메뉴와 버튼 사이 연결 영역 (hover 유지용) */
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+}
+
 .nav-dropdown:hover .nav-dropdown-menu,
 .nav-dropdown:focus-within .nav-dropdown-menu {
   opacity: 1;
@@ -230,11 +240,11 @@ img {
   transform: translateY(0);
 }
 
-.dropdown-link {
+.nav-dropdown-menu .dropdown-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 10px;
+  padding: 10px 14px 10px 20px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
@@ -251,6 +261,11 @@ img {
   color: var(--bg-primary);
   background: var(--accent-gradient);
   box-shadow: 0 8px 24px rgba(0, 208, 156, 0.15);
+}
+
+/* 드롭다운 링크에서 밑줄 제거 */
+.dropdown-link::after {
+  display: none;
 }
 
 .nav-actions {

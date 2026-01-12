@@ -71,8 +71,8 @@ function initFAQ() {
 function initScrollAnimations() {
   const observerOptions = {
     root: null,
-    rootMargin: '0px',
-    threshold: 0.1
+    rootMargin: '50px',  // 화면 진입 전 미리 애니메이션 시작
+    threshold: 0.05      // 5%만 보여도 시작
   };
 
   const observer = new IntersectionObserver((entries) => {
@@ -102,8 +102,10 @@ function initScrollAnimations() {
 
   animateElements.forEach((el, index) => {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = `all 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.05}s`;
+    el.style.transform = 'translateY(20px)';  // 30px → 20px (더 빠른 느낌)
+    // 지연 시간: 최대 0.15초로 제한 (기존: index * 0.05 = 무한정 증가)
+    const delay = Math.min(index * 0.03, 0.15);
+    el.style.transition = `all 0.4s cubic-bezier(0.4, 0, 0.2, 1) ${delay}s`;
     observer.observe(el);
   });
 
@@ -299,8 +301,8 @@ function animateCounter(element) {
 
   const targetNum = parseFloat(match[1]);
   const suffix = text.replace(match[1], '');
-  const duration = 2000;
-  const steps = 60;
+  const duration = 1200;  // 2000ms → 1200ms (더 빠르게)
+  const steps = 40;       // 60 → 40 (더 빠르게)
   const increment = targetNum / steps;
   let current = 0;
   let step = 0;

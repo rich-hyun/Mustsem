@@ -56,6 +56,30 @@
       100% { text-shadow: 0 0 38px rgba(0, 200, 255, 1); }
     }
 
+    /* 주소 흐림 처리 (크롤링/봇 방지) */
+    .address-cell {
+      filter: blur(5px);
+      transition: filter 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .address-cell:hover {
+      filter: blur(0);
+      user-select: text;
+    }
+    .address-cell::before {
+      content: "🔒 ";
+      filter: blur(0);
+    }
+    .address-cell:hover::before {
+      content: "";
+    }
+    .address-hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+
   </style>
 </head>
 
@@ -88,6 +112,7 @@
       </thead>
       <tbody id="walletTable"></tbody>
     </table>
+    <p class="address-hint">* 보안을 위해 지갑 주소가 흐림 처리되어 있습니다. 마우스를 올리면 확인할 수 있습니다.</p>
 
     <div class="refresh-btn" onclick="loadBalances()">새로고침</div>
   </main>
@@ -109,7 +134,7 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${row.label}</td>
-          <td>${row.address}</td>
+          <td class="address-cell" title="마우스를 올리면 주소가 표시됩니다">${row.address}</td>
           <td>${row.balance.toLocaleString()}</td>
         `;
         tbody.appendChild(tr);

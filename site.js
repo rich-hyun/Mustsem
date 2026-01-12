@@ -63,27 +63,27 @@ function renderNavbar() {
   const currentRoute = getCurrentRoute();
 
   const overviewLinks = [
-    { href: 'index.html', label: 'Home' },
-    { href: 'index.html#features', label: 'Features' },
-    { href: 'index.html#benefits', label: 'Benefits' },
-    { href: 'index.html#services', label: 'Services' },
-    { href: 'index.html#pricing', label: 'Pricing' },
-    { href: 'index.html#faq', label: 'FAQs' },
-    { href: 'index.html#contact', label: 'Contact' }
+    { href: 'index.html', label: '홈' },
+    { href: 'index.html#features', label: '특징' },
+    { href: 'index.html#benefits', label: '장점' },
+    { href: 'index.html#services', label: '서비스' },
+    { href: 'index.html#pricing', label: '요금제' },
+    { href: 'index.html#faq', label: 'FAQ' },
+    { href: 'index.html#contact', label: '문의' }
   ];
 
   const platformLinks = [
-    { href: 'network.html', label: 'Network' },
-    { href: 'bridge.html', label: 'Bridge' },
-    { href: 'staking.html', label: 'Staking' },
+    { href: 'network.html', label: '네트워크' },
+    { href: 'bridge.html', label: '브릿지' },
+    { href: 'staking.html', label: '스테이킹' },
     { href: 'nft.html', label: 'NFT' },
     { href: 'sbt.html', label: 'SBT' },
     { href: 'rwa.html', label: 'RWA' }
   ];
 
   const developerLinks = [
-    { href: 'api.html', label: 'API Catalog' },
-    { href: 'api-guide.html', label: 'API Guide' }
+    { href: 'api.html', label: 'API 카탈로그' },
+    { href: 'api-guide.html', label: 'API 가이드' }
   ];
 
   const overviewActive = currentRoute.page === 'index.html';
@@ -111,47 +111,47 @@ function renderNavbar() {
 
         <div class="nav-links">
           <div class="nav-dropdown ${overviewActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="Overview menu">
-              Overview
+            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="소개 메뉴">
+              소개
               <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="Overview">
+            <div class="nav-dropdown-menu" role="menu" aria-label="소개">
               ${dropdownMenu(overviewLinks, isOverviewHrefActive)}
             </div>
           </div>
 
           <div class="nav-dropdown ${platformActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="Platform menu">
-              Platform
+            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="플랫폼 메뉴">
+              플랫폼
               <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="Platform">
+            <div class="nav-dropdown-menu" role="menu" aria-label="플랫폼">
               ${dropdownMenu(platformLinks)}
             </div>
           </div>
 
           <div class="nav-dropdown ${devActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="Developers menu">
-              Developers
+            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="개발자 메뉴">
+              개발자
               <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="Developers">
+            <div class="nav-dropdown-menu" role="menu" aria-label="개발자">
               ${dropdownMenu(developerLinks)}
             </div>
           </div>
 
-          <a href="security.html" class="${securityActive ? 'active' : ''}" ${securityActive ? 'aria-current="page"' : ''}>Security</a>
+          <a href="security.html" class="${securityActive ? 'active' : ''}" ${securityActive ? 'aria-current="page"' : ''}>보안</a>
         </div>
 
         <div class="nav-actions">
-          <a href="dashboard.html" class="btn-nav">Dashboard</a>
-          <a href="network.html#apply" class="btn-primary-nav">Get Started</a>
+          <a href="dashboard.html" class="btn-nav">대시보드</a>
+          <a href="network.html#apply" class="btn-primary-nav">시작하기</a>
         </div>
 
         <button class="mobile-menu-btn" aria-label="Menu" type="button">
@@ -176,7 +176,7 @@ function renderFooter() {
               </div>
               <span>Mustree</span>
             </a>
-            <p>Enterprise blockchain infrastructure and tokenization APIs for teams that ship fast — without compromising security.</p>
+            <p>기업을 위한 블록체인 인프라와 토큰화 API를 제공합니다. 보안을 타협하지 않으면서 빠르게 구축하세요.</p>
             <div class="social-links">
               <a href="#" aria-label="Twitter">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
@@ -197,33 +197,33 @@ function renderFooter() {
           </div>
 
           <div class="footer-links">
-            <h4>Platform</h4>
-            <a href="network.html">Network</a>
-            <a href="bridge.html">Bridge</a>
-            <a href="staking.html">Staking</a>
+            <h4>플랫폼</h4>
+            <a href="network.html">네트워크</a>
+            <a href="bridge.html">브릿지</a>
+            <a href="staking.html">스테이킹</a>
             <a href="nft.html">NFT</a>
             <a href="sbt.html">SBT</a>
             <a href="rwa.html">RWA</a>
           </div>
 
           <div class="footer-links">
-            <h4>Developers</h4>
-            <a href="api.html">API Catalog</a>
-            <a href="api-guide.html">API Guide</a>
-            <a href="index.html#faq">FAQs</a>
+            <h4>개발자</h4>
+            <a href="api.html">API 카탈로그</a>
+            <a href="api-guide.html">API 가이드</a>
+            <a href="index.html#faq">FAQ</a>
           </div>
 
           <div class="footer-links">
-            <h4>Company</h4>
-            <a href="security.html">Security</a>
-            <a href="index.html#pricing">Pricing</a>
-            <a href="network.html#apply">Contact</a>
+            <h4>회사</h4>
+            <a href="security.html">보안</a>
+            <a href="index.html#pricing">요금제</a>
+            <a href="network.html#apply">문의하기</a>
           </div>
         </div>
 
         <div class="footer-bottom">
-          <p>&copy; 2025 Mustree Network. All rights reserved.</p>
-          <a href="index.html" class="made-with">Built with Mustree</a>
+          <p>&copy; 2025 머스트리 네트워크. All rights reserved.</p>
+          <a href="index.html" class="made-with">Powered by Mustree</a>
         </div>
       </div>
     </footer>

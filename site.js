@@ -46,15 +46,23 @@ function escapeHtml(value) {
 function renderLogoSvg(gradientId) {
   const id = escapeHtml(gradientId);
   return `
-    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
-      <circle cx="16" cy="16" r="14" stroke="url(#${id})" stroke-width="2"/>
-      <path d="M10 16L14 20L22 12" stroke="url(#${id})" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg viewBox="0 0 512 512" fill="none" aria-hidden="true" focusable="false">
       <defs>
-        <linearGradient id="${id}" x1="0" y1="0" x2="32" y2="32">
+        <linearGradient id="${id}" x1="70" y1="40" x2="442" y2="472" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stop-color="#00D09C"/>
           <stop offset="100%" stop-color="#00B4D8"/>
         </linearGradient>
       </defs>
+      <path d="M256 40L442 148V364L256 472L70 364V148L256 40Z" 
+            stroke="url(#${id})" 
+            stroke-width="40" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
+      <path d="M166 340V170L256 260L346 170V340" 
+            stroke="url(#${id})" 
+            stroke-width="40" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
     </svg>
   `.trim();
 }

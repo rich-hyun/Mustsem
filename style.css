@@ -1,6 +1,11 @@
 /* ============================================
    Mustree Network - Premium Blockchain Platform
-   $5000+ Quality Design System
+   Combined $5000+ Quality Design System
+
+   Best features merged from:
+   - Claude: Premium micro-interactions & card design
+   - Gemini: Cinematic polish & UI refinements
+   - Codex2: Fluid typography & accessibility
    ============================================ */
 
 /* CSS Variables */
@@ -23,9 +28,14 @@
 
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.15);
+  --ring-color: rgba(0, 208, 156, 0.55);
 
-  /* Typography */
+  /* Fluid Typography (Codex2) */
   --font-primary: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  --title-hero: clamp(1.75rem, 0.9rem + 3.6vw, 3.625rem);
+  --title-section: clamp(1.8rem, 1.1rem + 2.2vw, 2.625rem);
+  --title-subpage: clamp(1.6rem, 1.05rem + 2vw, 2.75rem);
+  --title-banner: clamp(1.3rem, 1rem + 1vw, 1.75rem);
 
   /* Spacing */
   --section-padding: 120px;
@@ -37,6 +47,8 @@
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
   --shadow-glow: 0 0 60px rgba(0, 208, 156, 0.15);
+  --card-surface: linear-gradient(180deg, rgba(22, 23, 28, 0.96) 0%, rgba(16, 17, 21, 0.92) 100%);
+  --card-surface-hover: linear-gradient(180deg, rgba(28, 29, 35, 0.98) 0%, rgba(18, 19, 24, 0.95) 100%);
 }
 
 /* Reset & Base */
@@ -54,11 +66,65 @@ html {
 
 body {
   font-family: var(--font-primary);
-  background: var(--bg-primary);
+  background:
+    radial-gradient(1200px 600px at 12% -10%, rgba(0, 208, 156, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 88% 0%, rgba(0, 180, 216, 0.06), transparent 55%),
+    var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
   overflow-x: hidden;
 }
+
+/* ============================================
+   GEMINI: Cinematic UI Polish
+   ============================================ */
+
+/* 1. Cinematic Noise Texture */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+}
+
+/* 2. Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 5px;
+  border: 2px solid var(--bg-primary);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* 3. Selection Color */
+::selection {
+  background: rgba(0, 208, 156, 0.2);
+  color: var(--accent-primary);
+}
+
+/* 4. Text Shimmer Animation */
+@keyframes textShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============================================
+   CODEX2: Accessibility & Focus States
+   ============================================ */
 
 a {
   text-decoration: none;
@@ -66,9 +132,19 @@ a {
   transition: var(--transition);
 }
 
+/* CODEX: Enhanced Focus Visible */
+:where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 2px solid var(--ring-color);
+  outline-offset: 3px;
+}
+
 img {
   max-width: 100%;
   height: auto;
+}
+
+section[id] {
+  scroll-margin-top: 120px;
 }
 
 /* Container */
@@ -222,7 +298,6 @@ img {
   z-index: 1100;
 }
 
-/* 드롭다운 메뉴와 버튼 사이 연결 영역 (hover 유지용) */
 .nav-dropdown-menu::before {
   content: '';
   position: absolute;
@@ -263,7 +338,6 @@ img {
   box-shadow: 0 8px 24px rgba(0, 208, 156, 0.15);
 }
 
-/* 드롭다운 링크에서 밑줄 제거 */
 .dropdown-link::after {
   display: none;
 }
@@ -321,7 +395,7 @@ img {
   transition: var(--transition);
 }
 
-/* Mobile menu dropdown override (menu HTML is cloned by script.js) */
+/* Mobile menu dropdown override */
 .mobile-menu .nav-dropdown {
   display: block;
   margin-top: 18px;
@@ -500,7 +574,7 @@ img {
 }
 
 .hero h1 {
-  font-size: 58px;
+  font-size: var(--title-hero);
   font-weight: 800;
   line-height: 1.1;
   margin-bottom: 24px;
@@ -509,16 +583,20 @@ img {
 
 .gradient-text {
   background: var(--accent-gradient);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: textShimmer 5s ease infinite;
 }
 
 .gradient-text-alt {
   background: linear-gradient(135deg, #00B4D8 0%, #00D09C 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  animation: textShimmer 5s ease infinite;
 }
 
 .hero-desc {
@@ -551,6 +629,8 @@ img {
   border-radius: 14px;
   box-shadow: 0 8px 32px var(--accent-glow);
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary svg {
@@ -561,6 +641,30 @@ img {
 .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 40px var(--accent-glow);
+}
+
+/* GEMINI: Button Sheen Effect */
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.btn-primary:hover::after {
+  left: 150%;
+  transition: 0.7s ease-in-out;
 }
 
 .btn-secondary {
@@ -585,9 +689,35 @@ img {
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--border-hover);
+  box-shadow:
+    0 8px 32px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Hero Visual */
+.floating-visual {
+  animation: visualFloat 6s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(0, 208, 156, 0.2));
+}
+
+.interactive-node {
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.interactive-node:hover {
+  transform: scale(1.8);
+  fill: #fff;
+  filter: drop-shadow(0 0 15px rgba(0, 208, 156, 0.8));
+}
+
+@keyframes visualFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
 .hero-visual {
   position: relative;
   height: 500px;
@@ -607,6 +737,47 @@ img {
   height: 100%;
   pointer-events: auto;
   background: transparent !important;
+}
+
+/* CODEX: Hero Media Container with Glow */
+.hero-media {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 208, 156, 0.12), transparent 55%),
+    radial-gradient(circle at 80% 80%, rgba(0, 180, 216, 0.10), transparent 50%),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+
+.hero-media-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 22px;
+  object-fit: contain;
+  filter: saturate(1.02) contrast(1.02);
+}
+
+/* CODEX2: Hero Network Image (fallback) */
+.hero-network {
+  width: min(620px, 85%);
+  height: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 30px 70px rgba(0, 0, 0, 0.45));
+  transform: translateX(28px);
+  opacity: 0.96;
 }
 
 .floating-card {
@@ -751,7 +922,7 @@ img {
 }
 
 .section-header h2 {
-  font-size: 42px;
+  font-size: var(--title-section);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -878,7 +1049,7 @@ img {
 }
 
 .features-content h2 {
-  font-size: 38px;
+  font-size: var(--title-section);
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 32px;
@@ -1269,12 +1440,52 @@ img {
   border: 1px solid var(--border-color);
   border-radius: 24px;
   gap: 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* CODEX2: Banner Card Inner Gradient */
+.banner-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 200px at 20% 0%, rgba(0, 208, 156, 0.18), transparent 70%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.banner-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* CLAUDE: Banner Card Shimmer Animation */
+.banner-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 208, 156, 0.03) 50%,
+    transparent 70%
+  );
+  background-size: 200% 200%;
+  animation: shimmer 3s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% -200%; }
+  100% { background-position: 200% 200%; }
 }
 
 .banner-content h3 {
-  font-size: 24px;
+  font-size: var(--title-banner);
   font-weight: 700;
   margin-bottom: 8px;
+  text-wrap: balance;
 }
 
 .banner-content p {
@@ -1292,6 +1503,8 @@ img {
   border-radius: 12px;
   white-space: nowrap;
   transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-banner:hover {
@@ -1392,7 +1605,7 @@ img {
 }
 
 .services-content h2 {
-  font-size: 38px;
+  font-size: var(--title-section);
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 16px;
@@ -1442,7 +1655,7 @@ img {
 }
 
 .upgrade-content h2 {
-  font-size: 38px;
+  font-size: var(--title-section);
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 16px;
@@ -1574,7 +1787,7 @@ img {
 }
 
 .cta h2 {
-  font-size: 42px;
+  font-size: var(--title-section);
   font-weight: 700;
   margin-bottom: 16px;
   letter-spacing: -0.02em;
@@ -1693,7 +1906,7 @@ img {
   width: 20px;
   height: 20px;
   color: var(--text-muted);
-  transition: var(--transition);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
   flex-shrink: 0;
 }
 
@@ -1705,11 +1918,13 @@ img {
 .faq-answer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  opacity: 0;
 }
 
 .faq-item.active .faq-answer {
   max-height: 200px;
+  opacity: 1;
 }
 
 .faq-answer p {
@@ -1788,10 +2003,27 @@ img {
   color: var(--text-secondary);
   padding: 8px 0;
   transition: var(--transition);
+  position: relative;
 }
 
 .footer-links a:hover {
   color: var(--accent-primary);
+}
+
+/* CLAUDE: Link Hover Underline Animation */
+.footer-links a::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-gradient);
+  transition: width 0.3s ease;
+}
+
+.footer-links a:hover::after {
+  width: 100%;
 }
 
 .app-btn {
@@ -1840,7 +2072,6 @@ img {
 
 /* ============================================
    Page System (App / Docs / Dashboard)
-   - Supports the legacy multi-page screens migrated into new_api_blockchain/
    ============================================ */
 body.page .hero {
   min-height: auto;
@@ -1849,7 +2080,7 @@ body.page .hero {
 }
 
 body.page .hero h1 {
-  font-size: 44px;
+  font-size: var(--title-subpage);
 }
 
 .hero--subpage .hero-bg {
@@ -2083,11 +2314,14 @@ body.page .hero h1 {
   resize: vertical;
 }
 
+/* CLAUDE: Input Focus Glow */
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  border-color: rgba(0, 208, 156, 0.5);
-  box-shadow: 0 0 0 4px rgba(0, 208, 156, 0.12);
+  border-color: var(--accent-primary);
+  box-shadow:
+    0 0 0 4px rgba(0, 208, 156, 0.15),
+    0 0 20px rgba(0, 208, 156, 0.1);
 }
 
 .table {
@@ -2227,15 +2461,312 @@ code {
 }
 
 /* ============================================
+   CLAUDE: PREMIUM MICRO-INTERACTIONS
+   ============================================ */
+
+/* --- 3D Tilt Card Effect --- */
+.crypto-card,
+.feature-item,
+.stat-card,
+.cta-card,
+.portfolio-card,
+.chart-card,
+.service-card-item,
+.solution-phone,
+.card {
+  transform-style: preserve-3d;
+  transition: var(--transition), transform 0.4s cubic-bezier(0.03, 0.98, 0.52, 0.99);
+}
+
+.tilt-effect {
+  transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale3d(1.02, 1.02, 1.02);
+}
+
+/* --- Gradient Border Animation --- */
+@keyframes gradient-border-spin {
+  0% { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.crypto-card,
+.feature-item,
+.stat-card,
+.cta-card,
+.portfolio-item,
+.faq-item {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+.crypto-card::before,
+.feature-item::before,
+.stat-card::before,
+.cta-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    var(--gradient-angle, 135deg),
+    rgba(0, 208, 156, 0.3),
+    rgba(0, 180, 216, 0.3),
+    rgba(0, 208, 156, 0.1),
+    rgba(0, 180, 216, 0.3)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.crypto-card:hover::before,
+.feature-item:hover::before,
+.stat-card:hover::before,
+.cta-card:hover::before {
+  opacity: 1;
+  animation: gradient-border-spin 3s linear infinite;
+}
+
+/* --- Enhanced Glassmorphism --- */
+.floating-card,
+.portfolio-card,
+.chart-card,
+.service-card-item,
+.solution-phone {
+  background: rgba(22, 23, 28, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.floating-card:hover {
+  animation-play-state: paused;
+  background: rgba(28, 29, 35, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.portfolio-card:hover,
+.chart-card:hover,
+.service-card-item:hover {
+  background: rgba(28, 29, 35, 0.9);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 40px rgba(0, 208, 156, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* --- Card Spotlight/Glow Effect --- */
+.crypto-card,
+.feature-item,
+.cta-card,
+.stat-card {
+  --spotlight-x: 50%;
+  --spotlight-y: 50%;
+}
+
+.crypto-card::after,
+.cta-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--spotlight-x) var(--spotlight-y),
+    rgba(0, 208, 156, 0.12),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.crypto-card:hover::after,
+.cta-card:hover::after {
+  opacity: 1;
+}
+
+/* --- Stat Card Enhanced Glow (Rotating) --- */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(0, 208, 156, 0.1),
+    transparent,
+    rgba(0, 180, 216, 0.1),
+    transparent
+  );
+  animation: rotate-glow 8s linear infinite;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.stat-card:hover::after {
+  opacity: 1;
+}
+
+@keyframes rotate-glow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.stat-card .stat-value,
+.stat-card .stat-label {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Feature Item Enhanced Hover --- */
+.feature-item:hover {
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 208, 156, 0.1);
+}
+
+.feature-item:hover .feature-icon {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 8px 24px rgba(0, 208, 156, 0.3);
+}
+
+.feature-icon {
+  transition: var(--transition), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* --- Portfolio Item Shine Effect --- */
+.portfolio-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.portfolio-item:hover::before {
+  left: 100%;
+}
+
+/* --- CTA Card Icon Pulse --- */
+.cta-icon {
+  transition: var(--transition), transform 0.4s ease;
+}
+
+.cta-card:hover .cta-icon {
+  transform: scale(1.1);
+  box-shadow:
+    0 0 30px rgba(0, 208, 156, 0.3),
+    0 0 60px rgba(0, 208, 156, 0.1);
+}
+
+.cta-card:hover .cta-icon svg {
+  animation: icon-pulse 1s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* --- Solution Icon Hover --- */
+.solution-icon {
+  transition: var(--transition), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.solution-item:hover .solution-icon {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow:
+    0 16px 32px rgba(0, 208, 156, 0.2),
+    0 0 24px rgba(0, 208, 156, 0.15);
+}
+
+/* --- Smooth Icon Transitions --- */
+.crypto-icon,
+.portfolio-icon,
+.service-card-icon,
+.card-icon {
+  transition: var(--transition), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.crypto-card:hover .crypto-icon,
+.portfolio-item:hover .portfolio-icon {
+  transform: scale(1.1) rotate(-3deg);
+}
+
+/* --- Scroll Progress Bar --- */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: var(--accent-gradient);
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+/* --- Loading Skeleton Shimmer --- */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0px,
+    var(--bg-card-hover) 40px,
+    var(--bg-card) 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* ============================================
    Responsive Design
    ============================================ */
 @media (max-width: 1200px) {
   .hero-container {
     gap: 40px;
-  }
-
-  .hero h1 {
-    font-size: 48px;
   }
 
   .crypto-grid {
@@ -2275,6 +2806,16 @@ code {
 
   .hero-visual {
     height: 400px;
+  }
+
+  .hero-network {
+    width: min(520px, 90%);
+    transform: translateX(0);
+  }
+
+  .hero-media {
+    padding: 18px;
+    border-radius: 24px;
   }
 
   .floating-card {
@@ -2328,22 +2869,6 @@ code {
 }
 
 @media (max-width: 768px) {
-  .hero h1 {
-    font-size: 36px;
-  }
-
-  body.page .hero h1 {
-    font-size: 32px;
-  }
-
-  .section-header h2,
-  .features-content h2,
-  .services-content h2,
-  .upgrade-content h2,
-  .cta h2 {
-    font-size: 32px;
-  }
-
   .crypto-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2388,16 +2913,17 @@ code {
     padding-top: 100px;
   }
 
-  .hero h1 {
-    font-size: 28px;
-  }
-
-  body.page .hero h1 {
-    font-size: 26px;
-  }
-
   .hero-desc {
     font-size: 15px;
+  }
+
+  .hero-network {
+    width: min(360px, 95%);
+  }
+
+  .hero-media {
+    padding: 14px;
+    border-radius: 22px;
   }
 
   .btn-primary,
@@ -2434,4 +2960,28 @@ code {
 
 .hero-visual {
   animation-delay: 0.2s;
+}
+
+/* ============================================
+   CODEX2: Accessibility - Reduced Motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .gradient-orb,
+  .floating-card,
+  .hero-content,
+  .hero-visual {
+    animation: none !important;
+  }
 }

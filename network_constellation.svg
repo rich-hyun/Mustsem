@@ -1,0 +1,62 @@
+<svg width="600" height="600" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="line_grad" x1="0" y1="0" x2="600" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D09C" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#00B4D8" stop-opacity="0.6"/>
+    </linearGradient>
+    <filter id="glow-node" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Network Lines (Connecting the nodes) -->
+  <g stroke="url(#line_grad)" stroke-width="1.5" stroke-linecap="round">
+    <!-- Main Hub Connections -->
+    <line x1="300" y1="300" x2="150" y2="180" stroke-opacity="0.4"/>
+    <line x1="300" y1="300" x2="450" y2="150" stroke-opacity="0.4"/>
+    <line x1="300" y1="300" x2="480" y2="380" stroke-opacity="0.4"/>
+    <line x1="300" y1="300" x2="180" y2="420" stroke-opacity="0.4"/>
+    <line x1="300" y1="300" x2="100" y2="300" stroke-opacity="0.3"/>
+    
+    <!-- Secondary Connections -->
+    <line x1="150" y1="180" x2="220" y2="100" stroke-opacity="0.3"/>
+    <line x1="150" y1="180" x2="100" y2="300" stroke-opacity="0.3"/>
+    <line x1="450" y1="150" x2="520" y2="220" stroke-opacity="0.3"/>
+    <line x1="450" y1="150" x2="380" y2="80" stroke-opacity="0.3"/>
+    <line x1="480" y1="380" x2="550" y2="450" stroke-opacity="0.3"/>
+    <line x1="480" y1="380" x2="520" y2="220" stroke-opacity="0.3"/>
+    <line x1="180" y1="420" x2="100" y2="300" stroke-opacity="0.3"/>
+    <line x1="180" y1="420" x2="250" y2="520" stroke-opacity="0.3"/>
+    
+    <!-- Tertiary (Distant) Connections -->
+    <line x1="220" y1="100" x2="380" y2="80" stroke-opacity="0.15"/>
+    <line x1="550" y1="450" x2="250" y2="520" stroke-opacity="0.15"/>
+  </g>
+
+  <!-- Nodes (Stars/Points) -->
+  <g filter="url(#glow-node)">
+    <!-- Center Hub -->
+    <circle cx="300" cy="300" r="8" fill="#FFFFFF" fill-opacity="0.9"/>
+    <circle cx="300" cy="300" r="16" stroke="#00D09C" stroke-width="1" stroke-opacity="0.3"/>
+    
+    <!-- Inner Ring -->
+    <circle cx="150" cy="180" r="5" fill="#00D09C"/>
+    <circle cx="450" cy="150" r="5" fill="#00B4D8"/>
+    <circle cx="480" cy="380" r="5" fill="#00B4D8"/>
+    <circle cx="180" cy="420" r="5" fill="#00D09C"/>
+    <circle cx="100" cy="300" r="4" fill="#FFFFFF" fill-opacity="0.7"/>
+
+    <!-- Outer Ring -->
+    <circle cx="220" cy="100" r="3" fill="#FFFFFF" fill-opacity="0.5"/>
+    <circle cx="520" cy="220" r="3" fill="#FFFFFF" fill-opacity="0.5"/>
+    <circle cx="550" cy="450" r="3" fill="#FFFFFF" fill-opacity="0.5"/>
+    <circle cx="250" cy="520" r="3" fill="#FFFFFF" fill-opacity="0.5"/>
+    <circle cx="380" cy="80" r="3" fill="#FFFFFF" fill-opacity="0.5"/>
+  </g>
+  
+  <!-- Floating Particles (Optional Dust) -->
+  <circle cx="350" cy="200" r="1" fill="#FFFFFF" fill-opacity="0.3"/>
+  <circle cx="250" cy="400" r="1" fill="#FFFFFF" fill-opacity="0.3"/>
+  <circle cx="400" cy="450" r="1.5" fill="#FFFFFF" fill-opacity="0.3"/>
+</svg>

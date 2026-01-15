@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initMobileMenu();
   initSmoothScroll();
   initCounterAnimation();
+  initLiveTicker();
 });
 
 // ============================================
@@ -458,5 +459,60 @@ document.querySelector('.hero')?.addEventListener('mousemove', (e) => {
     card.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
   });
 });
+
+// ============================================
+// Live Ticker Simulation (Delicate Upgrade)
+// ============================================
+function initLiveTicker() {
+  // 1. Balance Ticker (Phone Screen)
+  const balanceElement = document.querySelector('.balance-value');
+  
+  if (balanceElement) {
+    const originalText = balanceElement.textContent; // "5,500.25 ETH" or similar
+    // Extract number part: "5,500.25" -> 5500.25
+    let currentBalance = parseFloat(originalText.replace(/[^0-9.]/g, ''));
+    
+    // Safety check
+    if (!isNaN(currentBalance)) {
+      setInterval(() => {
+        // Random fluctuation: +/- 0.00 to 0.05
+        const change = (Math.random() - 0.45) * 0.1;
+        currentBalance += change;
+        
+        // Format with commas and 2 decimal places
+        const formatted = currentBalance.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Preserve inner HTML structure (small tag) if possible, or reconstruct
+        balanceElement.innerHTML = `${formatted} <small>ETH</small>`;
+      }, 3000); // Update every 3 seconds
+    }
+  }
+
+  // 2. Network Value Ticker (Phone Screen)
+  // Look for the specific element containing "$7,892.47"
+  const statElements = document.querySelectorAll('.phone-stat strong');
+  
+  statElements.forEach(el => {
+    if (el.textContent.includes('$')) {
+      let value = parseFloat(el.textContent.replace(/[^0-9.]/g, ''));
+      
+      if (!isNaN(value)) {
+        setInterval(() => {
+           // Larger fluctuation for dollar value
+           const change = (Math.random() - 0.4) * 5;
+           value += change;
+           
+           el.textContent = '$' + value.toLocaleString('en-US', {
+             minimumFractionDigits: 2,
+             maximumFractionDigits: 2
+           });
+        }, 2000);
+      }
+    }
+  });
+}
 
 console.log('Mustree Network - Premium Blockchain Platform Loaded');

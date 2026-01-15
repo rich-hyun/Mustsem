@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>머스트리 네트워크 - 엔터프라이즈 블록체인 & NFT API 플랫폼</title>
   <meta name="description" content="머스트리는 1억개 총발행량 기반의 자체 네트워크와 NFT API를 제공하는 블록체인 인프라 기업입니다.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.48/build/spline-viewer.js"></script>
 </head>
 <body>
   <div id="site-nav"></div>
@@ -53,33 +53,194 @@
           </a>
         </div>
       </div>
-      <div class="hero-visual">
-        <div class="spline-container" style="display: flex; justify-content: center; align-items: center;">
-          <img src="network.gif" alt="Network Animation" width="75%" height="75%" style="object-fit: contain; margin-left: 50px; margin-top: 0px;">
-        </div>
-        <div class="floating-card card-1">
-          <div class="card-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-          </div>
-          <div class="card-info">
-            <span class="card-label">엔터프라이즈급</span>
-            <span class="card-value">보안</span>
-          </div>
-        </div>
-        <div class="floating-card card-2">
-          <div class="card-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <div class="card-info">
-            <span class="card-label">빠른 블록 생성</span>
-            <span class="card-value">PoA</span>
-          </div>
-        </div>
+      <div class="hero-visual" style="position: relative; width: 100%; height: 600px; display: flex; align-items: center; justify-content: center;">
+        <canvas id="blockchain-network" style="width: 100%; height: 100%;"></canvas>
+        <script>
+          (function() {
+            const canvas = document.getElementById('blockchain-network');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            let links = [];
+            let packets = [];
+
+            // Configuration
+            const NODE_COUNT = 40;
+            const LINK_DISTANCE = 150;
+            const MOUSE_RADIUS = 200;
+            const COLORS = {
+              primary: '#00D09C',
+              secondary: '#00B4D8',
+              bg: 'transparent'
+            };
+
+            // Mouse tracking
+            let mouse = { x: -1000, y: -1000 };
+
+            // Resize handling
+            function resize() {
+              width = canvas.parentElement.offsetWidth;
+              height = canvas.parentElement.offsetHeight;
+              canvas.width = width;
+              canvas.height = height;
+              initParticles();
+            }
+
+            // Hexagon drawing helper
+            function drawHexagon(ctx, x, y, r) {
+              ctx.beginPath();
+              for (let i = 0; i < 6; i++) {
+                ctx.lineTo(x + r * Math.cos(i * Math.PI / 3), y + r * Math.sin(i * Math.PI / 3));
+              }
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            class Particle {
+              constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 3 + 2;
+                this.color = Math.random() > 0.5 ? COLORS.primary : COLORS.secondary;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.pulse = 0;
+                this.pulseSpeed = 0.05 + Math.random() * 0.05;
+              }
+
+              update() {
+                // Movement
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wall bounce
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Mouse interaction (Repulse)
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < MOUSE_RADIUS) {
+                  const forceDirectionX = dx / distance;
+                  const forceDirectionY = dy / distance;
+                  const force = (MOUSE_RADIUS - distance) / MOUSE_RADIUS;
+                  const directionX = forceDirectionX * force * 2;
+                  const directionY = forceDirectionY * force * 2;
+                  this.x -= directionX;
+                  this.y -= directionY;
+                }
+
+                // Pulse effect
+                this.pulse += this.pulseSpeed;
+              }
+
+              draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.8 + Math.sin(this.pulse) * 0.2;
+                drawHexagon(ctx, this.x, this.y, this.size * (1 + Math.sin(this.pulse) * 0.3));
+                ctx.globalAlpha = 1;
+              }
+            }
+
+            class Packet {
+              constructor(startNode, endNode) {
+                this.start = startNode;
+                this.end = endNode;
+                this.progress = 0;
+                this.speed = 0.02 + Math.random() * 0.03;
+                this.active = true;
+              }
+
+              update() {
+                this.progress += this.speed;
+                if (this.progress >= 1) {
+                  this.active = false;
+                }
+              }
+
+              draw() {
+                if (!this.active) return;
+                const x = this.start.x + (this.end.x - this.start.x) * this.progress;
+                const y = this.start.y + (this.end.y - this.start.y) * this.progress;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = COLORS.primary;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+              }
+            }
+
+            function initParticles() {
+              particles = [];
+              for (let i = 0; i < NODE_COUNT; i++) {
+                particles.push(new Particle());
+              }
+            }
+
+            function animate() {
+              ctx.clearRect(0, 0, width, height);
+
+              // Update & Draw Particles
+              particles.forEach(p => {
+                p.update();
+                p.draw();
+              });
+
+              // Draw Links
+              links = [];
+              for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                  const dx = particles[i].x - particles[j].x;
+                  const dy = particles[i].y - particles[j].y;
+                  const dist = Math.sqrt(dx*dx + dy*dy);
+
+                  if (dist < LINK_DISTANCE) {
+                    const opacity = 1 - (dist / LINK_DISTANCE);
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(0, 208, 156, ${opacity * 0.3})`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Chance to spawn a data packet
+                    if (Math.random() < 0.005) {
+                      packets.push(new Packet(particles[i], particles[j]));
+                    }
+                  }
+                }
+              }
+
+              // Update & Draw Packets
+              packets = packets.filter(p => p.active);
+              packets.forEach(p => {
+                p.update();
+                p.draw();
+              });
+
+              requestAnimationFrame(animate);
+            }
+
+            // Events
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', e => {
+              const rect = canvas.getBoundingClientRect();
+              mouse.x = e.clientX - rect.left;
+              mouse.y = e.clientY - rect.top;
+            });
+
+            // Init
+            resize();
+            animate();
+          })();
+        </script>
       </div>
     </div>
   </section>

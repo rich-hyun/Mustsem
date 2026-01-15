@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mustree_grad" x1="70" y1="40" x2="442" y2="472" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00D09C"/>
+      <stop offset="100%" stop-color="#00B4D8"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer Hexagon (Block) -->
+  <path d="M256 40L442 148V364L256 472L70 364V148L256 40Z" 
+        stroke="url(#mustree_grad)" 
+        stroke-width="32" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+        
+  <!-- Inner M (Mustree) -->
+  <path d="M166 340V170L256 260L346 170V340" 
+        stroke="url(#mustree_grad)" 
+        stroke-width="32" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+        
+  <!-- Decorative Dots (Nodes) -->
+  <circle cx="256" cy="40" r="12" fill="#00D09C"/>
+  <circle cx="256" cy="472" r="12" fill="#00B4D8"/>
+</svg>

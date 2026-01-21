@@ -110,11 +110,11 @@ function renderNavbar() {
   return `
     <nav class="navbar">
       <div class="nav-container">
-        <a href="index.html" class="logo" aria-label="Mustree Home">
+        <a href="index.html" class="logo" aria-label="MUSTROOT Home">
           <div class="logo-icon">
             ${renderLogoSvg('logoGrad')}
           </div>
-          <span>Mustree</span>
+          <span>MUSTROOT</span>
         </a>
 
         <div class="nav-links">
@@ -182,7 +182,7 @@ function renderFooter() {
               <div class="logo-icon">
                 ${renderLogoSvg('footerLogoGrad')}
               </div>
-              <span>Mustree</span>
+              <span>MUSTROOT</span>
             </a>
             <p>기업을 위한 블록체인 인프라와 토큰화 API를 제공합니다. 보안을 타협하지 않으면서 빠르게 구축하세요.</p>
             <div class="social-links">
@@ -231,7 +231,7 @@ function renderFooter() {
 
         <div class="footer-bottom">
           <p>&copy; 2025 머스트리 네트워크. All rights reserved.</p>
-          <a href="index.html" class="made-with">Powered by Mustree</a>
+          <a href="index.html" class="made-with">Powered by MUSTROOT</a>
         </div>
       </div>
     </footer>

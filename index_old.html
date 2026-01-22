@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>머스트리 네트워크 - 엔터프라이즈 Web3 & 토큰화 API 플랫폼</title>
+  <meta name="description" content="머스트리는 초당 10,000건 처리 가능한 고성능 Web3 인프라와 토큰화 API를 제공하는 탈중앙화 네트워크 전문 기업입니다.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="site-nav"></div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="unicorn-bg">
+        <div data-us-project="SB9V8PsgEu3aMkYk8SWg"></div>
+      </div>
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          24시간 내 구축 · 엔터프라이즈 Web3 인프라
+        </div>
+        <h1>
+          <span class="gradient-text">빠르고 안전한</span><br>
+          탈중앙화 네트워크<br>
+          <span class="gradient-text-alt">& 토큰화 API</span>
+        </h1>
+        <p class="hero-desc">
+          머스트리는 초당 <strong>10,000건 처리</strong> 가능한 고성능 Web3 인프라와 디지털 자산 토큰화 API를 제공합니다. 기업은 24시간 내에 전용 네트워크를 손쉽게 구축할 수 있습니다.
+        </p>
+        <div class="hero-btns">
+          <a href="#contact" class="btn-primary">
+            <span>시작하기</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a href="#features" class="btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>데모 보기</span>
+          </a>
+        </div>
+      </div>
+      <div class="hero-visual" style="position: relative; width: 100%; height: 600px; display: flex; align-items: center; justify-content: center;">
+        <canvas id="blockchain-network" style="width: 100%; height: 100%;"></canvas>
+        <script>
+          (function() {
+            const canvas = document.getElementById('blockchain-network');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            let links = [];
+            let packets = [];
+
+            // Configuration
+            const NODE_COUNT = 40;
+            const LINK_DISTANCE = 150;
+            const MOUSE_RADIUS = 200;
+            const PACKET_SPEED_MIN = 0.02; // 패킷 최소 속도 (0.01 ~ 0.1)
+            const PACKET_SPEED_MAX = 0.05; // 패킷 최대 속도
+            const COLORS = {
+              primary: '#00D09C',
+              secondary: '#00B4D8',
+              bg: 'transparent'
+            };
+
+            // Mouse tracking
+            let mouse = { x: -1000, y: -1000 };
+
+            // Resize handling
+            function resize() {
+              width = canvas.parentElement.offsetWidth;
+              height = canvas.parentElement.offsetHeight;
+              canvas.width = width;
+              canvas.height = height;
+              initParticles();
+            }
+
+            // Hexagon drawing helper
+            function drawHexagon(ctx, x, y, r) {
+              ctx.beginPath();
+              for (let i = 0; i < 6; i++) {
+                ctx.lineTo(x + r * Math.cos(i * Math.PI / 3), y + r * Math.sin(i * Math.PI / 3));
+              }
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            class Particle {
+              constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 3 + 2;
+                this.color = Math.random() > 0.5 ? COLORS.primary : COLORS.secondary;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.pulse = 0;
+                this.pulseSpeed = 0.05 + Math.random() * 0.05;
+              }
+
+              update() {
+                // Movement
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wall bounce
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Mouse interaction (Repulse)
+                const dx = mouse.x - this.x;
+                const dy = mouse.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < MOUSE_RADIUS) {
+                  const forceDirectionX = dx / distance;
+                  const forceDirectionY = dy / distance;
+                  const force = (MOUSE_RADIUS - distance) / MOUSE_RADIUS;
+                  const directionX = forceDirectionX * force * 2;
+                  const directionY = forceDirectionY * force * 2;
+                  this.x -= directionX;
+                  this.y -= directionY;
+                }
+
+                // Pulse effect
+                this.pulse += this.pulseSpeed;
+              }
+
+              draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.8 + Math.sin(this.pulse) * 0.2;
+                drawHexagon(ctx, this.x, this.y, this.size * (1 + Math.sin(this.pulse) * 0.3));
+                ctx.globalAlpha = 1;
+              }
+            }
+
+            class Packet {
+              constructor(startNode, endNode) {
+                this.start = startNode;
+                this.end = endNode;
+                this.progress = 0;
+                // 속도 조절: 설정된 최소/최대 속도 사이의 랜덤 값 사용
+                this.speed = PACKET_SPEED_MIN + Math.random() * (PACKET_SPEED_MAX - PACKET_SPEED_MIN);
+                this.active = true;
+              }
+
+              update() {
+                this.progress += this.speed;
+                if (this.progress >= 1) {
+                  this.active = false;
+                }
+              }
+
+              draw() {
+                if (!this.active) return;
+                const x = this.start.x + (this.end.x - this.start.x) * this.progress;
+                const y = this.start.y + (this.end.y - this.start.y) * this.progress;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = COLORS.primary;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+              }
+            }
+
+            function initParticles() {
+              particles = [];
+              for (let i = 0; i < NODE_COUNT; i++) {
+                particles.push(new Particle());
+              }
+            }
+
+            function animate() {
+              ctx.clearRect(0, 0, width, height);
+
+              // Update & Draw Particles
+              particles.forEach(p => {
+                p.update();
+                p.draw();
+              });
+
+              // Draw Links
+              links = [];
+              for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                  const dx = particles[i].x - particles[j].x;
+                  const dy = particles[i].y - particles[j].y;
+                  const dist = Math.sqrt(dx*dx + dy*dy);
+
+                  if (dist < LINK_DISTANCE) {
+                    const opacity = 1 - (dist / LINK_DISTANCE);
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(0, 208, 156, ${opacity * 0.3})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                    // Chance to spawn a data packet
+                    if (Math.random() < 0.005) {
+                      packets.push(new Packet(particles[i], particles[j]));
+                    }
+                  }
+                }
+              }
+
+              // Update & Draw Packets
+              packets = packets.filter(p => p.active);
+              packets.forEach(p => {
+                p.update();
+                p.draw();
+              });
+
+              requestAnimationFrame(animate);
+            }
+
+            // Events
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', e => {
+              const rect = canvas.getBoundingClientRect();
+              mouse.x = e.clientX - rect.left;
+              mouse.y = e.clientY - rect.top;
+            });
+
+            // Init
+            resize();
+            animate();
+          })();
+        </script>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Features -->
+  <section class="trusted">
+    <div class="container">
+      <p class="trusted-label"><span class="highlight">핵심 기술</span>로 구축된 플랫폼</p>
+      <div class="trusted-logos">
+        <div class="logo-item">
+          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">EVM 호환</text></svg>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="700">고속 합의</text></svg>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">REST API</text></svg>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">HSM 보안</text></svg>
+        </div>
+        <div class="logo-item">
+          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">IPFS 저장</text></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Crypto Updates -->
+  <section class="crypto-updates">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-badge">실시간 업데이트</span>
+        <h2>Web3 네트워크 핵심 지표</h2>
+      </div>
+      <div class="crypto-grid">
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon mst">
+              <span>M</span>
+            </div>
+            <div class="crypto-name">
+              <strong>TPS</strong>
+              <span>처리 성능</span>
+            </div>
+          </div>
+          <div class="crypto-price">10K</div>
+          <div class="crypto-change positive">TPS</div>
+        </div>
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon eth">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5zM5 14.2L12 22.5l7-8.3-7 4.2-7-4.2z"/>
+              </svg>
+            </div>
+            <div class="crypto-name">
+              <strong>ETH</strong>
+              <span>Ethereum</span>
+            </div>
+          </div>
+          <div class="crypto-price">호환</div>
+          <div class="crypto-change neutral">EVM 기반</div>
+        </div>
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon nft">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+            <div class="crypto-name">
+              <strong>토큰화</strong>
+              <span>API</span>
+            </div>
+          </div>
+          <div class="crypto-price">무제한</div>
+          <div class="crypto-change positive">발행 가능</div>
+        </div>
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon rwa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div class="crypto-name">
+              <strong>실물자산</strong>
+              <span>토큰화</span>
+            </div>
+          </div>
+          <div class="crypto-price">지원</div>
+          <div class="crypto-change positive">완료</div>
+        </div>
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon sbt">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
+            <div class="crypto-name">
+              <strong>SBT</strong>
+              <span>소울바운드</span>
+            </div>
+          </div>
+          <div class="crypto-price">신원</div>
+          <div class="crypto-change neutral">인증됨</div>
+        </div>
+        <div class="crypto-card">
+          <div class="crypto-header">
+            <div class="crypto-icon bridge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 14a1 1 0 011-1h14a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1v-7z"/>
+                <path d="M8 13V5a4 4 0 018 0v8"/>
+              </svg>
+            </div>
+            <div class="crypto-name">
+              <strong>Bridge</strong>
+              <span>크로스체인</span>
+            </div>
+          </div>
+          <div class="crypto-price">멀티</div>
+          <div class="crypto-change positive">체인</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features">
+    <div class="container">
+      <div class="features-layout">
+        <div class="features-content">
+          <span class="section-badge">왜 머스트리인가</span>
+          <h2>엔터프라이즈 Web3<br>플랫폼의 특징</h2>
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+              <div class="feature-text">
+                <h4>전용 네트워크 자동 구축</h4>
+                <p>기업별 독립적인 고성능 Web3 네트워크를 자동으로 구성합니다.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div class="feature-text">
+                <h4>엔터프라이즈급 보안</h4>
+                <p>검증된 보안 정책과 거버넌스 템플릿으로 안전한 운영을 보장합니다.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+              </div>
+              <div class="feature-text">
+                <h4>REST API 연동</h4>
+                <p>간단한 REST API로 기업 시스템과 쉽게 연동할 수 있습니다.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+              </div>
+              <div class="feature-text">
+                <h4>확장 가능한 인프라</h4>
+                <p>비즈니스 성장에 따라 유연하게 확장 가능한 구조를 제공합니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="features-visual">
+          <div class="portfolio-card">
+            <div class="portfolio-header">
+              <span>네트워크 현황</span>
+              <span class="portfolio-change">실시간</span>
+            </div>
+            <div class="portfolio-list">
+              <div class="portfolio-item">
+                <div class="portfolio-icon btc">
+                  <span>M</span>
+                </div>
+                <div class="portfolio-info">
+                  <strong>처리 성능</strong>
+                  <span>머스트리 네트워크</span>
+                </div>
+                <div class="portfolio-value">
+                  <strong>10K</strong>
+                  <span class="positive">TPS</span>
+                </div>
+              </div>
+              <div class="portfolio-item">
+                <div class="portfolio-icon eth">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5z"/>
+                  </svg>
+                </div>
+                <div class="portfolio-info">
+                  <strong>이더리움</strong>
+                  <span>브릿지 지원</span>
+                </div>
+                <div class="portfolio-value">
+                  <strong>EVM</strong>
+                  <span class="positive">호환</span>
+                </div>
+              </div>
+              <div class="portfolio-item">
+                <div class="portfolio-icon ltc">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                  </svg>
+                </div>
+                <div class="portfolio-info">
+                  <strong>디지털 자산</strong>
+                  <span>토큰화 API</span>
+                </div>
+                <div class="portfolio-value">
+                  <strong>무제한</strong>
+                  <span class="positive">발행</span>
+                </div>
+              </div>
+              <div class="portfolio-item">
+                <div class="portfolio-icon pol">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <div class="portfolio-info">
+                  <strong>보안</strong>
+                  <span>HSM/Vault 기반</span>
+                </div>
+                <div class="portfolio-value">
+                  <strong>엔터프라이즈</strong>
+                  <span class="positive">급</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section id="benefits" class="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">10K</div>
+          <div class="stat-label">TPS</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">EVM</div>
+          <div class="stat-label">완전 호환 네트워크</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">무제한</div>
+          <div class="stat-label">디지털 자산 토큰화</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">고속</div>
+          <div class="stat-label">합의 알고리즘</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Solution Section -->
+  <section class="solution">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-badge">최적의 솔루션</span>
+        <h2>구축과 확장의 자유를 제공하는<br>다양한 옵션의 통합 플랫폼</h2>
+      </div>
+      <div class="solution-grid">
+        <div class="solution-item">
+          <div class="solution-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z"/>
+              <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z"/>
+            </svg>
+          </div>
+          <h4>기획</h4>
+          <p>전문 템플릿으로 Web3 프로젝트 범위를 설계하세요</p>
+        </div>
+        <div class="solution-center">
+          <div class="solution-phone">
+            <div class="phone-screen">
+              <div class="phone-header">
+                <span>거래소</span>
+              </div>
+              <div class="phone-balance">
+                <span class="balance-label">잔액</span>
+                <span class="balance-value">5,500.25 <small>ETH</small></span>
+              </div>
+              <div class="phone-stats">
+                <div class="phone-stat">
+                  <span>네트워크</span>
+                  <strong>$7,892.47</strong>
+                </div>
+                <div class="phone-stat">
+                  <span>스테이킹</span>
+                  <strong>25.40%</strong>
+                </div>
+              </div>
+              <div class="phone-coins">
+                <span class="coin-badge">MST</span>
+                <span class="coin-badge">토큰화</span>
+                <span class="coin-badge">실물자산</span>
+                <span class="coin-badge">SBT</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="solution-item right">
+          <div class="solution-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <h4>고도화</h4>
+          <p>더 나은 성능을 위해 네트워크 설정을 개선하고 최적화하세요</p>
+        </div>
+        <div class="solution-item">
+          <div class="solution-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </div>
+          <h4>프로토타입</h4>
+          <p>제품과 앱을 위한 Web3 네트워크를 빠르게 구축하세요</p>
+        </div>
+        <div class="solution-item right">
+          <div class="solution-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </div>
+          <h4>확장 및 지원</h4>
+          <p>신속한 프로덕션 배포와 전문 지원을 보장합니다</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platform Banner -->
+  <section class="platform-banner">
+    <div class="container">
+      <div class="banner-card">
+        <div class="banner-content">
+          <h3>고성능 머스트리 플랫폼</h3>
+          <p>기업용 플랫폼은 Web3 개발자들에게 무료로 더 안전하고 신뢰할 수 있는 경험을 제공합니다. 지금 바로 플랫폼을 시작하고 네트워크를 구축하세요.</p>
+        </div>
+        <a href="#contact" class="btn-banner">플랫폼 시작하기</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services">
+    <div class="container">
+      <div class="services-layout">
+        <div class="services-visual">
+          <div class="service-cards-stack">
+            <div class="service-card-item">
+              <div class="service-card-icon eth-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5zM5 14.2L12 22.5l7-8.3-7 4.2-7-4.2z"/>
+                </svg>
+              </div>
+              <div class="service-card-info">
+                <strong>Ethereum</strong>
+                <div class="service-card-stars">
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                </div>
+              </div>
+              <div class="service-card-chart"></div>
+            </div>
+            <div class="service-card-item btc-card">
+              <div class="service-card-icon btc-icon">
+                <span>M</span>
+              </div>
+              <div class="service-card-info">
+                <strong>Mustree</strong>
+                <div class="service-card-stars">
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                  <span class="star">&#9733;</span>
+                </div>
+              </div>
+              <div class="service-card-chart btc-chart"></div>
+            </div>
+          </div>
+        </div>
+        <div class="services-content">
+          <span class="section-badge">기업 서비스</span>
+          <h2>지금 바로 기업 전용<br>Web3 네트워크를 구축하세요</h2>
+          <p class="services-desc">머스트리는 최고의 시작점이 되는 다양한 기능을 제공합니다. 완전한 유연성을 갖춘 엔터프라이즈급 인프라입니다.</p>
+          <div class="services-list">
+            <div class="service-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>네트워크 관리</span>
+            </div>
+            <div class="service-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>엔터프라이즈급 보안</span>
+            </div>
+            <div class="service-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              <span>모바일 & 웹 API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Upgrade Section -->
+  <section id="pricing" class="upgrade">
+    <div class="container">
+      <div class="upgrade-layout">
+        <div class="upgrade-content">
+          <span class="section-badge">기업 업그레이드</span>
+          <h2>지금 바로 Web3<br>인프라를 업그레이드하세요</h2>
+          <p class="upgrade-desc">중앙 장애점 없이 더 빠르고, 안전하며, 합리적인 가격의 엔터프라이즈급 솔루션을 제공합니다.</p>
+          <div class="upgrade-features">
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>100% 보안</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>무료 설정</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>더 높은 확장성</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>강력한 성능</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>더 쉬운 사용</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>기업을 위한 설계</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>합리적인 비용</span>
+            </div>
+            <div class="upgrade-feature">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <span>100% 무료 API 템플릿</span>
+            </div>
+          </div>
+        </div>
+        <div class="upgrade-visual">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-pair">
+                <span class="pair-icon">M</span>
+                <span>MST Network</span>
+              </div>
+              <div class="chart-value">
+                <span>처리 성능</span>
+                <strong>10K TPS</strong>
+              </div>
+            </div>
+            <div class="chart-stats">
+              <div class="chart-stat">
+                <span>합의 알고리즘</span>
+                <strong class="positive">고속</strong>
+              </div>
+              <div class="chart-stat">
+                <span>네트워크 호환</span>
+                <strong>EVM</strong>
+              </div>
+            </div>
+            <div class="chart-graph">
+              <svg viewBox="0 0 400 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#00D09C" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#00D09C" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,80 Q50,70 100,60 T200,40 T300,50 T400,20 V100 H0 Z" fill="url(#chartGrad)"/>
+                <path d="M0,80 Q50,70 100,60 T200,40 T300,50 T400,20" stroke="#00D09C" stroke-width="2" fill="none"/>
+              </svg>
+            </div>
+            <div class="chart-prices">
+              <span>$750K</span>
+              <span>$500K</span>
+              <span>$250K</span>
+              <span>$100K</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="contact">
+    <div class="container">
+      <p class="cta-label"><span class="highlight">항상</span> 함께합니다</p>
+      <h2>머스트리 플랫폼을 가장 먼저 사용해보세요!</h2>
+      <p class="cta-desc">더 빠르고, 안전하며, 합리적인 가격의 기업용 Web3 인프라를 경험하세요.</p>
+      <div class="cta-cards">
+        <div class="cta-card">
+          <div class="cta-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z"/>
+            </svg>
+          </div>
+          <h4>전문 기술 지원</h4>
+          <p>문제가 있으신가요? 전담 지원팀이 신속하게 해결해드립니다.</p>
+        </div>
+        <div class="cta-card">
+          <div class="cta-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+              <path d="M16 3.13a4 4 0 010 7.75"/>
+            </svg>
+          </div>
+          <h4>개발자 커뮤니티</h4>
+          <p>머스트리 개발자 커뮤니티에서 다양한 정보를 공유하세요.</p>
+        </div>
+        <div class="cta-card">
+          <div class="cta-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+            </svg>
+          </div>
+          <h4>튜토리얼 & 가이드</h4>
+          <p>무료 튜토리얼로 Web3와 개발을 쉽게 배워보세요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-badge">자주 묻는 질문</span>
+        <h2>머스트리에 대해 더 알아보세요</h2>
+        <p>궁금한 점을 확인하고 Web3 인프라 도입을 시작하세요</p>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>머스트리는 어떤 서비스인가요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>머스트리는 기업이 자체적으로 운영 가능한 전용 Web3 네트워크를 제공하는 인프라 전문 기업입니다. 초당 10,000건 처리 가능한 고성능 탈중앙화 네트워크를 기업별로 생성해드립니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>글로벌 서비스가 가능한가요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>네, 머스트리 서비스는 전 세계에서 이용 가능합니다. 전용 Web3 네트워크와 토큰화 API 서비스를 통해 글로벌 기업들을 지원합니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>어떤 Web3 기술을 지원하나요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>머스트리는 EVM 호환 고성능 탈중앙화 네트워크를 제공하며, Ethereum 브릿지, 디지털 자산 토큰화, SBT, 실물자산 토큰화 등 다양한 Web3 기술을 지원합니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>데이터 보안은 안전한가요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>물론입니다. 머스트리는 엔드투엔드 암호화, 다중 서명 지갑, 정기 보안 감사를 포함한 엔터프라이즈급 보안 체계를 갖추고 있습니다. 업계 최고 수준의 보안 프로토콜로 고객의 데이터와 자산을 안전하게 보호합니다.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>설정비나 유지보수 비용이 있나요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>기업 맞춤형 유연한 요금제를 제공합니다. 귀사의 요구사항에 맞는 견적을 위해 영업팀에 문의해 주세요.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>개발자용 API를 제공하나요?</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>네! 디지털 자산 토큰화, 토큰 관리, 지갑 운영, 네트워크 모니터링을 위한 종합 REST API를 제공합니다. 개발자를 위한 전체 API 문서와 SDK도 준비되어 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script src="site.js"></script>
+  <script src="script.js"></script>
+
+  <!-- Unicorn Studio Background -->
+  <script type="text/javascript">
+    !function(){
+      if(!window.UnicornStudio){
+        window.UnicornStudio={isInitialized:!1};
+        var i=document.createElement("script");
+        i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.0/dist/unicornStudio.umd.js";
+        i.onload=function(){
+          window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)
+        };
+        (document.head || document.body).appendChild(i)
+      }
+    }();
+  </script>
+</body>
+</html>

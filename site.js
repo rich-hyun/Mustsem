@@ -23,17 +23,6 @@ function isActiveHref(href, currentRoute) {
   return currentRoute.hash === `#${rawHash}`;
 }
 
-function isOverviewHrefActive(href, currentRoute) {
-  if (!href) return false;
-  const [rawPage, rawHash] = href.split('#');
-  const targetPage = rawPage || currentRoute.page;
-  if (targetPage !== 'index.html') return false;
-  if (currentRoute.page !== 'index.html') return false;
-
-  if (!rawHash) return currentRoute.hash === '';
-  return currentRoute.hash === `#${rawHash}`;
-}
-
 function escapeHtml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -70,16 +59,6 @@ function renderLogoSvg(gradientId) {
 function renderNavbar() {
   const currentRoute = getCurrentRoute();
 
-  const overviewLinks = [
-    { href: 'index.html', label: '홈' },
-    { href: 'index.html#features', label: '특징' },
-    { href: 'index.html#benefits', label: '장점' },
-    { href: 'index.html#services', label: '서비스' },
-    { href: 'index.html#pricing', label: '요금제' },
-    { href: 'index.html#faq', label: 'FAQ' },
-    { href: 'index.html#contact', label: '문의' }
-  ];
-
   const platformLinks = [
     { href: 'network.html', label: '네트워크' },
     { href: 'bridge.html', label: '브릿지' },
@@ -94,7 +73,6 @@ function renderNavbar() {
     { href: 'api-guide.html', label: 'API 가이드' }
   ];
 
-  const overviewActive = currentRoute.page === 'index.html';
   const platformActive = platformLinks.some((l) => isActiveHref(l.href, currentRoute));
   const devActive = developerLinks.some((l) => isActiveHref(l.href, currentRoute));
   const securityActive = isActiveHref('security.html', currentRoute);
@@ -118,18 +96,6 @@ function renderNavbar() {
         </a>
 
         <div class="nav-links">
-          <div class="nav-dropdown ${overviewActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="소개 메뉴">
-              소개
-              <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
-                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="소개">
-              ${dropdownMenu(overviewLinks, isOverviewHrefActive)}
-            </div>
-          </div>
-
           <div class="nav-dropdown ${platformActive ? 'active' : ''}">
             <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="플랫폼 메뉴">
               플랫폼

@@ -14,259 +14,37 @@
 <body>
   <div id="site-nav"></div>
 
-  <!-- Hero Section -->
+  <!-- Hero Section - IMS Style -->
   <section class="hero">
     <div class="hero-bg">
-      <div class="unicorn-bg">
-        <div data-us-project="SB9V8PsgEu3aMkYk8SWg"></div>
-      </div>
-      <div class="gradient-orb orb-1"></div>
-      <div class="gradient-orb orb-2"></div>
+      <video class="hero-video" autoplay muted loop playsinline poster="">
+        <source src="web3-marketing-businessman-working-with-virtual-re-2026-01-20-10-09-45-utc (1).webm" type="video/webm">
+      </video>
       <div class="grid-overlay"></div>
     </div>
     <div class="hero-container">
       <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          24시간 내 구축 · 엔터프라이즈 Web3 인프라
-        </div>
         <h1>
-          <span class="gradient-text">빠르고 안전한</span><br>
-          탈중앙화 네트워크<br>
-          <span class="gradient-text-alt">& 토큰화 API</span>
+          탈중앙화 네트워크 구축 및 관리에 필요한<br>
+          <strong>세계 최고의 오픈 솔루션(Solution)을</strong><br>
+          제공합니다.
         </h1>
-        <p class="hero-desc">
-          머스트리는 초당 <strong>10,000건 처리</strong> 가능한 고성능 Web3 인프라와 디지털 자산 토큰화 API를 제공합니다. 기업은 24시간 내에 전용 네트워크를 손쉽게 구축할 수 있습니다.
-        </p>
-        <div class="hero-btns">
-          <a href="#contact" class="btn-primary">
-            <span>시작하기</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </a>
-          <a href="#features" class="btn-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="5 3 19 12 5 21 5 3"/>
-            </svg>
-            <span>데모 보기</span>
-          </a>
-        </div>
-      </div>
-      <div class="hero-visual" style="position: relative; width: 100%; height: 600px; display: flex; align-items: center; justify-content: center;">
-        <canvas id="blockchain-network" style="width: 100%; height: 100%;"></canvas>
-        <script>
-          (function() {
-            const canvas = document.getElementById('blockchain-network');
-            const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-            let links = [];
-            let packets = [];
-
-            // Configuration
-            const NODE_COUNT = 40;
-            const LINK_DISTANCE = 150;
-            const MOUSE_RADIUS = 200;
-            const PACKET_SPEED_MIN = 0.02; // 패킷 최소 속도 (0.01 ~ 0.1)
-            const PACKET_SPEED_MAX = 0.05; // 패킷 최대 속도
-            const COLORS = {
-              primary: '#00D09C',
-              secondary: '#00B4D8',
-              bg: 'transparent'
-            };
-
-            // Mouse tracking
-            let mouse = { x: -1000, y: -1000 };
-
-            // Resize handling
-            function resize() {
-              width = canvas.parentElement.offsetWidth;
-              height = canvas.parentElement.offsetHeight;
-              canvas.width = width;
-              canvas.height = height;
-              initParticles();
-            }
-
-            // Hexagon drawing helper
-            function drawHexagon(ctx, x, y, r) {
-              ctx.beginPath();
-              for (let i = 0; i < 6; i++) {
-                ctx.lineTo(x + r * Math.cos(i * Math.PI / 3), y + r * Math.sin(i * Math.PI / 3));
-              }
-              ctx.closePath();
-              ctx.fill();
-            }
-
-            class Particle {
-              constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5;
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.size = Math.random() * 3 + 2;
-                this.color = Math.random() > 0.5 ? COLORS.primary : COLORS.secondary;
-                this.baseX = this.x;
-                this.baseY = this.y;
-                this.pulse = 0;
-                this.pulseSpeed = 0.05 + Math.random() * 0.05;
-              }
-
-              update() {
-                // Movement
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Wall bounce
-                if (this.x < 0 || this.x > width) this.vx *= -1;
-                if (this.y < 0 || this.y > height) this.vy *= -1;
-
-                // Mouse interaction (Repulse)
-                const dx = mouse.x - this.x;
-                const dy = mouse.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < MOUSE_RADIUS) {
-                  const forceDirectionX = dx / distance;
-                  const forceDirectionY = dy / distance;
-                  const force = (MOUSE_RADIUS - distance) / MOUSE_RADIUS;
-                  const directionX = forceDirectionX * force * 2;
-                  const directionY = forceDirectionY * force * 2;
-                  this.x -= directionX;
-                  this.y -= directionY;
-                }
-
-                // Pulse effect
-                this.pulse += this.pulseSpeed;
-              }
-
-              draw() {
-                ctx.fillStyle = this.color;
-                ctx.globalAlpha = 0.8 + Math.sin(this.pulse) * 0.2;
-                drawHexagon(ctx, this.x, this.y, this.size * (1 + Math.sin(this.pulse) * 0.3));
-                ctx.globalAlpha = 1;
-              }
-            }
-
-            class Packet {
-              constructor(startNode, endNode) {
-                this.start = startNode;
-                this.end = endNode;
-                this.progress = 0;
-                // 속도 조절: 설정된 최소/최대 속도 사이의 랜덤 값 사용
-                this.speed = PACKET_SPEED_MIN + Math.random() * (PACKET_SPEED_MAX - PACKET_SPEED_MIN);
-                this.active = true;
-              }
-
-              update() {
-                this.progress += this.speed;
-                if (this.progress >= 1) {
-                  this.active = false;
-                }
-              }
-
-              draw() {
-                if (!this.active) return;
-                const x = this.start.x + (this.end.x - this.start.x) * this.progress;
-                const y = this.start.y + (this.end.y - this.start.y) * this.progress;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, 2, 0, Math.PI * 2);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = COLORS.primary;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-              }
-            }
-
-            function initParticles() {
-              particles = [];
-              for (let i = 0; i < NODE_COUNT; i++) {
-                particles.push(new Particle());
-              }
-            }
-
-            function animate() {
-              ctx.clearRect(0, 0, width, height);
-
-              // Update & Draw Particles
-              particles.forEach(p => {
-                p.update();
-                p.draw();
-              });
-
-              // Draw Links
-              links = [];
-              for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                  const dx = particles[i].x - particles[j].x;
-                  const dy = particles[i].y - particles[j].y;
-                  const dist = Math.sqrt(dx*dx + dy*dy);
-
-                  if (dist < LINK_DISTANCE) {
-                    const opacity = 1 - (dist / LINK_DISTANCE);
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = `rgba(0, 208, 156, ${opacity * 0.3})`;
-                    ctx.lineWidth = 2.5;
-                    ctx.stroke();
-
-                    // Chance to spawn a data packet
-                    if (Math.random() < 0.005) {
-                      packets.push(new Packet(particles[i], particles[j]));
-                    }
-                  }
-                }
-              }
-
-              // Update & Draw Packets
-              packets = packets.filter(p => p.active);
-              packets.forEach(p => {
-                p.update();
-                p.draw();
-              });
-
-              requestAnimationFrame(animate);
-            }
-
-            // Events
-            window.addEventListener('resize', resize);
-            window.addEventListener('mousemove', e => {
-              const rect = canvas.getBoundingClientRect();
-              mouse.x = e.clientX - rect.left;
-              mouse.y = e.clientY - rect.top;
-            });
-
-            // Init
-            resize();
-            animate();
-          })();
-        </script>
+        <p class="hero-subtitle">Global No.1 Enterprise Web3 Platform</p>
       </div>
     </div>
   </section>
 
-  <!-- Key Features -->
-  <section class="trusted">
+  <!-- IMS Style Intro Section -->
+  <section class="intro-section">
     <div class="container">
-      <p class="trusted-label"><span class="highlight">핵심 기술</span>로 구축된 플랫폼</p>
-      <div class="trusted-logos">
-        <div class="logo-item">
-          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">EVM 호환</text></svg>
+      <div class="intro-layout">
+        <div class="intro-content">
+          <h2>Web3 인프라를<br>쉽게 만드는 ─<br><strong>머스트리</strong></h2>
+          <p>머스트리는 초당 10,000건 처리 가능한 고성능 Web3 인프라와 디지털 자산 토큰화 API를 제공합니다. 기업은 24시간 내에 전용 네트워크를 손쉽게 구축할 수 있습니다.</p>
+          <p>또한, 기업별 독립적인 고성능 Web3 네트워크를 자동으로 구성하며, 검증된 보안 정책과 거버넌스 템플릿으로 안전한 운영을 보장합니다.</p>
         </div>
-        <div class="logo-item">
-          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="700">고속 합의</text></svg>
-        </div>
-        <div class="logo-item">
-          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">REST API</text></svg>
-        </div>
-        <div class="logo-item">
-          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">HSM 보안</text></svg>
-        </div>
-        <div class="logo-item">
-          <svg viewBox="0 0 120 40" fill="currentColor"><text x="10" y="28" font-size="16" font-weight="600">IPFS 저장</text></svg>
+        <div class="intro-image">
+          <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop" alt="Blockchain Network" />
         </div>
       </div>
     </div>
@@ -509,25 +287,32 @@
     </div>
   </section>
 
-  <!-- Benefits Section -->
+  <!-- IMS Style Stats Section -->
   <section id="benefits" class="stats">
     <div class="container">
+      <h3 class="stats-title">변화를 만드는 머스트리의 가치</h3>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-value">10K</div>
-          <div class="stat-label">TPS</div>
+          <div class="stat-label">처리 성능</div>
+          <div class="stat-value">10,000+ TPS</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">EVM</div>
-          <div class="stat-label">완전 호환 네트워크</div>
+          <div class="stat-label">네트워크 호환성</div>
+          <div class="stat-value">EVM 완전 호환</div>
         </div>
+      </div>
+      <div class="stats-grid" style="margin-top: 20px;">
         <div class="stat-card">
-          <div class="stat-value">무제한</div>
           <div class="stat-label">디지털 자산 토큰화</div>
+          <div class="stat-value">무제한</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">고속</div>
           <div class="stat-label">합의 알고리즘</div>
+          <div class="stat-value">고속</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">네트워크 구축</div>
+          <div class="stat-value">24시간 내</div>
         </div>
       </div>
     </div>
@@ -627,72 +412,60 @@
     </div>
   </section>
 
-  <!-- Services Section -->
+  <!-- IMS Style Services Section -->
   <section id="services" class="services">
     <div class="container">
       <div class="services-layout">
-        <div class="services-visual">
-          <div class="service-cards-stack">
-            <div class="service-card-item">
-              <div class="service-card-icon eth-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5zM5 14.2L12 22.5l7-8.3-7 4.2-7-4.2z"/>
+        <div class="services-content">
+          <h2>SERVICE</h2>
+          <p class="services-desc">머스트리는 기업이 Web3 서비스를 쉽게 구축할 수 있도록 다양한 솔루션을 제공하고 있습니다.</p>
+          <div class="service-icons">
+            <div class="service-icon-item">
+              <div class="service-icon-box">M</div>
+              <span>네트워크</span>
+            </div>
+            <div class="service-icon-item">
+              <div class="service-icon-box blue">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                  <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5z"/>
                 </svg>
               </div>
-              <div class="service-card-info">
-                <strong>Ethereum</strong>
-                <div class="service-card-stars">
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                </div>
-              </div>
-              <div class="service-card-chart"></div>
+              <span>브릿지</span>
             </div>
-            <div class="service-card-item btc-card">
-              <div class="service-card-icon btc-icon">
-                <span>M</span>
+            <div class="service-icon-item">
+              <div class="service-icon-box green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
               </div>
-              <div class="service-card-info">
-                <strong>Mustree</strong>
-                <div class="service-card-stars">
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                  <span class="star">&#9733;</span>
-                </div>
+              <span>NFT</span>
+            </div>
+            <div class="service-icon-item">
+              <div class="service-icon-box orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
               </div>
-              <div class="service-card-chart btc-chart"></div>
+              <span>RWA</span>
+            </div>
+            <div class="service-icon-item">
+              <div class="service-icon-box purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <span>SBT</span>
+            </div>
+            <div class="service-icon-item">
+              <div class="service-icon-box navy">API</div>
+              <span>토큰화 API</span>
             </div>
           </div>
-        </div>
-        <div class="services-content">
-          <span class="section-badge">기업 서비스</span>
-          <h2>지금 바로 기업 전용<br>Web3 네트워크를 구축하세요</h2>
-          <p class="services-desc">머스트리는 최고의 시작점이 되는 다양한 기능을 제공합니다. 완전한 유연성을 갖춘 엔터프라이즈급 인프라입니다.</p>
-          <div class="services-list">
-            <div class="service-check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span>네트워크 관리</span>
-            </div>
-            <div class="service-check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span>엔터프라이즈급 보안</span>
-            </div>
-            <div class="service-check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
-              <span>모바일 & 웹 API</span>
-            </div>
-          </div>
+          <a href="api.html" class="btn-more">→ MORE</a>
         </div>
       </div>
     </div>
@@ -942,20 +715,5 @@
 
   <script src="site.js"></script>
   <script src="script.js"></script>
-
-  <!-- Unicorn Studio Background -->
-  <script type="text/javascript">
-    !function(){
-      if(!window.UnicornStudio){
-        window.UnicornStudio={isInitialized:!1};
-        var i=document.createElement("script");
-        i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.0/dist/unicornStudio.umd.js";
-        i.onload=function(){
-          window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)
-        };
-        (document.head || document.body).appendChild(i)
-      }
-    }();
-  </script>
 </body>
 </html>

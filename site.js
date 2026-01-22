@@ -246,4 +246,22 @@ function injectLayout() {
   if (footerMount) footerMount.innerHTML = renderFooter();
 }
 
+// IMS Style: Navbar scroll effect
+function initNavbarScroll() {
+  const navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+
+  const handleScroll = () => {
+    if (window.scrollY > 50) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  };
+
+  window.addEventListener('scroll', handleScroll);
+  handleScroll(); // Initial check
+}
+
 injectLayout();
+initNavbarScroll();

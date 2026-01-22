@@ -11,7 +11,32 @@ document.addEventListener('DOMContentLoaded', function() {
   initSmoothScroll();
   initCounterAnimation();
   initLiveTicker();
+  initHeroVideo();
 });
+
+// ============================================
+// Hero Video Background
+// ============================================
+function initHeroVideo() {
+  const video = document.querySelector('.hero-video');
+  if (!video) return;
+
+  // Mobile: disable video to save bandwidth (under 768px)
+  if (window.innerWidth < 768) {
+    video.remove();
+    return;
+  }
+
+  // Fade in video when loaded
+  video.addEventListener('canplaythrough', () => {
+    video.classList.add('loaded');
+  });
+
+  // If already loaded (from cache)
+  if (video.readyState >= 3) {
+    video.classList.add('loaded');
+  }
+}
 
 // ============================================
 // Navbar Scroll Effect

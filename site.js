@@ -1,5 +1,5 @@
 // ============================================
-// Mustree Network - Shared Site Layout
+// Mustsem Network - Shared Site Layout
 // - Injects Navbar/Footer into #site-nav/#site-footer
 // - Adds active state based on current pathname
 // ============================================
@@ -88,11 +88,11 @@ function renderNavbar() {
   return `
     <nav class="navbar">
       <div class="nav-container">
-        <a href="index.html" class="logo" aria-label="MUSTROOT Home">
+        <a href="index.html" class="logo" aria-label="MUSTSEM Home">
           <div class="logo-icon">
             ${renderLogoSvg('logoGrad')}
           </div>
-          <span>MUSTROOT</span>
+          <span>MUSTSEM</span>
         </a>
 
         <div class="nav-links">
@@ -148,7 +148,7 @@ function renderFooter() {
               <div class="logo-icon">
                 ${renderLogoSvg('footerLogoGrad')}
               </div>
-              <span>MUSTROOT</span>
+              <span>MUSTSEM</span>
             </a>
             <p>기업을 위한 블록체인 인프라와 토큰화 API를 제공합니다. 보안을 타협하지 않으면서 빠르게 구축하세요.</p>
             <div class="social-links">
@@ -196,8 +196,8 @@ function renderFooter() {
         </div>
 
         <div class="footer-bottom">
-          <p>&copy; 2025 머스트리 네트워크. All rights reserved.</p>
-          <a href="index.html" class="made-with">Powered by MUSTROOT</a>
+          <p>&copy; 2025 머스트셈 네트워크. All rights reserved.</p>
+          <a href="index.html" class="made-with">Powered by MUSTSEM</a>
         </div>
       </div>
     </footer>

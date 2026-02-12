@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SBT (Soulbound Token) - 머스트리 네트워크</title>
+  <title>SBT (Soulbound Token) - 머스트셈 네트워크</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,17 +98,17 @@
    1) 네트워크 정보 정의
 --------------------------- */
 const networks = [
-  { name:"Mustree", rpc:"https://block.mst3.site", chain:7601, symbol:"MST" },
+  { name:"Mustsem", rpc:"https://block.mst3.site", chain:7601, symbol:"MST" },
   { name:"JKK-TMZ", rpc:"https://jkk.mst2.site", chain:7707, symbol:"TMZ" },
   { name:"KukminBank", rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
   { name:"NABIZAM", rpc:"https://nbmst.mst2.site", chain:7602, symbol:"NBZ" },
   { name:"MDPCD", rpc:"https://mdpcd.mst2.site", chain:7603, symbol:"MDP" }
 ];
 
-// Mustree 고정 + 나머지 알파벳 정렬
+// Mustsem 고정 + 나머지 알파벳 정렬
 const sorted = [
-  networks.find(n => n.name === "Mustree"),
-  ...networks.filter(n => n.name !== "Mustree").sort((a,b)=>a.name.localeCompare(b.name))
+  networks.find(n => n.name === "Mustsem"),
+  ...networks.filter(n => n.name !== "Mustsem").sort((a,b)=>a.name.localeCompare(b.name))
 ];
 
 /* ---------------------------
@@ -257,7 +257,7 @@ contract SBT_Mint_${net.name} {
 
 /* 실제 컨트랙트 주소 (네트워크별로 다르면, 나중에 map으로 분기 가능) */
 const CONTRACTS = {
-  "Mustree": "0x58EA439b075e01E7a681b7798e3d8022e619eAD8",
+  "Mustsem": "0x58EA439b075e01E7a681b7798e3d8022e619eAD8",
   "JKK-TMZ": "0xcc2E2778a0F2148f9C09D38C6917b0FcD6728bf0",
   "KukminBank": "0x0000000000000000000000000000000000000001",
   "NABIZAM": "0xe02bF2Df1919f4dA20e10a2304648072fBD34E94",
@@ -768,7 +768,7 @@ async function execMintTx() {
 
     solOut.textContent = "트랜잭션 전송 중...";
 
-    // Mustree 보안 정책 때문에 이벤트 로그는 못 읽음 → callStatic로 tokenId 사전 계산
+    // Mustsem 보안 정책 때문에 이벤트 로그는 못 읽음 → callStatic로 tokenId 사전 계산
     const tokenId = await contract.mintSBT.staticCall(
       owner,
       sbtName,

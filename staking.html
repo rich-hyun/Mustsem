@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>스테이킹 · Mustree</title>
+  <title>스테이킹 · Mustsem</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <meta name="description" content="MST를 wMST로 래핑하고, wMST를 스테이킹하여 MST 보상을 받는 페이지" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +37,7 @@
       <div class="container">
         <h2 class="section-title">네트워크 선택</h2>
         <p class="small">
-          스테이킹을 진행할 네트워크를 선택하세요. 브릿지와 스테이킹은 Mustree(MST) 네트워크에서만 실제로 동작합니다.
+          스테이킹을 진행할 네트워크를 선택하세요. 브릿지와 스테이킹은 Mustsem(MST) 네트워크에서만 실제로 동작합니다.
         </p>
 
         <div class="grid cols-2" style="gap: 24px;">
@@ -49,7 +49,7 @@
               </div>
             </div>
             <p class="small text-block">
-              * 네트워크 정보는 화면 표시용입니다. 실제 트랜잭션은 Mustree(MST) 네트워크에서 실행됩니다.
+              * 네트워크 정보는 화면 표시용입니다. 실제 트랜잭션은 Mustsem(MST) 네트워크에서 실행됩니다.
             </p>
           </article>
 
@@ -74,7 +74,7 @@
           <article class="card">
             <h3>MetaMask 연결</h3>
             <p class="small">
-              아래 버튼을 눌러 지갑을 연결합니다. 네트워크가 Mustree(MST)가 아니면 자동 전환을 시도합니다.
+              아래 버튼을 눌러 지갑을 연결합니다. 네트워크가 Mustsem(MST)가 아니면 자동 전환을 시도합니다.
             </p>
             <button class="btn primary" id="btnConnect">지갑 연결</button>
           </article>
@@ -214,7 +214,7 @@
     // 공통 유틸 & 네트워크 UI
     // =============================
     const networks = [
-      { name:"Mustree",   rpc:"https://block.mst3.site",  chain:7601, symbol:"MST" },
+      { name:"Mustsem",   rpc:"https://block.mst3.site",  chain:7601, symbol:"MST" },
       { name:"JKK-TMZ",   rpc:"https://jkk.mst2.site",    chain:7707, symbol:"TMZ" },
       { name:"KukminBank",rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
       { name:"NABIZAM",   rpc:"https://nbmst.mst2.site",  chain:7602, symbol:"NBZ" },
@@ -351,7 +351,7 @@
             method: "wallet_addEthereumChain",
             params: [{
               chainId: MST_CHAIN_ID_HEX,
-              chainName: "Mustree",
+              chainName: "Mustsem",
               nativeCurrency: { name: "MST", symbol: "MST", decimals: 18 },
               rpcUrls: [MST_RPC_URL],
               blockExplorerUrls: []

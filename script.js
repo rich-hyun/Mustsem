@@ -1,5 +1,5 @@
 // ============================================
-// Mustree Network - Premium JavaScript
+// Mustsem Network - Premium JavaScript
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -540,4 +540,4 @@ function initLiveTicker() {
   });
 }
 
-console.log('Mustree Network - Premium Blockchain Platform Loaded');
+console.log('Mustsem Network - Premium Blockchain Platform Loaded');

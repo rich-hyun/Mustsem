@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NFT API - 머스트리 네트워크</title>
+  <title>NFT API - 머스트셈 네트워크</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,17 +105,17 @@
    1) 네트워크 정보
 ------------------------------ */
 const networks = [
-  { name:"Mustree", rpc:"https://block.mst3.site", chain:7601, symbol:"MST" },
+  { name:"Mustsem", rpc:"https://block.mst3.site", chain:7601, symbol:"MST" },
   { name:"JKK-TMZ", rpc:"https://jkk.mst2.site", chain:7707, symbol:"TMZ" },
   { name:"KukminBank", rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
   { name:"NABIZAM", rpc:"https://nbmst.mst2.site", chain:7602, symbol:"NBZ" },
   { name:"MDPCD", rpc:"https://mdpcd.mst2.site", chain:7603, symbol:"MDP" }
 ];
 
-// Mustree 먼저 정렬
+// Mustsem 먼저 정렬
 const sorted = [
-  networks.find(n=>n.name==="Mustree"),
-  ...networks.filter(n=>n.name!=="Mustree").sort((a,b)=>a.name.localeCompare(b.name))
+  networks.find(n=>n.name==="Mustsem"),
+  ...networks.filter(n=>n.name!=="Mustsem").sort((a,b)=>a.name.localeCompare(b.name))
 ];
 
 // 셀렉트 박스 구성
@@ -175,7 +175,7 @@ netSelect.addEventListener("change", async()=>{
    2) NFT 컨트랙트 주소 (네가 채워넣기)
 ------------------------------ */
 const CONTRACTS = {
-  "Mustree":    "0x6255a7Fbbc3BBccD177E38936062F84A7580B24d",
+  "Mustsem":    "0x6255a7Fbbc3BBccD177E38936062F84A7580B24d",
   "JKK-TMZ":    "0x522802a049B7B8940bBC03aB835954321f7872EC",
   "KukminBank": "0x0000000000000000000000000000000000000003",
   "NABIZAM":    "0xd57EAf9e0EEA6226ed0240643Ce409B5253dBcEa",
@@ -815,7 +815,7 @@ document.getElementById("pyExport").addEventListener("click", () => {
 
   const pythonCode = `
 # ----------------------------------------------------------
-# Mustree Network - NFT Minting Script (자동 생성됨)
+# Mustsem Network - NFT Minting Script (자동 생성됨)
 # ----------------------------------------------------------
 
 # pip install web3

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUSTSEM - 이메일 인증</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box }
+    html { -webkit-font-smoothing: antialiased }
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      color: #e2e8f0;
+      line-height: 1.7;
+      background: #0a0b0f;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.3; pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
+    .orb-1 { width: 400px; height: 400px; background: #2d7be5; top: -100px; left: -100px; }
+    .orb-2 { width: 350px; height: 350px; background: #00b4d8; bottom: -80px; right: -80px; animation-delay: -4s; }
+    @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } }
+
+    .confirm-container { position: relative; z-index: 1; width: 100%; max-width: 420px; padding: 0 20px; text-align: center; }
+    .confirm-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(45,123,229,0.15); border-radius: 28px; padding: 48px 40px; backdrop-filter: blur(24px) saturate(200%); }
+
+    /* Spinner */
+    .spinner { width: 56px; height: 56px; border: 3px solid rgba(255,255,255,0.1); border-top-color: #2d7be5; border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 24px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Icon circle */
+    .icon-circle { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+    .icon-circle.success { background: linear-gradient(135deg, #2d7be5, #00b4d8); box-shadow: 0 8px 32px rgba(45,123,229,0.3); }
+    .icon-circle.error { background: linear-gradient(135deg, #ef4444, #f87171); box-shadow: 0 8px 32px rgba(239,68,68,0.3); }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .icon-circle svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .confirm-title { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 12px; }
+    .confirm-desc { font-size: 14px; color: rgba(255,255,255,0.55); line-height: 1.8; margin-bottom: 24px; }
+    .countdown { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 20px; }
+    .countdown span { color: #2d7be5; font-weight: 600; }
+
+    .logo { font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(135deg, #fff 0%, rgba(0,180,216,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px; display: block; }
+    .go-btn { display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #2d7be5, #00b4d8); border: none; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+    .go-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(45,123,229,0.3); }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="confirm-container">
+    <div class="confirm-box">
+      <a href="index.html" class="logo">MUSTSEM</a>
+      <div id="stateLoading">
+        <div class="spinner"></div>
+        <p class="confirm-title">인증 처리 중</p>
+        <p class="confirm-desc">이메일 인증을 확인하고 있습니다.<br>잠시만 기다려 주세요.</p>
+      </div>
+      <div id="stateSuccess" style="display:none">
+        <div class="icon-circle success">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p class="confirm-title">인증 완료!</p>
+        <p class="confirm-desc">이메일 인증이 성공적으로 완료되었습니다.<br>MUSTSEM Web3 인프라 플랫폼에 오신 것을 환영합니다.</p>
+        <p class="countdown"><span id="countNum">3</span>초 후 로그인 페이지로 이동합니다.</p>
+        <a href="login.html" class="go-btn">바로 로그인하기</a>
+      </div>
+      <div id="stateError" style="display:none">
+        <div class="icon-circle error">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <p class="confirm-title">인증 실패</p>
+        <p class="confirm-desc" id="errorDesc">인증 링크가 만료되었거나 올바르지 않습니다.<br>다시 시도해 주세요.</p>
+        <p class="countdown"><span id="errorCountNum">3</span>초 후 로그인 페이지로 이동합니다.</p>
+        <a href="login.html" class="go-btn">로그인 페이지로</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://qkqhpzyazsvpggtyhuft.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE';
+
+    let sb = null;
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) { console.error('Supabase init failed:', e); }
+
+    function startCountdown(numId, seconds, dest) {
+      const el = document.getElementById(numId);
+      let count = seconds;
+      const iv = setInterval(function() {
+        count--;
+        if (el) el.textContent = count;
+        if (count <= 0) { clearInterval(iv); location.replace(dest); }
+      }, 1000);
+    }
+
+    function showSuccess() {
+      document.getElementById('stateLoading').style.display = 'none';
+      document.getElementById('stateSuccess').style.display = 'block';
+      startCountdown('countNum', 3, 'login.html');
+    }
+
+    function showError(msg) {
+      document.getElementById('stateLoading').style.display = 'none';
+      document.getElementById('stateError').style.display = 'block';
+      if (msg) document.getElementById('errorDesc').textContent = msg;
+      startCountdown('errorCountNum', 3, 'login.html');
+    }
+
+    async function handleConfirm() {
+      if (!sb) { showError('서비스 연결에 실패했습니다.'); return; }
+
+      try {
+        // Check for token in URL hash or query params (Supabase email confirm)
+        const hash = window.location.hash;
+        const params = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(hash.replace('#', ''));
+
+        const type = hashParams.get('type') || params.get('type');
+        const accessToken = hashParams.get('access_token') || params.get('access_token');
+        const refreshToken = hashParams.get('refresh_token') || params.get('refresh_token');
+
+        if (accessToken) {
+          const { data, error } = await sb.auth.setSession({ access_token: accessToken, refresh_token: refreshToken || '' });
+          if (error) { showError('인증 링크가 만료되었거나 올바르지 않습니다.'); return; }
+          showSuccess();
+          return;
+        }
+
+        // Check if already authenticated (redirect from Supabase)
+        const { data: { session }, error } = await sb.auth.getSession();
+        if (error) { showError('인증 처리 중 오류가 발생했습니다.'); return; }
+        if (session) { showSuccess(); return; }
+
+        showError('인증 링크가 올바르지 않습니다. 이메일의 링크를 다시 확인해주세요.');
+      } catch(err) {
+        console.error('Confirm error:', err);
+        showError('인증 처리 중 오류가 발생했습니다.');
+      }
+    }
+
+    handleConfirm();
+  </script>
+</body>
+</html>

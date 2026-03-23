@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUSTSEM - 로그인</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box }
+    html { -webkit-font-smoothing: antialiased }
+    body {
+      font-family: 'Noto Sans KR', 'Inter', sans-serif;
+      color: #e2e8f0;
+      line-height: 1.7;
+      background: #0a0b0f;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.3; pointer-events: none; animation: orbFloat 8s ease-in-out infinite; }
+    .orb-1 { width: 400px; height: 400px; background: #2d7be5; top: -100px; left: -100px; }
+    .orb-2 { width: 350px; height: 350px; background: #00b4d8; bottom: -80px; right: -80px; animation-delay: -4s; }
+    @keyframes orbFloat { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.05); } }
+    .login-container { position: relative; z-index: 1; width: 100%; max-width: 420px; padding: 0 20px; }
+    .login-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(45,123,229,0.15); border-radius: 28px; padding: 48px 40px; backdrop-filter: blur(24px) saturate(200%); }
+    .logo { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: -1px; background: linear-gradient(135deg, #fff 0%, rgba(0,180,216,0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 8px; }
+    .login-subtitle { text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 36px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+    .form-group input { width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(45,123,229,0.15); border-radius: 12px; color: #f8fafc; font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.3s, box-shadow 0.3s; }
+    .form-group input:focus { border-color: #2d7be5; box-shadow: 0 0 0 3px rgba(45,123,229,0.2); }
+    .form-group input::placeholder { color: rgba(255,255,255,0.25); }
+    .login-btn { width: 100%; padding: 14px; margin-top: 8px; background: linear-gradient(135deg, #2d7be5, #00b4d8); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(45,123,229,0.3); }
+    .login-btn:active { transform: translateY(0); }
+    .error-msg { text-align: center; color: #f87171; font-size: 13px; margin-top: 16px; min-height: 20px; }
+    .bottom-links { display: flex; justify-content: space-between; margin-top: 20px; font-size: 13px; }
+    .bottom-links a { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.3s; }
+    .bottom-links a:hover { color: #00b4d8; }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="logo">MUSTSEM</div>
+      <p class="login-subtitle">Web3 인프라 플랫폼 로그인</p>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="uid">이메일</label>
+          <input type="email" id="uid" placeholder="이메일을 입력하세요" autocomplete="email" maxlength="100" required>
+        </div>
+        <div class="form-group">
+          <label for="upw">비밀번호</label>
+          <input type="password" id="upw" placeholder="비밀번호를 입력하세요" autocomplete="current-password" maxlength="50" required>
+        </div>
+        <button type="submit" class="login-btn">로그인</button>
+        <div class="error-msg" id="errorMsg"></div>
+      </form>
+      <div class="bottom-links">
+        <a href="signup.html">회원가입</a>
+        <a href="index.html">홈으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const SUPABASE_URL = 'https://qkqhpzyazsvpggtyhuft.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE';
+    let sb = null;
+    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) { console.error('Supabase init failed:', e); }
+
+    if (sb) sb.auth.getSession().then(({ data: { session } }) => { if (session) location.replace('index.html'); });
+
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = form.querySelector('.login-btn');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('uid').value.trim();
+      const password = document.getElementById('upw').value;
+      if (!email || !password) { errorMsg.style.color = '#f87171'; errorMsg.textContent = '이메일과 비밀번호를 입력해주세요.'; return; }
+      loginBtn.disabled = true; loginBtn.textContent = '로그인 중...';
+      if (!sb) { errorMsg.style.color = '#f87171'; errorMsg.textContent = '서비스 연결에 실패했습니다.'; loginBtn.disabled = false; loginBtn.textContent = '로그인'; return; }
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        loginBtn.disabled = false; loginBtn.textContent = '로그인'; errorMsg.style.color = '#f87171';
+        if (error.message.includes('Invalid login')) errorMsg.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
+        else if (error.message.includes('Email not confirmed')) errorMsg.textContent = '이메일 인증이 완료되지 않았습니다.';
+        else errorMsg.textContent = '로그인에 실패했습니다.';
+      } else { errorMsg.style.color = '#34d399'; errorMsg.textContent = '로그인 성공!'; setTimeout(() => location.replace('index.html'), 500); }
+    });
+  </script>
+</body>
+</html>

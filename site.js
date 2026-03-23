@@ -125,7 +125,9 @@ function renderNavbar() {
 
         <div class="nav-actions">
           <a href="dashboard.html" class="btn-nav">대시보드</a>
-          <a href="network.html#apply" class="btn-primary-nav">시작하기</a>
+          <span class="nav-divider"></span>
+          <a href="login.html" class="btn-nav nav-login">로그인</a>
+          <a href="signup.html" class="btn-primary-nav">회원가입</a>
         </div>
 
         <button class="mobile-menu-btn" aria-label="Menu" type="button">
@@ -231,3 +233,34 @@ function initNavbarScroll() {
 
 injectLayout();
 initNavbarScroll();
+
+// Supabase Auth UI
+function initAuthUI() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.onload = async function() {
+    try {
+      const sb = window.supabase.createClient(
+        'https://qkqhpzyazsvpggtyhuft.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE'
+      );
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const loginLink = document.querySelector('.nav-login');
+        const signupLink = document.querySelector('.btn-primary-nav[href="signup.html"]');
+        if (loginLink) {
+          loginLink.textContent = '로그아웃';
+          loginLink.href = '#';
+          loginLink.addEventListener('click', async function(e) {
+            e.preventDefault();
+            await sb.auth.signOut();
+            location.reload();
+          });
+        }
+        if (signupLink) signupLink.style.display = 'none';
+      }
+    } catch(e) { console.error('Auth UI error:', e); }
+  };
+  document.head.appendChild(script);
+}
+initAuthUI();

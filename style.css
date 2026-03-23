@@ -364,6 +364,13 @@ section[id] {
   transform: translateY(-1px);
 }
 
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
+}
+
 .mobile-menu-btn {
   display: none;
   flex-direction: column;

@@ -65,7 +65,8 @@ function renderNavbar() {
     { href: 'staking.html', label: '스테이킹' },
     { href: 'nft.html', label: 'NFT' },
     { href: 'sbt.html', label: 'SBT' },
-    { href: 'rwa.html', label: 'RWA' }
+    { href: 'rwa.html', label: 'RWA' },
+    { href: 'ipfs.html', label: 'IPFS' }
   ];
 
   const developerLinks = [
@@ -180,6 +181,7 @@ function renderFooter() {
             <a href="nft.html">NFT</a>
             <a href="sbt.html">SBT</a>
             <a href="rwa.html">RWA</a>
+            <a href="ipfs.html">IPFS</a>
           </div>
 
           <div class="footer-links">

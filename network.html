@@ -9,6 +9,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Page-scoped spacing helpers (relocated from inline styles) */
+    .apply-lead { margin-bottom: 32px; }
+    .apply-form { max-width: 640px; margin: 0 auto; }
+    .apply-result { text-align: center; margin-top: 12px; }
+    .apply-form .cta-row { justify-content: center; }
+  </style>
 </head>
 
 <body class="page">
@@ -31,9 +38,9 @@
     <section class="section" id="apply">
       <div class="container">
         <h2 class="section-title">네트워크 생성 신청</h2>
-        <p class="lead" style="margin-bottom:32px;">아래 정보를 입력하시면 내부 확인 후 <strong>24시간 이내</strong> 생성이 진행됩니다.</p>
+        <p class="lead apply-lead">아래 정보를 입력하시면 내부 확인 후 <strong>24시간 이내</strong> 생성이 진행됩니다.</p>
 
-        <form id="applyForm" class="card form" style="max-width:640px;margin:0 auto;">
+        <form id="applyForm" class="card form apply-form">
           <div class="field">
             <label for="company">회사명</label>
             <input type="text" id="company" name="company" required placeholder="예: (주)머스트셈테크" />
@@ -54,18 +61,18 @@
             <textarea id="memo" name="memo" rows="3" placeholder="도메인, 네트워크명 등 추가 요청사항을 입력하세요."></textarea>
           </div>
 
-          <div class="cta-row" style="justify-content:center;">
+          <div class="cta-row">
             <button type="submit" class="btn primary">신청 정보 저장 및 생성 요청</button>
           </div>
         </form>
 
-        <p id="applyResult" class="small" style="text-align:center;margin-top:12px;color:#7dd3fc;"></p>
+        <p id="applyResult" class="small apply-result"></p>
       </div>
     </section>
 
     <!-- 정책 요약 Section -->
-    <section class="section" style="padding-top:48px;">
-      <div class="container grid cols-2" style="gap:24px;">
+    <section class="section">
+      <div class="container grid cols-2">
         <article class="card">
           <h3>서비스 개요</h3>
           <ul class="small">

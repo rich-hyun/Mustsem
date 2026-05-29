@@ -36,7 +36,7 @@
       <select id="netSelect"></select>
     </div>
 
-    <div class="card mono" style="margin-top:12px; padding:12px;">
+    <div class="card mono" style="margin-top:12px;">
       <div><b>네트워크 이름:</b> <span id="netName"></span></div>
       <div><b>RPC URL:</b> <span id="netRpc"></span></div>
       <div><b>Chain ID:</b> <span id="netChain"></span></div>
@@ -74,15 +74,17 @@
 
     </div>
 
-    <button id="codeGen" class="btn primary" style="margin-top:12px;">
-      코드 생성
-    </button>
+    <div class="cta-row">
+      <button id="codeGen" class="btn primary">
+        코드 생성
+      </button>
 
-    <button id="txExec" class="btn" style="margin-left:8px;">
-      NFT 발행 실행 (MetaMask)
-    </button>
+      <button id="txExec" class="btn">
+        NFT 발행 실행 (MetaMask)
+      </button>
 
-	<button id="pyExport" class="btn" style="margin-left:8px;">Python 실행 스크립트 복사</button>
+      <button id="pyExport" class="btn">Python 실행 스크립트 복사</button>
+    </div>
 
 
     <div class="card" style="margin-top:16px;">

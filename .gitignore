@@ -1,0 +1,3 @@
+# Local dev / review artifacts (not for deployment)
+_review/
+.playwright-cli/

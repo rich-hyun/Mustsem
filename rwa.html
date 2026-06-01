@@ -10,6 +10,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Page-scoped: LIGHT themed upload progress bar (unified design system) */
+    .progress-track {
+      background: var(--bg-gray);
+      border: 1px solid var(--border-light);
+      height: 10px;
+      width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: var(--accent-primary);
+      width: 0%;
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.2s ease;
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 </head>
 
@@ -24,8 +42,7 @@
       <p class="eyebrow">실물자산 토큰화(RWA)</p>
       <h1>RWA 토큰 생성 페이지</h1>
       <p class="sub">
-        IPFS · MetaMask 연동으로<br/>
-        실물 자산 이미지를 온체인 RWA로 발행합니다.
+        IPFS · MetaMask 연동으로 실물 자산 이미지를 온체인 RWA로 발행합니다.
       </p>
     </div>
   </section>
@@ -67,8 +84,8 @@
           파일 업로드 &amp; CID 생성
         </button>
         <div id="uploadProgressBox" style="display:none; margin-top:12px;">
-          <div style="background:#222; height:10px; width:100%; border-radius:8px;">
-            <div id="uploadProgress" style="background:#4ade80; width:0%; height:10px; border-radius:8px;"></div>
+          <div class="progress-track">
+            <div id="uploadProgress" class="progress-fill"></div>
           </div>
           <p id="uploadPercent" class="small"></p>
         </div>

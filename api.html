@@ -14,18 +14,15 @@
        API Catalog Page - Enhanced Styles
        ============================================ */
 
-    /* Category Box Enhanced */
+    /* Category Box -- canonical .card look comes from shared style.css;
+       only refine hover here (light borders, gentler lift). */
     .category-box {
-      background: var(--card-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      padding: 24px;
       transition: var(--transition);
     }
 
     .category-box:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-4px);
+      border-color: var(--border-light);
+      transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
 
@@ -35,7 +32,7 @@
       gap: 14px;
       margin-bottom: 20px;
       padding-bottom: 16px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-light);
     }
 
     .category-icon {
@@ -111,7 +108,7 @@
       font-weight: 600;
       padding: 3px 8px;
       background: rgba(0, 208, 156, 0.1);
-      color: var(--accent-primary);
+      color: #00795b;
       border-radius: 6px;
     }
 
@@ -128,7 +125,7 @@
       padding: 24px 20px;
       background: linear-gradient(135deg, rgba(0, 208, 156, 0.08) 0%, rgba(0, 180, 216, 0.04) 100%);
       border: 1px solid rgba(0, 208, 156, 0.2);
-      border-radius: 16px;
+      border-radius: 12px;
     }
 
     .stat-item .stat-num {
@@ -153,7 +150,7 @@
       gap: 10px;
       margin-bottom: 32px;
       padding-bottom: 20px;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-light);
     }
 
     .api-tab {
@@ -162,8 +159,8 @@
       gap: 8px;
       padding: 12px 20px;
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
       font-size: 14px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -172,15 +169,15 @@
     }
 
     .api-tab:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-hover);
-      color: var(--text-primary);
+      background: var(--bg-gray);
+      border-color: var(--border-light);
+      color: var(--text-dark);
     }
 
     .api-tab.active {
-      background: var(--accent-gradient);
+      background: var(--accent-primary);
       border-color: transparent;
-      color: var(--bg-primary);
+      color: #ffffff;
     }
 
     .api-tab svg {
@@ -191,21 +188,24 @@
     .api-tab .count {
       font-size: 11px;
       padding: 2px 7px;
-      background: rgba(255, 255, 255, 0.2);
+      background: var(--bg-gray);
+      color: var(--text-secondary);
       border-radius: 10px;
     }
 
     .api-tab.active .count {
-      background: rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
     }
 
     /* API Section Card */
     .api-section {
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
       padding: 28px;
       margin-bottom: 28px;
+      box-shadow: var(--shadow-sm);
     }
 
     .api-section-header {
@@ -241,37 +241,37 @@
     .api-section-title p {
       margin: 0;
       font-size: 14px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
 
-    /* Enhanced Table */
+    /* Enhanced Table -- LIGHT */
     .api-table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
       overflow: hidden;
     }
 
     .api-table th {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-gray);
       padding: 14px 16px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: var(--text-muted);
+      color: var(--text-dark);
       text-align: left;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-light);
     }
 
     .api-table td {
       padding: 14px 16px;
       font-size: 13px;
       color: var(--text-secondary);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--border-light);
       vertical-align: middle;
     }
 
@@ -280,12 +280,12 @@
     }
 
     .api-table tr:hover td {
-      background: rgba(0, 208, 156, 0.03);
+      background: rgba(0, 208, 156, 0.05);
     }
 
     .api-table .api-name {
       font-weight: 600;
-      color: var(--text-primary);
+      color: var(--text-dark);
     }
 
     /* HTTP Method Badges */
@@ -299,35 +299,36 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
+    /* Semantic method colors kept distinct; text darkened for AA contrast on light tints */
     .method-badge.get {
       background: rgba(0, 208, 156, 0.15);
-      color: #00D09C;
+      color: #00795b;
     }
 
     .method-badge.post {
-      background: rgba(98, 126, 234, 0.15);
-      color: #627EEA;
+      background: rgba(0, 180, 216, 0.15);
+      color: #0277a0;
     }
 
     .method-badge.put {
-      background: rgba(255, 193, 7, 0.15);
-      color: #FFC107;
+      background: rgba(255, 193, 7, 0.18);
+      color: #8a6500;
     }
 
     .method-badge.delete {
       background: rgba(255, 107, 107, 0.15);
-      color: #FF6B6B;
+      color: #c0392b;
     }
 
-    /* Endpoint Code */
+    /* Endpoint Code -- LIGHT code chip (no teal-on-teal) */
     .endpoint-code {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 12px;
       padding: 6px 10px;
-      background: rgba(0, 208, 156, 0.08);
-      border: 1px solid rgba(0, 208, 156, 0.15);
-      border-radius: 8px;
-      color: var(--accent-primary);
+      background: var(--bg-gray);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      color: var(--text-dark);
       white-space: nowrap;
     }
 
@@ -341,20 +342,21 @@
     .param-tag {
       font-size: 11px;
       padding: 3px 8px;
-      background: rgba(255, 255, 255, 0.06);
+      background: var(--bg-gray);
+      border: 1px solid var(--border-light);
       border-radius: 6px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
-    /* Quick Links */
+    /* Quick Links -- on the DARK hero, so keep white-alpha surface + light text */
     .quick-links {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 20px;
       padding-top: 20px;
-      border-top: 1px solid var(--border-color);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .quick-link {
@@ -362,19 +364,19 @@
       align-items: center;
       gap: 8px;
       padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-secondary);
+      color: rgba(255, 255, 255, 0.85);
       transition: var(--transition);
     }
 
     .quick-link:hover {
-      background: rgba(0, 208, 156, 0.1);
+      background: rgba(0, 208, 156, 0.18);
       border-color: var(--accent-primary);
-      color: var(--accent-primary);
+      color: #ffffff;
     }
 
     .quick-link svg {
@@ -667,7 +669,7 @@
     </section>
 
     <!-- ===== API 카테고리 ===== -->
-    <section class="section" style="background: var(--bg-secondary);">
+    <section class="section">
       <div class="container">
         <h2 class="section-title">제공 가능한 API</h2>
         <p class="lead" style="margin-bottom: 32px;">

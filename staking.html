@@ -12,6 +12,36 @@
   <link rel="stylesheet" href="style.css" />
   <!-- ethers.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <style>
+    /* Page-specific helpers (unified LIGHT system) */
+    .net-info p {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .net-info p:last-child {
+      margin-bottom: 0;
+    }
+    .net-info strong,
+    .net-info b {
+      color: var(--text-dark);
+      font-weight: 600;
+    }
+    .text-block {
+      margin-top: 12px;
+      color: var(--text-secondary);
+    }
+    .note {
+      margin-top: 16px;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      background: var(--bg-gray);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body class="page">
   <div id="site-nav"></div>
@@ -26,8 +56,8 @@
           MST를 스테이킹 하고 보상을 받으세요
         </h1>
         <p class="sub">
-          이 페이지는 <b>MST 네트워크(체인ID 7601)</b>에서 동작합니다.<br>
-          먼저 <b>MST ↔ wMST</b> 브릿지를 사용하고, 이후 <b>wMST 스테이킹</b>까지 진행할 수 있습니다.
+          이 페이지는 MST 네트워크(체인ID 7601)에서 동작합니다.<br>
+          먼저 MST ↔ wMST 브릿지를 사용하고, 이후 wMST 스테이킹까지 진행할 수 있습니다.
         </p>
       </div>
     </section>
@@ -36,11 +66,11 @@
     <section class="section">
       <div class="container">
         <h2 class="section-title">네트워크 선택</h2>
-        <p class="small">
+        <p class="lead">
           스테이킹을 진행할 네트워크를 선택하세요. 브릿지와 스테이킹은 Mustsem(MST) 네트워크에서만 실제로 동작합니다.
         </p>
 
-        <div class="grid cols-2" style="gap: 24px;">
+        <div class="grid cols-2">
           <article class="card">
             <div class="form">
               <div class="field">
@@ -70,7 +100,7 @@
     <section class="section">
       <div class="container">
         <h2 class="section-title">지갑 연결</h2>
-        <div class="grid cols-2" style="gap:24px;">
+        <div class="grid cols-2">
           <article class="card">
             <h3>MetaMask 연결</h3>
             <p class="small">
@@ -96,12 +126,12 @@
     <section class="section">
       <div class="container">
         <h2 class="section-title">MST ↔ wMST 브릿지</h2>
-        <p class="small">
+        <p class="lead">
           아래 기능은 <b>wMST 래퍼 컨트랙트(0x3Dfc5a626a046CE0F01B130fA92dd4ef4A3f714B)</b>를 사용해
           네이티브 MST를 wMST로 래핑/언래핑 합니다.
         </p>
 
-        <div class="grid cols-2" style="gap:24px;">
+        <div class="grid cols-2">
           <!-- MST → wMST -->
             <article class="card">
             <h3>MST → wMST (Wrap)</h3>
@@ -149,12 +179,12 @@
     <section class="section">
       <div class="container">
         <h2 class="section-title">wMST 스테이킹 (보상: MST)</h2>
-        <p class="small">
+        <p class="lead">
           스테이킹 컨트랙트 주소: <code>0x8Fb01DA4FA713Ce590546dC440165170E02e7D07</code><br />
           APR 2%, 7일마다 MST 보상을 claim 할 수 있습니다.
         </p>
 
-        <div class="grid cols-2" style="gap:24px;">
+        <div class="grid cols-2">
           <!-- 왼쪽: 액션 -->
           <article class="card">
             <h3>스테이킹 / 언스테이킹</h3>

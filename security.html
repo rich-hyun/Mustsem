@@ -386,17 +386,6 @@
       margin: 40px 0;
     }
 
-    .roadmap-timeline::before {
-      content: '';
-      position: absolute;
-      left: 23px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
-      border-radius: 2px;
-    }
-
     .roadmap-stage {
       position: relative;
       padding: 24px 28px;
@@ -435,6 +424,30 @@
       color: var(--bg-primary);
       box-shadow: 0 8px 24px var(--accent-glow);
       z-index: 1;
+      transition: var(--transition);
+    }
+
+    /* 단계 원과 다음 원을 잇는 연결선 (마지막 단계 제외) — 원 중심(상단 48px)에서
+       다음 원 중심까지: 카드 아래 margin 24px + 다음 카드 상단 48px = 72px */
+    .roadmap-stage:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: -37px;
+      top: 48px;
+      bottom: -72px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 2px;
+      z-index: 0;
+      transition: var(--transition);
+    }
+
+    /* 카드 hover 시 translateX(8px)가 자식인 번호 원/연결선까지 끌고 가 레일이
+       틀어지는 문제 방지 — 동일한 거리를 역으로 상쇄해 레일(원+선)을 고정시킨다.
+       카드 본문만 오른쪽으로 미끄러지고 타임라인 축은 그대로 유지된다. */
+    .roadmap-stage:hover::before,
+    .roadmap-stage:hover::after {
+      transform: translateX(-8px);
     }
 
     .roadmap-stage h4 {
@@ -639,6 +652,12 @@
         width: 40px;
         height: 40px;
         font-size: 16px;
+      }
+
+      .roadmap-stage:not(:last-child)::after {
+        left: -31px;
+        top: 44px;
+        bottom: -68px;
       }
 
       .onprem-banner {

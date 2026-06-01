@@ -35,10 +35,12 @@
 
   /* Fluid Typography */
   --font-primary: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
-  --title-hero: clamp(1.75rem, 0.9rem + 3.6vw, 3.625rem);
-  --title-section: clamp(1.8rem, 1.1rem + 2.2vw, 2.625rem);
-  --title-subpage: clamp(1.6rem, 1.05rem + 2vw, 2.75rem);
-  --title-banner: clamp(1.3rem, 1rem + 1vw, 1.75rem);
+  /* 타입 램프: floor·ceiling·slope·base를 레벨 순서대로 정렬해 모든 뷰포트에서
+     h1(hero/subpage) > h2(section) > h3(banner)이 교차 없이 단조 유지되도록 함 */
+  --title-hero: clamp(2rem, 0.95rem + 3.5vw, 3.625rem);       /* h1(홈)    32 → 58px */
+  --title-subpage: clamp(1.875rem, 0.95rem + 2.7vw, 2.875rem); /* h1(서브)  30 → 46px */
+  --title-section: clamp(1.6rem, 0.85rem + 2vw, 2.5rem);       /* h2        25.6 → 40px */
+  --title-banner: clamp(1.25rem, 0.85rem + 1.1vw, 1.625rem);   /* h3(배너)  20 → 26px */
 
   /* Spacing */
   --section-padding: 120px;
@@ -990,6 +992,7 @@ section[id] {
   color: var(--accent-primary);
 }
 
+.feature-text h3,
 .feature-text h4 {
   font-size: 15px;
   font-weight: 600;
@@ -1225,6 +1228,7 @@ section[id] {
   color: var(--accent-primary);
 }
 
+.solution-item h3,
 .solution-item h4 {
   font-size: 18px;
   font-weight: 600;

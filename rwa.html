@@ -159,7 +159,7 @@
 		</button>
 
 		<p class="small" style="margin-top:8px;">
-			Gateway: <code>https://rwa-gw.mst3.site/ipfs/&lt;CID&gt;</code>
+			Gateway: <code>https://rwa-gw.mustree.kr/ipfs/&lt;CID&gt;</code>
 		</p>
 		</div>
 	</div>
@@ -176,7 +176,7 @@
 /* ================================
    0) 환경 설정
 ================================ */
-const UPLOAD_ENDPOINT = "https://api.mst3.site/upload";
+const UPLOAD_ENDPOINT = "https://api.mustree.kr/upload";
 // 필요시 nginx 리버스프록시로 /rwa-upload 등으로 변경 가능
 
 document.getElementById("apiEndpointLabel").textContent = UPLOAD_ENDPOINT;
@@ -185,7 +185,7 @@ document.getElementById("apiEndpointLabel").textContent = UPLOAD_ENDPOINT;
    1) 네트워크 정보 & 컨트랙트 매핑
 ================================ */
 const networks = [
-  { name:"Mustsem",    rpc:"https://block.mst3.site",     chain:7601, symbol:"MST" },
+  { name:"Mustsem",    rpc:"https://block.mustree.kr",     chain:7601, symbol:"MST" },
   { name:"JKK-TMZ",    rpc:"https://jkk.mst2.site",       chain:7707, symbol:"TMZ" },
   { name:"KukminBank", rpc:"https://rpc.mstblock.com",    chain:1213, symbol:"KBB" },
   { name:"NABIZAM",    rpc:"https://nbmst.mst2.site",     chain:7602, symbol:"NBZ" },
@@ -981,7 +981,7 @@ downloadBtn.addEventListener("click", () => {
     return;
   }
 
-  const gatewayUrl = `https://rwa-gw.mst3.site/ipfs/${cid}`;
+  const gatewayUrl = `https://rwa-gw.mustree.kr/ipfs/${cid}`;
 
   // 새 탭에서 다운로드 (브라우저 기본 처리)
   window.open(gatewayUrl, "_blank");

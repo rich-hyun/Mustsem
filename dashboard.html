@@ -103,32 +103,64 @@
   <script src="script.js"></script>
 
   <script>
+    let _loadingBalances = false;
+
     async function loadBalances() {
-      const res = await fetch("https://api.mst3.site/api/balances")
-      const json = await res.json();
+      if (_loadingBalances) return;          // 중복 요청 방지
+      _loadingBalances = true;
 
       const tbody = document.getElementById("walletTable");
-      tbody.innerHTML = "";
+      const btn = document.querySelector(".cta-row .btn");
+      // 표 전체 폭(3칸)에 걸친 상태 메시지 표시
+      const stateRow = (html) => {
+        tbody.innerHTML =
+          `<tr><td colspan="3" style="text-align:center;padding:28px;color:var(--text-secondary);line-height:1.6">${html}</td></tr>`;
+      };
 
-      json.data.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row.label}</td>
-          <td class="address-cell" title="마우스를 올리면 주소가 표시됩니다">${row.address}</td>
-          <td>${row.balance.toLocaleString()}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      stateRow("불러오는 중…");
+      if (btn) btn.disabled = true;
 
-      const formattedTime = new Date(json.updated).toLocaleString();
-      const text = `⟳ 업데이트 시각: ${formattedTime}`;
+      try {
+        const res = await fetch("https://api.mustree.kr/api/balances", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const rows = Array.isArray(json && json.data) ? json.data : [];
 
-      // [UPGRADE] 네온 스타일 영역 업데이트
-      const updateElem = document.getElementById("updateTimeBig");
-      updateElem.innerText = text;
-      updateElem.style.animation = "none";      // 재실행 위해 초기화
-      void updateElem.offsetWidth;              // 강제 리플로우
-      updateElem.style.animation = "";          // 애니메이션 재적용
+        if (rows.length === 0) {
+          stateRow("표시할 잔액 데이터가 없습니다.");
+        } else {
+          tbody.innerHTML = "";
+          rows.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${row.label ?? "-"}</td>
+              <td class="address-cell" title="마우스를 올리면 주소가 표시됩니다">${row.address ?? "-"}</td>
+              <td>${Number(row.balance ?? 0).toLocaleString()}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+
+        // 업데이트 시각은 데이터 로드에 성공했을 때만 갱신
+        if (json && json.updated) {
+          const updateElem = document.getElementById("updateTimeBig");
+          updateElem.innerText = `⟳ 업데이트 시각: ${new Date(json.updated).toLocaleString()}`;
+          updateElem.style.animation = "none";   // 재실행 위해 초기화
+          void updateElem.offsetWidth;            // 강제 리플로우
+          updateElem.style.animation = "";        // 애니메이션 재적용
+        }
+      } catch (err) {
+        // 네트워크/서버/JSON 오류 → 빈 표 대신 명확한 안내 표시
+        console.error("[dashboard] 잔액 로드 실패:", err);
+        stateRow(
+          "⚠ 잔액 데이터를 불러오지 못했습니다.<br>" +
+          '<span style="font-size:13px">API 서버(api.mustree.kr)에 연결할 수 없습니다. ' +
+          "잠시 후 <b>새로고침</b>을 눌러 다시 시도하세요.</span>"
+        );
+      } finally {
+        _loadingBalances = false;
+        if (btn) btn.disabled = false;
+      }
     }
 
     loadBalances();

@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/fx",        "destination": "http://203.252.147.200:20210/" },
+    { "source": "/fx/:path*", "destination": "http://203.252.147.200:20210/:path*" }
+  ]
+}

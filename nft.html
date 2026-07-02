@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NFT API - 머스트셈 네트워크</title>
+  <meta name="description" content="네트워크를 선택하고 이미지·메타데이터 기반 NFT를 발행하는 페이지입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 </head>
@@ -99,6 +100,7 @@
 
 <div id="site-footer"></div>
 
+<script src="networks.js"></script>
 <script src="site.js"></script>
 <script src="script.js"></script>
 
@@ -106,13 +108,7 @@
 /* ------------------------------
    1) 네트워크 정보
 ------------------------------ */
-const networks = [
-  { name:"Mustsem", rpc:"https://block.mustree.kr", chain:7601, symbol:"MST" },
-  { name:"JKK-TMZ", rpc:"https://jkk.mst2.site", chain:7707, symbol:"TMZ" },
-  { name:"KukminBank", rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
-  { name:"NABIZAM", rpc:"https://nbmst.mst2.site", chain:7602, symbol:"NBZ" },
-  { name:"MDPCD", rpc:"https://mdpcd.mst2.site", chain:7603, symbol:"MDP" }
-];
+const networks = window.MST_CONFIG.networks;
 
 // Mustsem 먼저 정렬
 const sorted = [
@@ -129,6 +125,11 @@ sorted.forEach(n=>{
   netSelect.appendChild(opt);
 });
 
+const mmStatus = document.getElementById("mmStatus");
+
+// 지갑/컨트랙트 오류를 사용자용 문구로 축약 (내부 스택 노출 방지)
+const txError = (e) => e?.shortMessage || e?.reason || e?.message || String(e);
+
 function getSelectedNet(){
   return sorted.find(n=>n.name===netSelect.value);
 }
@@ -142,35 +143,18 @@ function updateNetworkInfo(){
 }
 updateNetworkInfo();
 
-async function switchNetwork(net){
-  const chainHex="0x"+net.chain.toString(16);
-  try {
-    await ethereum.request({
-      method:"wallet_switchEthereumChain",
-      params:[{chainId:chainHex}]
-    });
-  } catch(e) {
-    if (e.code===4902) {
-      await ethereum.request({
-        method:"wallet_addEthereumChain",
-        params:[{
-          chainId:chainHex,
-          chainName:net.name,
-          rpcUrls:[net.rpc],
-          nativeCurrency:{name:net.symbol, symbol:net.symbol, decimals:18}
-        }]
-      });
-      await ethereum.request({
-        method:"wallet_switchEthereumChain",
-        params:[{chainId:chainHex}]
-      });
-    }
-  }
+// MetaMask 상태 안내
+if (window.ethereum) {
+  mmStatus.textContent = "MetaMask 감지됨. 네트워크 선택 시 지갑도 함께 전환됩니다.";
+} else {
+  mmStatus.textContent = "MetaMask가 설치되지 않았습니다. 코드 생성 기능만 사용할 수 있습니다.";
 }
 
 netSelect.addEventListener("change", async()=>{
   updateNetworkInfo();
-  await switchNetwork(getSelectedNet());
+  // 지갑에 체인이 없으면 등록까지 처리하는 공용 헬퍼(networks.js) 사용
+  const msg = await MST_SWITCH_CHAIN(getSelectedNet());
+  if (msg) mmStatus.textContent = msg;
 });
 
 /* ------------------------------
@@ -742,25 +726,35 @@ contract NFT_Mint_${net.name} {
 /* ------------------------------
    5) NFT 발행 실행
 ------------------------------ */
-document.getElementById("txExec").addEventListener("click", execNFT);
+const txExecBtn = document.getElementById("txExec");
+txExecBtn.addEventListener("click", async () => {
+  // 트랜잭션 진행 중 이중 클릭(이중 발행) 방지
+  txExecBtn.disabled = true;
+  try { await execNFT(); } finally { txExecBtn.disabled = false; }
+});
 
 async function execNFT(){
+  if (!window.ethereum) {
+    logOut.textContent = "MetaMask가 감지되지 않습니다.";
+    return;
+  }
+
   const owner=document.getElementById("owner").value.trim();
   const nftName=document.getElementById("nftName").value.trim();
   const metadata=document.getElementById("metadata").value.trim() || "{}";
 
   if(!owner || !nftName){
-    logOut.textContent="❌ 모든 필드를 입력하세요.";
+    logOut.textContent="모든 필드를 입력하세요.";
     return;
   }
 
   try {
-    await ethereum.request({method:"eth_requestAccounts"});
+    await window.ethereum.request({method:"eth_requestAccounts"});
 
     const net=getSelectedNet();
     const CONTRACT_ADDRESS=CONTRACTS[net.name];
 
-    const provider=new ethers.BrowserProvider(ethereum);
+    const provider=new ethers.BrowserProvider(window.ethereum);
     const signer=await provider.getSigner();
 
     const contract=new ethers.Contract(CONTRACT_ADDRESS, NFT_ABI, signer);
@@ -780,13 +774,14 @@ async function execNFT(){
     const receipt = await tx.wait();
 
     logOut.textContent =
-      `🎉 NFT 발행 성공!\n` +
+      `NFT 발행 성공\n` +
       `Token ID: ${predicted}\n` +
       `TX: ${receipt.hash}\n` +
       `Block: ${receipt.blockNumber}`;
 
   } catch(err){
-    logOut.textContent="오류: "+err.message;
+    console.error(err);
+    logOut.textContent="오류: "+txError(err);
   }
 }
 document.getElementById("pyExport").addEventListener("click", () => {
@@ -795,7 +790,7 @@ document.getElementById("pyExport").addEventListener("click", () => {
   const metadataRaw = document.getElementById("metadata").value.trim() || "{}";
 
   if (!owner || !nftName) {
-    logOut.textContent = "❌ 모든 필드를 입력해야 Python 스크립트를 생성할 수 있습니다.";
+    logOut.textContent = "모든 필드를 입력해야 Python 스크립트를 생성할 수 있습니다.";
     return;
   }
 
@@ -803,15 +798,21 @@ document.getElementById("pyExport").addEventListener("click", () => {
   const CONTRACT = CONTRACTS[net.name];
   const ABI = JSON.stringify(NFT_ABI, null, 2);
 
-  // ⭐ NEW 1: owner checksum 변환
-  const checksumOwner = ethers.getAddress(owner);
+  // owner checksum 변환 (형식이 틀리면 여기서 안내하고 중단)
+  let checksumOwner;
+  try {
+    checksumOwner = ethers.getAddress(owner);
+  } catch {
+    logOut.textContent = "지갑 주소 형식이 올바르지 않습니다. (0x로 시작하는 40자리 16진수)";
+    return;
+  }
 
-  // ⭐ NEW 2: metadata JSON 안전 변환
+  // metadata JSON 안전 변환
   let safeMetadata = "{}";
   try {
     safeMetadata = JSON.stringify(JSON.parse(metadataRaw));
   } catch {
-    alert("❌ Metadata가 JSON 형식이 아닙니다.");
+    logOut.textContent = "Metadata가 JSON 형식이 아닙니다.";
     return;
   }
 
@@ -839,8 +840,8 @@ contract = w3.eth.contract(address=CONTRACT, abi=ABI)
 
 tx = contract.functions.mintNFT(
     Web3.to_checksum_address("${checksumOwner}"),
-    "${nftName}",
-    '${safeMetadata}'
+    ${JSON.stringify(nftName)},
+    ${JSON.stringify(safeMetadata)}
 ).build_transaction({
     "from": acct.address,
     "nonce": w3.eth.get_transaction_count(acct.address),
@@ -854,37 +855,41 @@ tx = contract.functions.mintNFT(
 signed = acct.sign_transaction(tx)
 tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
 
-print("🚀 NFT Mint TX Hash:", tx_hash.hex())
-print("⏳ Waiting for confirmation...")
+print("NFT Mint TX Hash:", tx_hash.hex())
+print("Waiting for confirmation...")
 
 # 3) 블록 포함될 때까지 대기
 receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
 
 if receipt.status != 1:
-    raise Exception("❌ NFT Mint Failed (Transaction Reverted)")
+    raise Exception("NFT Mint Failed (Transaction Reverted)")
 else:
-    print("✅ NFT Mint Success!")
+    print("NFT Mint Success!")
 
 # 4) Token ID 추출 (Event or nextTokenId fallback)
 try:
     event_log = receipt["logs"][0]
     token_id = int(event_log["data"], 16)
-except:
+except Exception:
     token_id = contract.functions.nextTokenId().call() - 1
 
 # 5) Owner 조회
 owner_addr = contract.functions.ownerOf(token_id).call()
 
-print("\\n🎯 MINT RESULT")
+print("\\nMINT RESULT")
 print("---------------------------")
-print("📌 Token ID:", token_id)
-print("👤 Owner:", owner_addr)
-print("📜 Contract:", CONTRACT)
+print("Token ID:", token_id)
+print("Owner:", owner_addr)
+print("Contract:", CONTRACT)
 print("---------------------------")
   `.trim();
 
-  navigator.clipboard.writeText(pythonCode);
-  alert("📌 Python 실행 스크립트가 클립보드에 복사되었습니다!");
+  navigator.clipboard.writeText(pythonCode).then(() => {
+    logOut.textContent = "Python 실행 스크립트가 클립보드에 복사되었습니다.\n(PRIVATE_KEY는 직접 채워서 사용하세요)";
+  }).catch(() => {
+    // 클립보드 권한이 없으면 화면에 출력해서 직접 복사할 수 있게 한다
+    logOut.textContent = pythonCode;
+  });
 });
 
 </script>

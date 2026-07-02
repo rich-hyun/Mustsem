@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SBT (Soulbound Token) - 머스트셈 네트워크</title>
+  <meta name="description" content="지갑에 영구 귀속되는 소울바운드 토큰(SBT)을 발급하는 페이지입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <!-- 브라우저에서 바로 컨트랙트 호출을 위한 ethers.js 로드 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
@@ -91,6 +92,7 @@
 
 <div id="site-footer"></div>
 
+<script src="networks.js"></script>
 <script src="site.js"></script>
 <script src="script.js"></script>
 
@@ -99,13 +101,7 @@
 /* ---------------------------
    1) 네트워크 정보 정의
 --------------------------- */
-const networks = [
-  { name:"Mustsem", rpc:"https://block.mustree.kr", chain:7601, symbol:"MST" },
-  { name:"JKK-TMZ", rpc:"https://jkk.mst2.site", chain:7707, symbol:"TMZ" },
-  { name:"KukminBank", rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
-  { name:"NABIZAM", rpc:"https://nbmst.mst2.site", chain:7602, symbol:"NBZ" },
-  { name:"MDPCD", rpc:"https://mdpcd.mst2.site", chain:7603, symbol:"MDP" }
-];
+const networks = window.MST_CONFIG.networks;
 
 // Mustsem 고정 + 나머지 알파벳 정렬
 const sorted = [
@@ -129,6 +125,9 @@ sorted.forEach(n => {
 const solOut = document.getElementById("solOut");
 const mmStatus = document.getElementById("mmStatus");
 
+// 지갑/컨트랙트 오류를 사용자용 문구로 축약 (내부 스택 노출 방지)
+const txError = (e) => e?.shortMessage || e?.reason || e?.message || String(e);
+
 /* ---------------------------
    3) 네트워크 선택 시 정보 표시
 --------------------------- */
@@ -144,66 +143,23 @@ function updateNetworkInfo() {
   document.getElementById("netSymbol").textContent = selected.symbol;
 }
 
-/* MetaMask 네트워크 전환 함수 */
-async function switchToNetwork(net) {
-  const chainHex = "0x" + net.chain.toString(16);
-
-  try {
-    // 우선 전환 시도
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: chainHex }]
-    });
-
-    // 실제 전환 검증
-    const current = await window.ethereum.request({ method: "eth_chainId" });
-    if (current.toLowerCase() !== chainHex.toLowerCase()) {
-      throw new Error("Switch failed, re-adding network...");
-    }
-
-    console.log("Network switched:", current);
-
-  } catch (err) {
-    console.log("Switch error:", err);
-
-    // 네트워크가 없으면 추가
-    if (err.code === 4902 || err.message.includes("re-adding")) {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [{
-          chainId: chainHex,
-          chainName: net.name,
-          rpcUrls: [net.rpc],
-          nativeCurrency: {
-            name: net.symbol,
-            symbol: net.symbol,
-            decimals: 18
-          }
-        }]
-      });
-
-      // 추가 후 다시 전환
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainHex }]
-      });
-
-    } else {
-      alert("네트워크 전환 실패: " + err.message);
-    }
-  }
-}
-
-
 // 네트워크 선택 시, 정보 갱신 + MetaMask 전환
+// (지갑에 체인이 없으면 등록까지 처리하는 공용 헬퍼 사용 — networks.js)
 netSelect.addEventListener("change", async () => {
   updateNetworkInfo();
-  const selected = getSelectedNet();
-  await switchToNetwork(selected);
+  const msg = await MST_SWITCH_CHAIN(getSelectedNet());
+  if (msg) mmStatus.textContent = msg;
 });
 
 // 초기 표시
 updateNetworkInfo();
+
+// MetaMask 상태 안내
+if (window.ethereum) {
+  mmStatus.textContent = "MetaMask 감지됨. 네트워크 선택 시 지갑도 함께 전환됩니다.";
+} else {
+  mmStatus.textContent = "MetaMask가 설치되지 않았습니다. 코드 생성 기능만 사용할 수 있습니다.";
+}
 
 /* ---------------------------
    4) Solidity 코드 자동 생성 (기존 기능 유지)
@@ -750,17 +706,17 @@ async function execMintTx() {
   }
 
   try {
-    await ethereum.request({ method: "eth_requestAccounts" });
+    await window.ethereum.request({ method: "eth_requestAccounts" });
 
     const selected = getSelectedNet();
     if (!selected) {
-      solOut.textContent = "❌ 네트워크를 선택해주세요.";
+      solOut.textContent = "네트워크를 선택해주세요.";
       return;
     }
     const CONTRACT_ADDRESS = CONTRACTS[selected.name];
 
     if (!CONTRACT_ADDRESS || CONTRACT_ADDRESS.length !== 42) {
-      solOut.textContent = `❌ ${selected.name} 네트워크 컨트랙트 주소가 잘못되었습니다.`;
+      solOut.textContent = `${selected.name} 네트워크 컨트랙트 주소가 잘못되었습니다.`;
       return;
     }
 
@@ -791,18 +747,23 @@ async function execMintTx() {
     const receipt = await txResponse.wait();
 
     solOut.textContent =
-      `🎉 SBT 발행 성공!\n` +
+      `SBT 발행 성공\n` +
       `Token ID: ${tokenId}\n` +
       `TX Hash: ${receipt.hash}\n` +
       `Block: ${receipt.blockNumber}`;
 
   } catch (err) {
-    solOut.textContent = "실행 오류: " + (err?.message || err);
+    console.error(err);
+    solOut.textContent = "실행 오류: " + txError(err);
   }
 }
 
-// 실행 버튼에 핸들러 연결
-document.getElementById("txExec").addEventListener("click", execMintTx);
+// 실행 버튼에 핸들러 연결 (트랜잭션 진행 중 이중 클릭 방지)
+const txExecBtn = document.getElementById("txExec");
+txExecBtn.addEventListener("click", async () => {
+  txExecBtn.disabled = true;
+  try { await execMintTx(); } finally { txExecBtn.disabled = false; }
+});
 
 </script>
 

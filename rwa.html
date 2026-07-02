@@ -8,7 +8,7 @@
   <meta name="description" content="IPFS · MetaMask 연동으로 실물자산(RWA)을 온체인 토큰으로 발행합니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Page-scoped: LIGHT themed upload progress bar (unified design system) */
@@ -159,7 +159,7 @@
 		</button>
 
 		<p class="small" style="margin-top:8px;">
-			Gateway: <code>https://rwa-gw.mustree.kr/ipfs/&lt;CID&gt;</code>
+			Gateway: <code id="gatewayLabel"></code>
 		</p>
 		</div>
 	</div>
@@ -169,6 +169,7 @@
 
 <div id="site-footer"></div>
 
+<script src="networks.js"></script>
 <script src="site.js"></script>
 <script src="script.js"></script>
 
@@ -176,7 +177,7 @@
 /* ================================
    0) 환경 설정
 ================================ */
-const UPLOAD_ENDPOINT = "https://api.mustree.kr/upload";
+const UPLOAD_ENDPOINT = MST_CONFIG.api + "/upload";
 // 필요시 nginx 리버스프록시로 /rwa-upload 등으로 변경 가능
 
 document.getElementById("apiEndpointLabel").textContent = UPLOAD_ENDPOINT;
@@ -184,13 +185,7 @@ document.getElementById("apiEndpointLabel").textContent = UPLOAD_ENDPOINT;
 /* ================================
    1) 네트워크 정보 & 컨트랙트 매핑
 ================================ */
-const networks = [
-  { name:"Mustsem",    rpc:"https://block.mustree.kr",     chain:7601, symbol:"MST" },
-  { name:"JKK-TMZ",    rpc:"https://jkk.mst2.site",       chain:7707, symbol:"TMZ" },
-  { name:"KukminBank", rpc:"https://rpc.mstblock.com",    chain:1213, symbol:"KBB" },
-  { name:"NABIZAM",    rpc:"https://nbmst.mst2.site",     chain:7602, symbol:"NBZ" },
-  { name:"MDPCD",      rpc:"https://mdpcd.mst2.site",     chain:7603, symbol:"MDP" }
-];
+const networks = window.MST_CONFIG.networks;
 
 const RWA_CONTRACTS = {
   "Mustsem":    "0x44FDE9228ED16B64Af6C4Bf8f4f985079184c639",
@@ -711,56 +706,23 @@ function updateNetworkInfo() {
   netContract.textContent = RWA_CONTRACTS[n.name] || "(설정되지 않음)";
 }
 
-async function switchToNetwork(net) {
-  if (!window.ethereum) {
-    mmStatus.textContent = "❌ MetaMask가 감지되지 않았습니다.";
-    return;
-  }
-  const chainHex = "0x" + net.chain.toString(16);
-  try {
-    await window.ethereum.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: chainHex }]
-    });
-  } catch (err) {
-    // 네트워크가 없으면 추가
-    if (err.code === 4902) {
-      await window.ethereum.request({
-        method: "wallet_addEthereumChain",
-        params: [{
-          chainId: chainHex,
-          chainName: net.name,
-          rpcUrls: [net.rpc],
-          nativeCurrency: {
-            name: net.symbol,
-            symbol: net.symbol,
-            decimals: 18
-          }
-        }]
-      });
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: chainHex }]
-      });
-    } else {
-      mmStatus.textContent = "네트워크 전환 실패: " + (err.message || err);
-    }
-  }
-}
+// 지갑/컨트랙트 오류를 사용자용 문구로 축약 (내부 스택 노출 방지)
+const txError = (e) => e?.shortMessage || e?.reason || e?.message || String(e);
 
 netSelect.addEventListener("change", async () => {
   updateNetworkInfo();
-  const n = getSelectedNet();
-  await switchToNetwork(n);
+  // 지갑에 체인이 없으면 등록까지 처리하는 공용 헬퍼(networks.js) 사용
+  const msg = await MST_SWITCH_CHAIN(getSelectedNet());
+  if (msg) mmStatus.textContent = msg;
 });
 
 updateNetworkInfo();
 
 // MetaMask 상태 안내 초기화
 if (window.ethereum) {
-  mmStatus.textContent = "✅ MetaMask 감지됨. 네트워크를 선택 후 사용해주세요.";
+  mmStatus.textContent = "MetaMask 감지됨. 네트워크를 선택 후 사용해주세요.";
 } else {
-  mmStatus.textContent = "❌ MetaMask가 설치되지 않았습니다.";
+  mmStatus.textContent = "MetaMask가 설치되지 않았습니다. 업로드와 코드 생성만 사용할 수 있습니다.";
 }
 
 /* ================================
@@ -782,7 +744,7 @@ let CURRENT_GW       = null;
 async function uploadFileAndGetCid() {
   const file = fileInput.files[0];
   if (!file) {
-    logOut.textContent = "❌ 업로드할 파일을 선택해주세요.";
+    logOut.textContent = "업로드할 파일을 선택해주세요.";
     return;
   }
 
@@ -812,9 +774,11 @@ async function uploadFileAndGetCid() {
       xhr.onreadystatechange = () => {
         if (xhr.readyState === 4) {
           if (xhr.status >= 200 && xhr.status < 300) resolve(xhr.responseText);
-          else reject(xhr.responseText);
+          // 서버 응답 원문(스택 등)은 노출하지 않고 상태 코드만 안내
+          else reject(new Error(xhr.status ? `서버 오류 (HTTP ${xhr.status})` : "서버에 연결할 수 없습니다"));
         }
       };
+      xhr.onerror = () => reject(new Error("네트워크 오류로 업로드에 실패했습니다"));
       xhr.send(form);
     });
 
@@ -829,18 +793,23 @@ async function uploadFileAndGetCid() {
     gwOut.textContent   = CURRENT_GW;
 
     logOut.textContent =
-      "✅ 업로드 & CID 생성 성공\n" +
+      "업로드 & CID 생성 성공\n" +
       "CID: " + CURRENT_CID + "\n" +
       "IPFS URI: " + CURRENT_IPFS_URI + "\n" +
       "Gateway: " + CURRENT_GW;
 
   } catch (err) {
-    logOut.textContent = "❌ 업로드 실패: " + err;
+    console.error(err);
+    logOut.textContent = "업로드 실패: " + (err?.message || "잠시 후 다시 시도해주세요.");
   }
 }
 
 
-uploadBtn.addEventListener("click", uploadFileAndGetCid);
+// 업로드 진행 중 중복 요청 방지
+uploadBtn.addEventListener("click", async () => {
+  uploadBtn.disabled = true;
+  try { await uploadFileAndGetCid(); } finally { uploadBtn.disabled = false; }
+});
 
 /* ================================
    4) 코드 스니펫 자동 생성
@@ -850,11 +819,11 @@ const codeGenBtn = document.getElementById("codeGenBtn");
 function genCodeSnippet() {
   const to = toAddrInput.value.trim();
   if (!CURRENT_IPFS_URI || !CURRENT_CID) {
-    codeOut.textContent = "❌ 먼저 파일 업로드를 통해 CID/IPFS URI를 생성해주세요.";
+    codeOut.textContent = "먼저 파일 업로드를 통해 CID/IPFS URI를 생성해주세요.";
     return;
   }
   if (!to) {
-    codeOut.textContent = "❌ 받는 지갑 주소(to)를 입력해주세요.";
+    codeOut.textContent = "받는 지갑 주소(to)를 입력해주세요.";
     return;
   }
 
@@ -905,28 +874,28 @@ const mintBtn = document.getElementById("mintBtn");
 
 async function mintRwaOnChain() {
   if (!window.ethereum) {
-    logOut.textContent = "❌ MetaMask가 감지되지 않습니다.";
+    logOut.textContent = "MetaMask가 감지되지 않습니다.";
     return;
   }
   if (!CURRENT_IPFS_URI) {
-    logOut.textContent = "❌ 먼저 파일을 업로드해서 CID/IPFS URI를 생성해주세요.";
+    logOut.textContent = "먼저 파일을 업로드해서 CID/IPFS URI를 생성해주세요.";
     return;
   }
   const to = toAddrInput.value.trim();
   if (!to) {
-    logOut.textContent = "❌ 받는 지갑 주소를 입력해주세요.";
+    logOut.textContent = "받는 지갑 주소를 입력해주세요.";
     return;
   }
 
   const net = getSelectedNet();
   const contractAddr = RWA_CONTRACTS[net.name];
   if (!contractAddr) {
-    logOut.textContent = `❌ ${net.name} 네트워크에 설정된 RWA 컨트랙트 주소가 없습니다.`;
+    logOut.textContent = `${net.name} 네트워크에 설정된 RWA 컨트랙트 주소가 없습니다.`;
     return;
   }
 
   try {
-    logOut.textContent = "⏳ MetaMask 연결 중...";
+    logOut.textContent = "MetaMask 연결 중...";
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -938,7 +907,7 @@ async function mintRwaOnChain() {
     const predictedTokenId = Number(nextId);
 
     logOut.textContent =
-      "⏳ 트랜잭션 전송 중...\n" +
+      "트랜잭션 전송 중...\n" +
       "to: " + to + "\n" +
       "cid: " + CURRENT_IPFS_URI + "\n" +
       "예상 Token ID: " + predictedTokenId + "\n";
@@ -946,13 +915,13 @@ async function mintRwaOnChain() {
     const tx = await rwa.mintRWA(to, CURRENT_IPFS_URI);
 
     logOut.textContent +=
-      "\nTX 생성됨!\n" +
+      "\nTX 생성됨\n" +
       "TX Hash: " + tx.hash + "\n컨펌 대기 중...";
 
     const receipt = await tx.wait();
 
     logOut.textContent =
-      "🎉 RWA 민팅 성공!\n" +
+      "RWA 민팅 성공\n" +
       "Token ID: " + predictedTokenId + "\n" +
       "TX Hash: " + receipt.hash + "\n" +
       "Block: " + receipt.blockNumber + "\n" +
@@ -961,18 +930,25 @@ async function mintRwaOnChain() {
       "IPFS: " + CURRENT_IPFS_URI;
 
   } catch (err) {
-    logOut.textContent = "❌ 민팅 에러: " + (err?.message || err);
+    console.error(err);
+    logOut.textContent = "민팅 에러: " + txError(err);
   }
 }
 
 
-mintBtn.addEventListener("click", mintRwaOnChain);
+// 트랜잭션 진행 중 이중 클릭(이중 민팅) 방지
+mintBtn.addEventListener("click", async () => {
+  mintBtn.disabled = true;
+  try { await mintRwaOnChain(); } finally { mintBtn.disabled = false; }
+});
 
 /* ================================
    6) CID 기반 IPFS 원본 다운로드
 ================================ */
 const downloadBtn = document.getElementById("downloadBtn");
 const downloadCidInput = document.getElementById("downloadCidInput");
+
+document.getElementById("gatewayLabel").textContent = MST_CONFIG.ipfsGateway + "/<CID>";
 
 downloadBtn.addEventListener("click", () => {
   const cid = downloadCidInput.value.trim();
@@ -981,7 +957,7 @@ downloadBtn.addEventListener("click", () => {
     return;
   }
 
-  const gatewayUrl = `https://rwa-gw.mustree.kr/ipfs/${cid}`;
+  const gatewayUrl = `${MST_CONFIG.ipfsGateway}/${cid}`;
 
   // 새 탭에서 다운로드 (브라우저 기본 처리)
   window.open(gatewayUrl, "_blank");

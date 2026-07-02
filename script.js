@@ -4,7 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize all components
-  initNavbar();
+  // (navbar 스크롤 효과는 site.js의 initNavbarScroll이 클래스 기반으로 처리)
   initFAQ();
   initScrollAnimations();
   initMobileMenu();
@@ -39,43 +39,21 @@ function initHeroVideo() {
 }
 
 // ============================================
-// Navbar Scroll Effect
-// ============================================
-function initNavbar() {
-  const navbar = document.querySelector('.navbar');
-  let lastScroll = 0;
-
-  window.addEventListener('scroll', () => {
-    const currentScroll = window.pageYOffset;
-
-    // Add background on scroll
-    if (currentScroll > 50) {
-      navbar.style.background = 'rgba(10, 11, 15, 0.95)';
-      navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.3)';
-    } else {
-      navbar.style.background = 'rgba(10, 11, 15, 0.8)';
-      navbar.style.boxShadow = 'none';
-    }
-
-    // Hide/show navbar on scroll direction
-    if (currentScroll > lastScroll && currentScroll > 100) {
-      navbar.style.transform = 'translateY(-100%)';
-    } else {
-      navbar.style.transform = 'translateY(0)';
-    }
-
-    lastScroll = currentScroll;
-  });
-}
-
-// ============================================
 // FAQ Accordion
 // ============================================
 function initFAQ() {
   const faqItems = document.querySelectorAll('.faq-item');
 
+  const syncExpanded = () => {
+    faqItems.forEach(item => {
+      const q = item.querySelector('.faq-question');
+      if (q) q.setAttribute('aria-expanded', String(item.classList.contains('active')));
+    });
+  };
+
   faqItems.forEach(item => {
     const question = item.querySelector('.faq-question');
+    if (!question) return;
 
     question.addEventListener('click', () => {
       // Close other items
@@ -87,8 +65,11 @@ function initFAQ() {
 
       // Toggle current item
       item.classList.toggle('active');
+      syncExpanded();
     });
   });
+
+  syncExpanded();
 }
 
 // ============================================
@@ -244,10 +225,12 @@ function initMobileMenu() {
   document.head.appendChild(style);
 
   // Toggle menu
+  menuBtn.setAttribute('aria-expanded', 'false');
   menuBtn.addEventListener('click', () => {
     isMenuOpen = !isMenuOpen;
     menuBtn.classList.toggle('active');
     mobileMenu.classList.toggle('active');
+    menuBtn.setAttribute('aria-expanded', String(isMenuOpen));
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
   });
 
@@ -257,6 +240,7 @@ function initMobileMenu() {
       isMenuOpen = false;
       menuBtn.classList.remove('active');
       mobileMenu.classList.remove('active');
+      menuBtn.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
     });
   });
@@ -329,7 +313,6 @@ function animateCounter(element) {
   const suffix = text.replace(match[1], '');
   const duration = 1200;  // 2000ms → 1200ms (더 빠르게)
   const steps = 40;       // 60 → 40 (더 빠르게)
-  const increment = targetNum / steps;
   let current = 0;
   let step = 0;
 
@@ -364,8 +347,8 @@ function easeOutQuart(t) {
 // Parallax Effect for Hero
 // ============================================
 function initParallax() {
-  const hero = document.querySelector('.hero');
   const orbs = document.querySelectorAll('.gradient-orb');
+  if (!orbs.length) return;
 
   window.addEventListener('mousemove', (e) => {
     const x = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -382,51 +365,6 @@ function initParallax() {
 if (window.innerWidth > 992) {
   initParallax();
 }
-
-// ============================================
-// Crypto Cards Hover Effect
-// ============================================
-document.querySelectorAll('.crypto-card').forEach(card => {
-  card.addEventListener('mouseenter', function(e) {
-    const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    this.style.setProperty('--mouse-x', `${x}px`);
-    this.style.setProperty('--mouse-y', `${y}px`);
-  });
-});
-
-// Add glow effect styles
-const glowStyle = document.createElement('style');
-glowStyle.textContent = `
-  .crypto-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(0, 208, 156, 0.1),
-      transparent 40%
-    );
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-  }
-
-  .crypto-card:hover::before {
-    opacity: 1;
-  }
-
-  .crypto-card {
-    position: relative;
-  }
-`;
-document.head.appendChild(glowStyle);
 
 // ============================================
 // Loading Animation
@@ -474,25 +412,28 @@ floatingCards.forEach((card, index) => {
 });
 
 // Add mouse movement effect to floating cards
-document.querySelector('.hero')?.addEventListener('mousemove', (e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width - 0.5;
-  const y = (e.clientY - rect.top) / rect.height - 0.5;
+if (floatingCards.length) {
+  document.querySelector('.hero')?.addEventListener('mousemove', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
 
-  floatingCards.forEach((card, index) => {
-    const speed = (index + 1) * 15;
-    card.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+    floatingCards.forEach((card, index) => {
+      const speed = (index + 1) * 15;
+      card.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+    });
   });
-});
+}
 
 // ============================================
 // Live Ticker Simulation (Delicate Upgrade)
 // ============================================
 function initLiveTicker() {
   // 1. Balance Ticker (Phone Screen)
+  // display:none 처리된 데모 섹션에서는 인터벌을 만들지 않는다
   const balanceElement = document.querySelector('.balance-value');
-  
-  if (balanceElement) {
+
+  if (balanceElement && balanceElement.offsetParent !== null) {
     const originalText = balanceElement.textContent; // "5,500.25 ETH" or similar
     // Extract number part: "5,500.25" -> 5500.25
     let currentBalance = parseFloat(originalText.replace(/[^0-9.]/g, ''));
@@ -521,6 +462,7 @@ function initLiveTicker() {
   const statElements = document.querySelectorAll('.phone-stat strong');
   
   statElements.forEach(el => {
+    if (el.offsetParent === null) return;
     if (el.textContent.includes('$')) {
       let value = parseFloat(el.textContent.replace(/[^0-9.]/g, ''));
       
@@ -539,5 +481,3 @@ function initLiveTicker() {
     }
   });
 }
-
-console.log('Mustsem Network - Premium Blockchain Platform Loaded');

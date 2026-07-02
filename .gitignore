@@ -1,3 +1,8 @@
 # Local dev / review artifacts (not for deployment)
 _review/
 .playwright-cli/
+
+# 업무 문서 / 자료 (사이트 배포 대상 아님)
+*.pdf
+EMS_*
+image.png

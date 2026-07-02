@@ -8,7 +8,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,8 +17,10 @@
   <!-- Hero Section - IMS Style -->
   <section class="hero">
     <div class="hero-bg">
-      <video class="hero-video" autoplay muted loop playsinline poster="">
-        <source src="web3-marketing-businessman-working-with-virtual-re-2026-01-20-10-09-45-utc (1).webm" type="video/webm">
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <!-- VP9(webm)가 절반 용량으로 동일 화질 — 미지원 브라우저만 mp4 폴백 -->
+        <source src="hero-bg.webm" type="video/webm">
+        <source src="hero-bg.mp4" type="video/mp4">
       </video>
       <div class="grid-overlay"></div>
     </div>
@@ -46,7 +48,98 @@
           <p>초당 10,000건 처리 가능한 고성능 탈중앙화 네트워크를 기업별로 생성하며, 검증된 보안 정책과 거버넌스 템플릿으로 안전한 운영을 보장합니다.</p>
         </div>
         <div class="intro-image">
-          <img src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop" alt="Blockchain Network" />
+          <!-- 전용 네트워크 구성도: 로고의 육각형 모티프를 잇는 자체 일러스트 (외부 이미지 의존 없음)
+               구성: 점선 궤도(구조) · 허브 펄스(흐름) · 텍스트 폭에 맞춘 알약형 노드 -->
+          <svg class="intro-diagram" viewBox="0 0 600 420" role="img"
+               aria-label="머스트셈 전용 네트워크 구성도 — 기업 전용 체인을 중심으로 브릿지, 스테이킹, NFT, SBT, RWA, API가 하나의 궤도로 연결된 구조">
+            <defs>
+              <linearGradient id="introGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#00D09C"/>
+                <stop offset="100%" stop-color="#00B4D8"/>
+              </linearGradient>
+              <pattern id="introGridP" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M40 0H0V40" fill="none" stroke="#0f1e38" stroke-opacity="0.045"/>
+              </pattern>
+              <filter id="introShadowHub" x="-40%" y="-40%" width="180%" height="180%">
+                <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0f1e38" flood-opacity="0.12"/>
+              </filter>
+              <filter id="introShadowPill" x="-40%" y="-60%" width="180%" height="220%">
+                <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f1e38" flood-opacity="0.07"/>
+              </filter>
+              <style>
+                /* 허브에서 궤도까지 번지는 신호 — prefers-reduced-motion 시 전역 규칙이 정지시킴 */
+                @keyframes introPulse {
+                  0%   { transform: scale(1);    opacity: 0.30; }
+                  70%  { transform: scale(2.2);  opacity: 0.07; }
+                  100% { transform: scale(2.65); opacity: 0; }
+                }
+                .intro-pulse {
+                  animation: introPulse 5.2s cubic-bezier(0.25, 0.6, 0.4, 1) infinite;
+                }
+                .intro-pulse--late { animation-delay: 2.6s; }
+              </style>
+            </defs>
+
+            <!-- 패널 -->
+            <rect x="0.5" y="0.5" width="599" height="419" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+            <rect x="0.5" y="0.5" width="599" height="419" rx="12" fill="url(#introGridP)"/>
+
+            <!-- 상단 캡션 행: 브랜드 라벨(좌) · 성능 칩(우) -->
+            <path d="M37 37 L41.3 39.5 V44.5 L37 47 L32.7 44.5 V39.5 Z" fill="url(#introGrad)"/>
+            <text x="50" y="46" font-size="10" font-weight="700" letter-spacing="0.15em" fill="#6b7280">MUSTSEM NETWORK</text>
+            <rect x="456" y="29" width="112" height="24" rx="12" fill="rgba(0, 208, 156, 0.08)" stroke="rgba(0, 208, 156, 0.22)"/>
+            <text x="512" y="45" text-anchor="middle" font-size="11" font-weight="700" fill="#077a64">10,000 TPS</text>
+
+            <!-- 서비스 궤도 (모든 노드가 이 위에 놓인다) -->
+            <circle cx="300" cy="205" r="150" fill="none" stroke="#b9c4d6"
+                    stroke-width="1.5" stroke-dasharray="0.1 7" stroke-linecap="round" opacity="0.6"/>
+
+            <!-- 허브 펄스 (두 개를 엇갈려 연속적인 신호로) -->
+            <g transform="translate(300, 205)" fill="none" stroke="#00D09C" stroke-width="1.5">
+              <circle class="intro-pulse" r="54"/>
+              <circle class="intro-pulse intro-pulse--late" r="54"/>
+            </g>
+
+            <!-- 연결선 (노드 뒤로 깔림) -->
+            <g stroke="#d5dce8" stroke-width="1.5">
+              <line x1="300" y1="205" x2="150" y2="205"/>
+              <line x1="300" y1="205" x2="225" y2="75"/>
+              <line x1="300" y1="205" x2="375" y2="75"/>
+              <line x1="300" y1="205" x2="450" y2="205"/>
+              <line x1="300" y1="205" x2="375" y2="335"/>
+              <line x1="300" y1="205" x2="225" y2="335"/>
+            </g>
+
+            <!-- 허브: 기업 전용 체인 (로고 육각형 + M 마크) -->
+            <g filter="url(#introShadowHub)">
+              <path d="M300 155 L343.3 180 V230 L300 255 L256.7 230 V180 Z"
+                    fill="#ffffff" stroke="url(#introGrad)" stroke-width="3"
+                    stroke-linejoin="round"/>
+            </g>
+            <path d="M284 224 V190 L300 206 L316 190 V224"
+                  fill="none" stroke="url(#introGrad)" stroke-width="6"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="300" y="283" text-anchor="middle" font-size="13" font-weight="600"
+                  letter-spacing="-0.01em" fill="#1a1a1a">기업 전용 체인</text>
+
+            <!-- 서비스 노드: 궤도 위 알약형 (텍스트 폭에 맞춤) -->
+            <g filter="url(#introShadowPill)">
+              <rect x="115" y="191" width="70" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+              <rect x="184" y="61"  width="82" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+              <rect x="346" y="61"  width="58" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+              <rect x="422" y="191" width="56" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+              <rect x="345" y="321" width="60" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+              <rect x="198" y="321" width="54" height="28" rx="14" fill="#ffffff" stroke="#e5e7eb"/>
+            </g>
+            <g text-anchor="middle" font-size="12" font-weight="600" fill="#0f1e38">
+              <text x="150" y="209">브릿지</text>
+              <text x="225" y="79">스테이킹</text>
+              <text x="375" y="79">NFT</text>
+              <text x="450" y="209">SBT</text>
+              <text x="375" y="339">RWA</text>
+              <text x="225" y="339">API</text>
+            </g>
+          </svg>
         </div>
       </div>
     </div>

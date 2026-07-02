@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUSTSEM - 이메일 인증</title>
+  <meta name="description" content="MUSTSEM 계정 이메일 인증을 처리하는 페이지입니다." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -95,12 +96,6 @@
   <script src="site.js"></script>
   <script src="script.js"></script>
   <script>
-    const SUPABASE_URL = 'https://qkqhpzyazsvpggtyhuft.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE';
-
-    let sb = null;
-    try { sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch(e) { console.error('Supabase init failed:', e); }
-
     function startCountdown(numId, seconds, dest) {
       const el = document.getElementById(numId);
       let count = seconds;
@@ -125,6 +120,9 @@
     }
 
     async function handleConfirm() {
+      // Supabase 접속 정보는 site.js의 공통 설정(MST_SUPABASE) 한 곳에서 관리된다
+      let sb = null;
+      try { sb = await window.mstSupabase(); } catch(e) { console.error('Supabase init failed:', e); }
       if (!sb) { showError('서비스 연결에 실패했습니다.'); return; }
 
       try {

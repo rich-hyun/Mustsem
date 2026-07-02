@@ -175,6 +175,11 @@ section[id] {
   backdrop-filter: blur(10px);
 }
 
+/* 아래로 스크롤 시 숨김 — site.js initNavbarScroll이 토글 */
+.navbar.nav-hidden {
+  transform: translateY(-100%);
+}
+
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -856,11 +861,16 @@ section[id] {
   justify-content: center;
 }
 
-.intro-image img {
+.intro-image img,
+.intro-image svg {
   max-width: 100%;
   height: auto;
   border-radius: 12px;
   box-shadow: var(--shadow-md);
+}
+
+.intro-image svg {
+  width: 100%;
 }
 
 /* ============================================

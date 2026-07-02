@@ -4,10 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>크로스체인 브릿지 - 머스트셈 네트워크</title>
+  <meta name="description" content="TMZ를 래핑하고 MST 체인의 wMST로 브릿지하는 크로스체인 브릿지 페이지입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Page-specific: wallet status rows + section header spacing */
@@ -111,14 +112,16 @@
 
 <div id="site-footer"></div>
 
+<script src="networks.js"></script>
 <script src="site.js"></script>
 <script src="script.js"></script>
 
 <script>
 // ================= CONFIG =================
-const TMZ_CHAIN_ID = 7707;
-const TMZ_CHAIN_ID_HEX = '0x1E1B';
-const MST_RPC = 'https://block.mustree.kr';
+const TMZ_NET_INFO = MST_NET("JKK-TMZ");
+const TMZ_CHAIN_ID = TMZ_NET_INFO.chain;
+const TMZ_CHAIN_ID_HEX = MST_CHAIN_HEX(TMZ_NET_INFO.chain);
+const MST_RPC = MST_NET("Mustsem").rpc;
 
 const ADDR_WTMZ = '0x0D1BFd55283a07e199D52459a7800B66A22b6790';
 const ADDR_BRIDGE_REQ = '0x41bf31f5cfa121deA3875e435382fd0a890ab938';
@@ -140,29 +143,60 @@ const ABI_BRIDGE_REQ = [
 
 let tmzProvider, mstProvider, signer, account;
 
+// 지갑/컨트랙트 오류를 사용자용 문구로 축약 (내부 스택 노출 방지)
+const txError = (e) => e?.shortMessage || e?.reason || e?.message || String(e);
+
 // ================= WALLET =================
 async function connectWallet() {
-  if (!window.ethereum) return alert('MetaMask 필요');
-  tmzProvider = new ethers.BrowserProvider(window.ethereum);
-  await tmzProvider.send('eth_requestAccounts', []);
-  signer = await tmzProvider.getSigner();
-  account = await signer.getAddress();
+  if (!window.ethereum) return alert('MetaMask가 필요합니다.');
+  try {
+    tmzProvider = new ethers.BrowserProvider(window.ethereum);
+    await tmzProvider.send('eth_requestAccounts', []);
+    signer = await tmzProvider.getSigner();
+    account = await signer.getAddress();
 
-  document.getElementById('walletStatus').textContent = '연결됨';
-  document.getElementById('walletAddress').textContent = account;
+    document.getElementById('walletStatus').textContent = '연결됨';
+    document.getElementById('walletAddress').textContent = account;
 
-  const net = await tmzProvider.getNetwork();
-  document.getElementById('chainId').textContent = net.chainId.toString();
+    const net = await tmzProvider.getNetwork();
+    document.getElementById('chainId').textContent = net.chainId.toString();
 
-  mstProvider = new ethers.JsonRpcProvider(MST_RPC);
-  await refreshBalances();
+    mstProvider = new ethers.JsonRpcProvider(MST_RPC);
+    setupWalletListeners();
+    await refreshBalances();
+  } catch (e) {
+    console.error(e);
+    alert('지갑 연결 실패: ' + txError(e));
+  }
+}
+
+// 계정/체인 변경 시 화면 상태 동기화 (중복 등록 방지)
+let _walletListenersReady = false;
+function setupWalletListeners() {
+  if (_walletListenersReady || !window.ethereum) return;
+  _walletListenersReady = true;
+
+  window.ethereum.on('accountsChanged', async (accounts) => {
+    if (!accounts || accounts.length === 0) {
+      account = undefined;
+      signer = undefined;
+      document.getElementById('walletStatus').textContent = '연결 안 됨';
+      document.getElementById('walletAddress').textContent = '-';
+      return;
+    }
+    await connectWallet();
+  });
+
+  window.ethereum.on('chainChanged', async (chainIdHex) => {
+    document.getElementById('chainId').textContent = parseInt(chainIdHex, 16);
+    await refreshBalances();
+  });
 }
 
 async function switchToTMZ() {
-  await window.ethereum.request({
-    method: 'wallet_switchEthereumChain',
-    params: [{ chainId: TMZ_CHAIN_ID_HEX }]
-  });
+  // 지갑에 TMZ 체인이 없으면 등록까지 처리하는 공용 헬퍼 사용
+  const msg = await MST_SWITCH_CHAIN(TMZ_NET_INFO);
+  if (msg) alert(msg);
 }
 
 // ================= BALANCES =================
@@ -193,46 +227,76 @@ async function refreshBalances() {
 
 // ================= ACTIONS =================
 async function wrapTMZ() {
+  if (!signer) return alert('지갑을 먼저 연결하세요.');
   const amt = document.getElementById('wrapAmount').value;
-  if (!amt) return alert('수량 입력');
+  if (!amt || Number(amt) <= 0) return alert('유효한 수량을 입력하세요.');
 
-  const c = new ethers.Contract(ADDR_WTMZ, ABI_WNATIVE, signer);
-  const tx = await c.deposit({ value: ethers.parseEther(amt) });
-  document.getElementById('wrapResult').textContent = 'TX: ' + tx.hash;
-  await tx.wait();
-  document.getElementById('wrapResult').textContent = '래핑 완료';
-  refreshBalances();
+  const out = document.getElementById('wrapResult');
+  try {
+    const c = new ethers.Contract(ADDR_WTMZ, ABI_WNATIVE, signer);
+    const tx = await c.deposit({ value: ethers.parseEther(amt) });
+    out.textContent = 'TX: ' + tx.hash;
+    await tx.wait();
+    out.textContent = '래핑 완료';
+    refreshBalances();
+  } catch (e) {
+    console.error(e);
+    out.textContent = '래핑 실패: ' + txError(e);
+  }
 }
 
 async function approveWTMZ() {
+  if (!signer) return alert('지갑을 먼저 연결하세요.');
   const amt = document.getElementById('bridgeAmount').value;
-  if (!amt) return alert('수량 입력');
+  if (!amt || Number(amt) <= 0) return alert('유효한 수량을 입력하세요.');
 
-  const c = new ethers.Contract(ADDR_WTMZ, ABI_WNATIVE, signer);
-  const tx = await c.approve(ADDR_BRIDGE_REQ, ethers.parseEther(amt));
-  document.getElementById('bridgeResult').textContent = 'Approve TX: ' + tx.hash;
-  await tx.wait();
-  document.getElementById('bridgeResult').textContent = '승인 완료';
+  const out = document.getElementById('bridgeResult');
+  try {
+    const c = new ethers.Contract(ADDR_WTMZ, ABI_WNATIVE, signer);
+    const tx = await c.approve(ADDR_BRIDGE_REQ, ethers.parseEther(amt));
+    out.textContent = 'Approve TX: ' + tx.hash;
+    await tx.wait();
+    out.textContent = '승인 완료';
+  } catch (e) {
+    console.error(e);
+    out.textContent = '승인 실패: ' + txError(e);
+  }
 }
 
 async function requestBridge() {
+  if (!signer) return alert('지갑을 먼저 연결하세요.');
   const amt = document.getElementById('bridgeAmount').value;
-  if (!amt) return alert('수량 입력');
+  if (!amt || Number(amt) <= 0) return alert('유효한 수량을 입력하세요.');
 
-  const c = new ethers.Contract(ADDR_BRIDGE_REQ, ABI_BRIDGE_REQ, signer);
-  const tx = await c.request(ethers.parseEther(amt), account);
-  document.getElementById('bridgeResult').textContent = 'Request TX: ' + tx.hash;
-  await tx.wait();
-  document.getElementById('bridgeResult').textContent = '브릿지 요청 완료 (릴레이 대기)';
+  const out = document.getElementById('bridgeResult');
+  try {
+    const c = new ethers.Contract(ADDR_BRIDGE_REQ, ABI_BRIDGE_REQ, signer);
+    const tx = await c.request(ethers.parseEther(amt), account);
+    out.textContent = 'Request TX: ' + tx.hash;
+    await tx.wait();
+    out.textContent = '브릿지 요청 완료 (릴레이 대기)';
+  } catch (e) {
+    console.error(e);
+    out.textContent = '브릿지 요청 실패: ' + txError(e);
+  }
 }
 
 // ================= EVENTS =================
-document.getElementById('btnConnect').onclick = connectWallet;
-document.getElementById('btnSwitchTMZ').onclick = switchToTMZ;
-document.getElementById('btnRefresh').onclick = refreshBalances;
-document.getElementById('btnWrap').onclick = wrapTMZ;
-document.getElementById('btnApproveWTMZ').onclick = approveWTMZ;
-document.getElementById('btnRequestBridge').onclick = requestBridge;
+// 트랜잭션 진행 중 이중 클릭(이중 전송) 방지: 완료될 때까지 버튼 잠금
+const bindBusy = (id, fn) => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try { await fn(); } finally { btn.disabled = false; }
+  });
+};
+
+bindBusy('btnConnect', connectWallet);
+bindBusy('btnSwitchTMZ', switchToTMZ);
+bindBusy('btnRefresh', refreshBalances);
+bindBusy('btnWrap', wrapTMZ);
+bindBusy('btnApproveWTMZ', approveWTMZ);
+bindBusy('btnRequestBridge', requestBridge);
 </script>
 </body>
 </html>

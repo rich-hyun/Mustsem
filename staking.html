@@ -8,10 +8,10 @@
   <meta name="description" content="MST를 wMST로 래핑하고, wMST를 스테이킹하여 MST 보상을 받는 페이지" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <!-- ethers.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <!-- ethers.js — 다른 dApp 페이지와 동일한 v6 사용 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
   <style>
     /* Page-specific helpers (unified LIGHT system) */
     .net-info p {
@@ -56,7 +56,7 @@
           MST를 스테이킹 하고 보상을 받으세요
         </h1>
         <p class="sub">
-          이 페이지는 MST 네트워크(체인ID 7601)에서 동작합니다.<br>
+          이 페이지는 MST 네트워크(체인ID <span id="mstChainIdLabel"></span>)에서 동작합니다.<br>
           먼저 MST ↔ wMST 브릿지를 사용하고, 이후 wMST 스테이킹까지 진행할 수 있습니다.
         </p>
       </div>
@@ -236,6 +236,7 @@
 
   <div id="site-footer"></div>
 
+  <script src="networks.js"></script>
   <script src="site.js"></script>
   <script src="script.js"></script>
 
@@ -243,13 +244,7 @@
     // =============================
     // 공통 유틸 & 네트워크 UI
     // =============================
-    const networks = [
-      { name:"Mustsem",   rpc:"https://block.mustree.kr",  chain:7601, symbol:"MST" },
-      { name:"JKK-TMZ",   rpc:"https://jkk.mst2.site",    chain:7707, symbol:"TMZ" },
-      { name:"KukminBank",rpc:"https://rpc.mstblock.com", chain:1213, symbol:"KBB" },
-      { name:"NABIZAM",   rpc:"https://nbmst.mst2.site",  chain:7602, symbol:"NBZ" },
-      { name:"MDPCD",     rpc:"https://mdpcd.mst2.site",  chain:7603, symbol:"MDP" }
-    ];
+    const networks = window.MST_CONFIG.networks;
 
     const netSelect  = document.getElementById('netSelect');
     const netNameEl  = document.getElementById('netName');
@@ -283,12 +278,18 @@
 
     const fmt = (n) => Number(n || 0).toLocaleString('ko-KR', { maximumFractionDigits: 6 });
 
+    // 지갑/컨트랙트 오류를 사용자용 문구로 축약 (내부 스택 노출 방지)
+    const txError = (e) => e?.shortMessage || e?.reason || e?.message || String(e);
+
     // =============================
     // 온체인 설정 상수
     // =============================
-    const MST_CHAIN_ID      = 7601;
-    const MST_CHAIN_ID_HEX  = "0x1DB1";
-    const MST_RPC_URL       = "https://block.mustree.kr";
+    const MST_NET_INFO      = MST_NET("Mustsem");
+    const MST_CHAIN_ID      = MST_NET_INFO.chain;
+    const MST_CHAIN_ID_HEX  = MST_CHAIN_HEX(MST_NET_INFO.chain);
+    const MST_RPC_URL       = MST_NET_INFO.rpc;
+
+    document.getElementById("mstChainIdLabel").textContent = MST_CHAIN_ID;
 
     const WMST_ADDRESS      = "0x3Dfc5a626a046CE0F01B130fA92dd4ef4A3f714B";
     const STAKING_ADDRESS   = "0x8Fb01DA4FA713Ce590546dC440165170E02e7D07";
@@ -347,8 +348,8 @@
       }
       try {
         await window.ethereum.request({ method: "eth_requestAccounts" });
-        provider       = new ethers.providers.Web3Provider(window.ethereum);
-        signer         = provider.getSigner();
+        provider       = new ethers.BrowserProvider(window.ethereum);
+        signer         = await provider.getSigner();
         currentAccount = await signer.getAddress();
 
         walletStatusEl.textContent  = "연결됨";
@@ -361,14 +362,14 @@
         setupWalletListeners();
       } catch (e) {
         console.error(e);
-        alert("지갑 연결 실패: " + (e.message || e));
+        alert("지갑 연결 실패: " + txError(e));
       }
     }
 
     async function ensureMstNetwork() {
       if (!provider) return;
       const net = await provider.getNetwork();
-      if (net.chainId === MST_CHAIN_ID) return;
+      if (Number(net.chainId) === MST_CHAIN_ID) return;
 
       try {
         await window.ethereum.request({
@@ -392,7 +393,7 @@
           throw switchError;
         } else {
           console.error(switchError);
-          alert("네트워크 전환 실패: " + (switchError.message || switchError));
+          alert("네트워크 전환 실패: " + txError(switchError));
           throw switchError;
         }
       }
@@ -416,7 +417,7 @@
           currentAccount = accounts[0];
           walletStatusEl.textContent  = "연결됨";
           walletAddressEl.textContent = currentAccount;
-          signer = provider.getSigner();
+          signer = await provider.getSigner();
           await initContracts();
           await refreshBalances();
           await refreshStakingInfo();
@@ -432,27 +433,27 @@
     // 잔액 조회
     // =============================
     async function refreshBalances() {
-    if (!provider || !currentAccount || !wMST) return;
-    try {
+      if (!provider || !currentAccount || !wMST) return;
+      try {
         const mstWei  = await provider.getBalance(currentAccount);
-        const mst     = ethers.utils.formatEther(mstWei);
+        const mst     = ethers.formatEther(mstWei);
 
-        mstBalanceEl.textContent        = fmt(mst);
+        mstBalanceEl.textContent = fmt(mst);
         if (bridgeMstBalanceEl) {
-        bridgeMstBalanceEl.textContent = fmt(mst);
+          bridgeMstBalanceEl.textContent = fmt(mst);
         }
 
         const wmstWei = await wMST.balanceOf(currentAccount);
-        const wmst    = ethers.utils.formatEther(wmstWei);
+        const wmst    = ethers.formatEther(wmstWei);
 
-        wmstBalanceEl.textContent        = fmt(wmst);
-        wmstBalanceStakeEl.textContent   = fmt(wmst);
+        wmstBalanceEl.textContent      = fmt(wmst);
+        wmstBalanceStakeEl.textContent = fmt(wmst);
         if (bridgeWmstBalanceEl) {
-        bridgeWmstBalanceEl.textContent = fmt(wmst);
+          bridgeWmstBalanceEl.textContent = fmt(wmst);
         }
-    } catch (e) {
+      } catch (e) {
         console.error(e);
-    }
+      }
     }
 
 
@@ -471,18 +472,18 @@
       }
 
       try {
-        const value = ethers.utils.parseEther(amountStr);
+        const value = ethers.parseEther(amountStr);
         bridgeStatusEl.textContent = "MST → wMST 트랜잭션 전송 중...";
 
         const tx = await wMST.deposit({ value });
         bridgeStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        bridgeStatusEl.textContent = "✅ 래핑 완료!";
+        bridgeStatusEl.textContent = "래핑 완료";
         await refreshBalances();
       } catch (e) {
         console.error(e);
-        bridgeStatusEl.textContent = "❌ 오류: " + (e.reason || e.message || e);
+        bridgeStatusEl.textContent = "오류: " + txError(e);
       }
     }
 
@@ -498,18 +499,18 @@
       }
 
       try {
-        const amount = ethers.utils.parseEther(amountStr);
+        const amount = ethers.parseEther(amountStr);
         bridgeStatusEl.textContent = "wMST → MST 트랜잭션 전송 중...";
 
         const tx = await wMST.withdraw(amount);
         bridgeStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        bridgeStatusEl.textContent = "✅ 언래핑 완료!";
+        bridgeStatusEl.textContent = "언래핑 완료";
         await refreshBalances();
       } catch (e) {
         console.error(e);
-        bridgeStatusEl.textContent = "❌ 오류: " + (e.reason || e.message || e);
+        bridgeStatusEl.textContent = "오류: " + txError(e);
       }
     }
 
@@ -520,27 +521,22 @@
       if (!staking || !currentAccount) return;
       try {
         const info = await staking.stakes(currentAccount);
-        // info: [amount, accrued, lastUpdate, lastClaimTime]
-        const amountBN     = info[0];
-        const accruedBN    = info[1];
-        const lastUpdateBN = info[2];
-        const lastClaimBN  = info[3];
+        // info: [amount, accrued, lastUpdate, lastClaimTime] — ethers v6는 bigint 반환
+        const amount    = info[0];
+        const lastClaim = Number(info[3]);
 
-        const pendingBN = await staking.pendingReward(currentAccount);
-        const minIntBN  = await staking.minClaimInterval();
+        const pending = await staking.pendingReward(currentAccount);
+        const minInt  = Number(await staking.minClaimInterval());
 
-        const staked  = ethers.utils.formatEther(amountBN);
-        const pending = ethers.utils.formatEther(pendingBN);
+        stStakedEl.textContent  = fmt(ethers.formatEther(amount));
+        stPendingEl.textContent = fmt(ethers.formatEther(pending));
 
-        stStakedEl.textContent  = fmt(staked);
-        stPendingEl.textContent = fmt(pending);
-
-        if (lastClaimBN.toNumber() === 0) {
+        if (lastClaim === 0) {
           stLastClaimEl.textContent = "-";
           stNextClaimEl.textContent = "-";
         } else {
-          const last = new Date(lastClaimBN.toNumber() * 1000);
-          const next = new Date((lastClaimBN.toNumber() + minIntBN.toNumber()) * 1000);
+          const last = new Date(lastClaim * 1000);
+          const next = new Date((lastClaim + minInt) * 1000);
           stLastClaimEl.textContent = last.toLocaleString();
           stNextClaimEl.textContent = next.toLocaleString();
         }
@@ -548,7 +544,7 @@
         stStatusEl.textContent = "상태: 정상";
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "상태 조회 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "상태 조회 실패: " + txError(e);
       }
     }
 
@@ -567,17 +563,17 @@
       }
 
       try {
-        const amount = ethers.utils.parseEther(amountStr);
+        const amount = ethers.parseEther(amountStr);
         stStatusEl.textContent = "wMST Approve 트랜잭션 전송 중...";
 
         const tx = await wMST.approve(STAKING_ADDRESS, amount);
         stStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        stStatusEl.textContent = "✅ Approve 완료";
+        stStatusEl.textContent = "Approve 완료";
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "❌ Approve 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "Approve 실패: " + txError(e);
       }
     }
 
@@ -593,19 +589,19 @@
       }
 
       try {
-        const amount = ethers.utils.parseEther(amountStr);
+        const amount = ethers.parseEther(amountStr);
         stStatusEl.textContent = "Stake 트랜잭션 전송 중...";
 
         const tx = await staking.stake(amount);
         stStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        stStatusEl.textContent = "🎉 스테이킹 완료";
+        stStatusEl.textContent = "스테이킹 완료";
         await refreshBalances();
         await refreshStakingInfo();
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "❌ Stake 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "Stake 실패: " + txError(e);
       }
     }
 
@@ -621,19 +617,19 @@
       }
 
       try {
-        const amount = ethers.utils.parseEther(amountStr);
+        const amount = ethers.parseEther(amountStr);
         stStatusEl.textContent = "Withdraw 트랜잭션 전송 중...";
 
         const tx = await staking.withdraw(amount);
         stStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        stStatusEl.textContent = "✅ 언스테이킹 완료";
+        stStatusEl.textContent = "언스테이킹 완료";
         await refreshBalances();
         await refreshStakingInfo();
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "❌ Withdraw 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "Withdraw 실패: " + txError(e);
       }
     }
 
@@ -649,12 +645,12 @@
         stStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        stStatusEl.textContent = "🎉 보상 수령 완료";
+        stStatusEl.textContent = "보상 수령 완료";
         await refreshBalances();
         await refreshStakingInfo();
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "❌ Claim 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "Claim 실패: " + txError(e);
       }
     }
 
@@ -670,27 +666,36 @@
         stStatusEl.textContent = "대기 중... TX: " + tx.hash;
         await tx.wait();
 
-        stStatusEl.textContent = "✅ Exit 완료 (전부 언스테이킹 + Claim 시도)";
+        stStatusEl.textContent = "Exit 완료 (전부 언스테이킹 + Claim 시도)";
         await refreshBalances();
         await refreshStakingInfo();
       } catch (e) {
         console.error(e);
-        stStatusEl.textContent = "❌ Exit 실패: " + (e.reason || e.message || e);
+        stStatusEl.textContent = "Exit 실패: " + txError(e);
       }
     }
 
     // =============================
     // 이벤트 바인딩 & 초기화
     // =============================
-    document.getElementById("btnConnect").addEventListener("click", connectWallet);
-    document.getElementById("btnWrap").addEventListener("click", wrapMst);
-    document.getElementById("btnUnwrap").addEventListener("click", unwrapWmst);
+    // 트랜잭션 진행 중 이중 클릭(이중 전송) 방지: 완료될 때까지 버튼 잠금
+    const bindBusy = (id, fn) => {
+      const btn = document.getElementById(id);
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try { await fn(); } finally { btn.disabled = false; }
+      });
+    };
 
-    document.getElementById("btnStakeApprove").addEventListener("click", stakeApproveOnchain);
-    document.getElementById("btnStake").addEventListener("click", stakeOnchain);
-    document.getElementById("btnStakeWithdraw").addEventListener("click", withdrawOnchain);
-    document.getElementById("btnStakeClaim").addEventListener("click", claimOnchain);
-    document.getElementById("btnStakeExit").addEventListener("click", exitOnchain);
+    bindBusy("btnConnect", connectWallet);
+    bindBusy("btnWrap", wrapMst);
+    bindBusy("btnUnwrap", unwrapWmst);
+
+    bindBusy("btnStakeApprove", stakeApproveOnchain);
+    bindBusy("btnStake", stakeOnchain);
+    bindBusy("btnStakeWithdraw", withdrawOnchain);
+    bindBusy("btnStakeClaim", claimOnchain);
+    bindBusy("btnStakeExit", exitOnchain);
 
     // 초기 네트워크 UI 세팅
     populateNetworkSelect();

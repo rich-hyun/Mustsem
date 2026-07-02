@@ -8,7 +8,7 @@
   <meta name="description" content="MST 네트워크의 주요 지갑 잔액을 실시간으로 모니터링합니다." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Hero update-time line: lives on the DARK hero, so keep it light.
@@ -38,13 +38,6 @@
     .address-cell:hover {
       filter: blur(0);
       user-select: text;
-    }
-    .address-cell::before {
-      content: "🔒 ";
-      filter: blur(0);
-    }
-    .address-cell:hover::before {
-      content: "";
     }
     .address-hint {
       font-size: 13px;
@@ -99,6 +92,7 @@
 
   <div id="site-footer"></div>
 
+  <script src="networks.js"></script>
   <script src="site.js"></script>
   <script src="script.js"></script>
 
@@ -121,7 +115,7 @@
       if (btn) btn.disabled = true;
 
       try {
-        const res = await fetch("https://api.mustree.kr/api/balances", { cache: "no-store" });
+        const res = await fetch(`${MST_CONFIG.api}/api/balances`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         const rows = Array.isArray(json && json.data) ? json.data : [];
@@ -144,7 +138,7 @@
         // 업데이트 시각은 데이터 로드에 성공했을 때만 갱신
         if (json && json.updated) {
           const updateElem = document.getElementById("updateTimeBig");
-          updateElem.innerText = `⟳ 업데이트 시각: ${new Date(json.updated).toLocaleString()}`;
+          updateElem.innerText = `업데이트 시각: ${new Date(json.updated).toLocaleString()}`;
           updateElem.style.animation = "none";   // 재실행 위해 초기화
           void updateElem.offsetWidth;            // 강제 리플로우
           updateElem.style.animation = "";        // 애니메이션 재적용
@@ -153,8 +147,8 @@
         // 네트워크/서버/JSON 오류 → 빈 표 대신 명확한 안내 표시
         console.error("[dashboard] 잔액 로드 실패:", err);
         stateRow(
-          "⚠ 잔액 데이터를 불러오지 못했습니다.<br>" +
-          '<span style="font-size:13px">API 서버(api.mustree.kr)에 연결할 수 없습니다. ' +
+          "잔액 데이터를 불러오지 못했습니다.<br>" +
+          `<span style="font-size:13px">API 서버(${MST_CONFIG.api.replace(/^https?:\/\//, "")})에 연결할 수 없습니다. ` +
           "잠시 후 <b>새로고침</b>을 눌러 다시 시도하세요.</span>"
         );
       } finally {

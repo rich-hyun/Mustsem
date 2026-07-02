@@ -154,23 +154,6 @@ function renderFooter() {
               <span>MUSTSEM</span>
             </a>
             <p>기업을 위한 블록체인 인프라와 토큰화 API를 제공합니다. 보안을 타협하지 않으면서 빠르게 구축하세요.</p>
-            <div class="social-links">
-              <a href="#" aria-label="Twitter">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                  <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
-                </svg>
-              </a>
-              <a href="#" aria-label="GitHub">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-              </a>
-              <a href="#" aria-label="Discord">
-                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                  <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-                </svg>
-              </a>
-            </div>
           </div>
 
           <div class="footer-links">
@@ -188,19 +171,17 @@ function renderFooter() {
             <h4>개발자</h4>
             <a href="api.html">API 카탈로그</a>
             <a href="api-guide.html">API 가이드</a>
-            <a href="index.html#faq">FAQ</a>
           </div>
 
           <div class="footer-links">
             <h4>회사</h4>
             <a href="security.html">보안</a>
-            <a href="index.html#pricing">요금제</a>
             <a href="network.html#apply">문의하기</a>
           </div>
         </div>
 
         <div class="footer-bottom">
-          <p>&copy; 2025 머스트셈 네트워크. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} 머스트셈 네트워크. All rights reserved.</p>
           <a href="index.html" class="made-with">Powered by MUSTSEM</a>
         </div>
       </div>
@@ -217,52 +198,76 @@ function injectLayout() {
 }
 
 // IMS Style: Navbar scroll effect
+// 배경(.scrolled)과 숨김(.nav-hidden)을 클래스로만 제어한다.
+// 인라인 스타일을 쓰면 테마 색상(style.css)과 어긋나므로 금지.
 function initNavbarScroll() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
 
+  let lastY = window.scrollY;
+
   const handleScroll = () => {
-    if (window.scrollY > 50) {
-      navbar.classList.add('scrolled');
-    } else {
-      navbar.classList.remove('scrolled');
-    }
+    const y = window.scrollY;
+    navbar.classList.toggle('scrolled', y > 50);
+    // 아래로 스크롤하면 숨기고, 위로 스크롤하면 다시 표시
+    navbar.classList.toggle('nav-hidden', y > lastY && y > 100);
+    lastY = y;
   };
 
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener('scroll', handleScroll, { passive: true });
   handleScroll(); // Initial check
 }
 
 injectLayout();
 initNavbarScroll();
 
-// Supabase Auth UI
-function initAuthUI() {
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  script.onload = async function() {
-    try {
-      const sb = window.supabase.createClient(
-        'https://qkqhpzyazsvpggtyhuft.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE'
-      );
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        const loginLink = document.querySelector('.nav-login');
-        const signupLink = document.querySelector('.btn-primary-nav[href="signup.html"]');
-        if (loginLink) {
-          loginLink.textContent = '로그아웃';
-          loginLink.href = '#';
-          loginLink.addEventListener('click', async function(e) {
-            e.preventDefault();
-            await sb.auth.signOut();
-            location.reload();
-          });
-        }
-        if (signupLink) signupLink.style.display = 'none';
-      }
-    } catch(e) { console.error('Auth UI error:', e); }
+// ============================================
+// Supabase (인증) 공통 설정
+// URL/키 교체 시 여기만 수정 — login/signup/confirm 페이지가 함께 사용
+// ============================================
+window.MST_SUPABASE = {
+  url: 'https://qkqhpzyazsvpggtyhuft.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrcWhwenlhenN2cGdndHlodWZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTU1ODUsImV4cCI6MjA4OTM5MTU4NX0.p1RJDLt4v3O_3PvGhfsFiKnu54OMDD0YJ7WvBpfv3TE'
+};
+
+// supabase-js SDK를 필요할 때만 로드하고 클라이언트는 1개만 생성해 공유한다.
+// (페이지별로 createClient를 중복 호출하면 GoTrue 인스턴스 중복 경고 발생)
+let _mstSbClient = null;
+window.mstSupabase = function () {
+  if (_mstSbClient) return Promise.resolve(_mstSbClient);
+  const create = () => {
+    _mstSbClient = window.supabase.createClient(window.MST_SUPABASE.url, window.MST_SUPABASE.anonKey);
+    return _mstSbClient;
   };
-  document.head.appendChild(script);
+  if (window.supabase) return Promise.resolve(create());
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = () => resolve(create());
+    script.onerror = () => reject(new Error('supabase-js load failed'));
+    document.head.appendChild(script);
+  });
+};
+
+// Supabase Auth UI — 로그인 상태면 네비 버튼을 로그아웃으로 전환
+async function initAuthUI() {
+  try {
+    const sb = await window.mstSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return;
+
+    const loginLink = document.querySelector('.nav-login');
+    const signupLink = document.querySelector('.btn-primary-nav[href="signup.html"]');
+    if (loginLink) {
+      loginLink.textContent = '로그아웃';
+      loginLink.href = '#';
+      loginLink.addEventListener('click', async function(e) {
+        e.preventDefault();
+        await sb.auth.signOut();
+        location.reload();
+      });
+    }
+    if (signupLink) signupLink.style.display = 'none';
+  } catch(e) { console.error('Auth UI error:', e); }
 }
 initAuthUI();

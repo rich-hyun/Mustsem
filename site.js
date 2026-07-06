@@ -269,4 +269,7 @@ async function initAuthUI() {
         location.reload();
       });
     }
-    if (sign
+    if (signupLink) signupLink.style.display = 'none';
+  } catch(e) { console.error('Auth UI error:', e); }
+}
+initAuthUI();

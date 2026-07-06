@@ -177,6 +177,8 @@ function renderFooter() {
             <h4>회사</h4>
             <a href="security.html">보안</a>
             <a href="network.html#apply">문의하기</a>
+            <a href="privacy.html">개인정보처리방침</a>
+            <a href="terms.html">이용약관</a>
           </div>
         </div>
 
@@ -267,7 +269,4 @@ async function initAuthUI() {
         location.reload();
       });
     }
-    if (signupLink) signupLink.style.display = 'none';
-  } catch(e) { console.error('Auth UI error:', e); }
-}
-initAuthUI();
+    if (sign

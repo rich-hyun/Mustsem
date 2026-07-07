@@ -9,6 +9,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="canonical" href="https://www.mustsem.co.kr/dashboard.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MUSTSEM">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:title" content="대시보드 · Mustsem">
+  <meta property="og:description" content="MST 네트워크의 주요 지갑 잔액을 실시간으로 모니터링합니다.">
+  <meta property="og:url" content="https://www.mustsem.co.kr/dashboard.html">
+  <meta property="og:image" content="https://www.mustsem.co.kr/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css" />
   <style>
     /* Hero update-time line: lives on the DARK hero, so keep it light.
@@ -125,12 +136,17 @@
         } else {
           tbody.innerHTML = "";
           rows.forEach(row => {
+            // API 응답 값은 textContent로만 주입 (서버 침해 시 XSS 전파 차단)
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${row.label ?? "-"}</td>
-              <td class="address-cell" title="마우스를 올리면 주소가 표시됩니다">${row.address ?? "-"}</td>
-              <td>${Number(row.balance ?? 0).toLocaleString()}</td>
-            `;
+            const tdLabel = document.createElement("td");
+            tdLabel.textContent = row.label ?? "-";
+            const tdAddr = document.createElement("td");
+            tdAddr.className = "address-cell";
+            tdAddr.title = "마우스를 올리면 주소가 표시됩니다";
+            tdAddr.textContent = row.address ?? "-";
+            const tdBal = document.createElement("td");
+            tdBal.textContent = Number(row.balance ?? 0).toLocaleString();
+            tr.append(tdLabel, tdAddr, tdBal);
             tbody.appendChild(tr);
           });
         }

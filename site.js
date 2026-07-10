@@ -1,22 +1,31 @@
 // ============================================
 // Mustsem Network - Shared Site Layout
 // - Injects Navbar/Footer into #site-nav/#site-footer
-// - Adds active state based on current pathname
+// - Adds active state based on the current route
 // ============================================
+
+function normalizeRoutePage(value) {
+  const cleanPath = String(value || '')
+    .split(/[?#]/, 1)[0]
+    .replace(/\\/g, '/')
+    .replace(/\/+$/, '');
+  const lastSegment = cleanPath.split('/').filter(Boolean).pop() || 'index';
+  return lastSegment.replace(/\.html$/i, '') || 'index';
+}
 
 function getCurrentRoute() {
   const path = window.location.pathname || '';
   const last = path.split('/').filter(Boolean).pop();
   return {
-    page: last || 'index.html',
+    page: normalizeRoutePage(last || 'index'),
     hash: window.location.hash || ''
   };
 }
 
 function isActiveHref(href, currentRoute) {
   if (!href) return false;
-  const [rawPage, rawHash] = href.split('#');
-  const targetPage = rawPage || currentRoute.page;
+  const [rawPage, rawHash] = href.split('#', 2);
+  const targetPage = normalizeRoutePage(rawPage || currentRoute.page);
   if (targetPage !== currentRoute.page) return false;
 
   if (!rawHash) return true;
@@ -78,18 +87,18 @@ function renderNavbar() {
   const devActive = developerLinks.some((l) => isActiveHref(l.href, currentRoute));
   const securityActive = isActiveHref('security.html', currentRoute);
 
-  const dropdownMenu = (links, isActive = isActiveHref) =>
+  const dropdownMenu = (links) =>
     links
       .map((l) => {
-        const active = isActive(l.href, currentRoute);
-        return `<a href="${escapeHtml(l.href)}" class="dropdown-link ${active ? 'active' : ''}" ${active ? 'aria-current="page"' : ''}>${escapeHtml(l.label)}</a>`;
+        const active = isActiveHref(l.href, currentRoute);
+        return `<a href="${escapeHtml(l.href)}" class="dropdown-link ${active ? 'active' : ''}" role="menuitem" ${active ? 'aria-current="page"' : ''}>${escapeHtml(l.label)}</a>`;
       })
       .join('');
 
   return `
-    <nav class="navbar">
+    <nav class="navbar" aria-label="주요 탐색">
       <div class="nav-container">
-        <a href="index.html" class="logo" aria-label="MUSTSEM Home">
+        <a href="index.html" class="logo" aria-label="MUSTSEM 홈">
           <div class="logo-icon">
             ${renderLogoSvg('logoGrad')}
           </div>
@@ -98,25 +107,27 @@ function renderNavbar() {
 
         <div class="nav-links">
           <div class="nav-dropdown ${platformActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="플랫폼 메뉴">
+            <button id="nav-platform-button" class="nav-dropdown-btn" type="button"
+                    aria-haspopup="menu" aria-controls="nav-platform-menu" aria-expanded="false">
               플랫폼
               <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="플랫폼">
+            <div id="nav-platform-menu" class="nav-dropdown-menu" role="menu" aria-labelledby="nav-platform-button">
               ${dropdownMenu(platformLinks)}
             </div>
           </div>
 
           <div class="nav-dropdown ${devActive ? 'active' : ''}">
-            <button class="nav-dropdown-btn" type="button" aria-haspopup="true" aria-label="개발자 메뉴">
+            <button id="nav-developer-button" class="nav-dropdown-btn" type="button"
+                    aria-haspopup="menu" aria-controls="nav-developer-menu" aria-expanded="false">
               개발자
               <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-            <div class="nav-dropdown-menu" role="menu" aria-label="개발자">
+            <div id="nav-developer-menu" class="nav-dropdown-menu" role="menu" aria-labelledby="nav-developer-button">
               ${dropdownMenu(developerLinks)}
             </div>
           </div>
@@ -131,10 +142,11 @@ function renderNavbar() {
           <a href="signup.html" class="btn-primary-nav">회원가입</a>
         </div>
 
-        <button class="mobile-menu-btn" aria-label="Menu" type="button">
-          <span></span>
-          <span></span>
-          <span></span>
+        <button id="mobile-menu-toggle" class="mobile-menu-btn" type="button"
+                aria-label="모바일 메뉴 열기" aria-controls="mobile-navigation" aria-expanded="false">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </button>
       </div>
     </nav>
@@ -191,37 +203,335 @@ function renderFooter() {
   `.trim();
 }
 
+function ensureMainContentTarget(navMount, footerMount) {
+  let main = document.querySelector('main');
+
+  // The home page historically placed its sections directly under <body>.
+  // Wrap only the nodes between the shared shell mounts so the skip target is
+  // semantic without touching page-owned scripts or the footer.
+  if (!main && navMount && footerMount) {
+    const contentNodes = [];
+    let node = navMount.nextSibling;
+    while (node && node !== footerMount) {
+      contentNodes.push(node);
+      node = node.nextSibling;
+    }
+
+    if (contentNodes.some((contentNode) => contentNode.nodeType === Node.ELEMENT_NODE)) {
+      main = document.createElement('main');
+      navMount.insertAdjacentElement('afterend', main);
+      contentNodes.forEach((contentNode) => main.appendChild(contentNode));
+    }
+  }
+
+  main = main || document.querySelector('section');
+  if (!main) return null;
+
+  if (!main.id) main.id = 'main-content';
+  if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+  return main;
+}
+
+function ensureSkipLink(navMount, mainTarget) {
+  if (!navMount || !mainTarget) return;
+
+  let skipLink = document.querySelector('.skip-link');
+  if (!skipLink) {
+    skipLink = document.createElement('a');
+    skipLink.className = 'skip-link';
+    skipLink.textContent = '본문 바로가기';
+    navMount.insertAdjacentElement('beforebegin', skipLink);
+  }
+
+  skipLink.href = '#' + mainTarget.id;
+  skipLink.addEventListener('click', () => {
+    // Let the native fragment jump happen, then move the accessibility focus
+    // without triggering a second scroll.
+    window.requestAnimationFrame(() => mainTarget.focus({ preventScroll: true }));
+  });
+}
+
 function injectLayout() {
   const navMount = document.getElementById('site-nav');
   if (navMount) navMount.innerHTML = renderNavbar();
 
   const footerMount = document.getElementById('site-footer');
   if (footerMount) footerMount.innerHTML = renderFooter();
+
+  const mainTarget = ensureMainContentTarget(navMount, footerMount);
+  ensureSkipLink(navMount, mainTarget);
 }
 
-// IMS Style: Navbar scroll effect
+function initNavbarDropdowns() {
+  const dropdowns = Array.from(document.querySelectorAll('.navbar .nav-dropdown'));
+  if (!dropdowns.length) return;
+
+  let suppressFocusOpen = false;
+
+  const getParts = (dropdown) => ({
+    button: dropdown.querySelector('.nav-dropdown-btn'),
+    menu: dropdown.querySelector('.nav-dropdown-menu'),
+    items: Array.from(dropdown.querySelectorAll('.dropdown-link'))
+  });
+
+  const closeDropdown = (dropdown) => {
+    const { button, menu } = getParts(dropdown);
+    if (!button || !menu) return;
+    dropdown.dataset.pinned = 'false';
+    dropdown.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    menu.hidden = true;
+  };
+
+  const closeOthers = (exception) => {
+    dropdowns.forEach((dropdown) => {
+      if (dropdown !== exception) closeDropdown(dropdown);
+    });
+  };
+
+  const openDropdown = (dropdown, { pinned = false } = {}) => {
+    const { button, menu } = getParts(dropdown);
+    if (!button || !menu) return;
+    closeOthers(dropdown);
+    dropdown.dataset.pinned = String(pinned);
+    dropdown.classList.add('open');
+    menu.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+  };
+
+  const closeAndFocusTrigger = (dropdown) => {
+    const { button } = getParts(dropdown);
+    suppressFocusOpen = true;
+    closeDropdown(dropdown);
+    if (button) button.focus();
+    Promise.resolve().then(() => { suppressFocusOpen = false; });
+  };
+
+  dropdowns.forEach((dropdown) => {
+    const { button, menu, items } = getParts(dropdown);
+    if (!button || !menu) return;
+
+    closeDropdown(dropdown);
+
+    dropdown.addEventListener('mouseenter', () => {
+      openDropdown(dropdown, { pinned: dropdown.dataset.pinned === 'true' });
+    });
+
+    dropdown.addEventListener('mouseleave', () => {
+      if (!dropdown.contains(document.activeElement)) closeDropdown(dropdown);
+    });
+
+    dropdown.addEventListener('focusin', () => {
+      if (!suppressFocusOpen) {
+        openDropdown(dropdown, { pinned: dropdown.dataset.pinned === 'true' });
+      }
+    });
+
+    dropdown.addEventListener('focusout', () => {
+      window.requestAnimationFrame(() => {
+        if (!dropdown.contains(document.activeElement) && !dropdown.matches(':hover')) {
+          closeDropdown(dropdown);
+        }
+      });
+    });
+
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const isPinnedOpen =
+        dropdown.dataset.pinned === 'true' &&
+        button.getAttribute('aria-expanded') === 'true';
+      if (isPinnedOpen) {
+        closeDropdown(dropdown);
+      } else {
+        openDropdown(dropdown, { pinned: true });
+      }
+    });
+
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        openDropdown(dropdown);
+        const item = event.key === 'ArrowDown' ? items[0] : items[items.length - 1];
+        if (item) item.focus();
+      } else if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        event.preventDefault();
+        closeAndFocusTrigger(dropdown);
+      }
+    });
+
+    menu.addEventListener('keydown', (event) => {
+      const currentIndex = items.indexOf(document.activeElement);
+      let nextIndex = null;
+
+      if (event.key === 'ArrowDown') {
+        nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
+      } else if (event.key === 'ArrowUp') {
+        nextIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = items.length - 1;
+      }
+
+      if (nextIndex !== null && items[nextIndex]) {
+        event.preventDefault();
+        items[nextIndex].focus();
+      }
+    });
+
+    menu.addEventListener('click', (event) => {
+      if (event.target.closest('a')) closeDropdown(dropdown);
+    });
+  });
+
+  document.addEventListener('pointerdown', (event) => {
+    dropdowns.forEach((dropdown) => {
+      if (!dropdown.contains(event.target)) closeDropdown(dropdown);
+    });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const openDropdownElement = dropdowns.find((dropdown) => {
+      const { button } = getParts(dropdown);
+      return button && button.getAttribute('aria-expanded') === 'true';
+    });
+    if (!openDropdownElement) return;
+
+    event.preventDefault();
+    closeAndFocusTrigger(openDropdownElement);
+  });
+}
+
+function initMobileMenuButtonA11y() {
+  const button = document.querySelector('.mobile-menu-btn');
+  if (!button) return;
+
+  const syncLabel = () => {
+    const expanded =
+      button.getAttribute('aria-expanded') === 'true' ||
+      button.classList.contains('active');
+    const expandedValue = String(expanded);
+    const label = expanded ? '모바일 메뉴 닫기' : '모바일 메뉴 열기';
+    if (button.getAttribute('aria-expanded') !== expandedValue) {
+      button.setAttribute('aria-expanded', expandedValue);
+    }
+    if (button.getAttribute('aria-label') !== label) {
+      button.setAttribute('aria-label', label);
+    }
+  };
+
+  const observer = new MutationObserver(syncLabel);
+  observer.observe(button, {
+    attributes: true,
+    attributeFilter: ['aria-expanded', 'class']
+  });
+  syncLabel();
+}
+
 // 배경(.scrolled)과 숨김(.nav-hidden)을 클래스로만 제어한다.
-// 인라인 스타일을 쓰면 테마 색상(style.css)과 어긋나므로 금지.
+// rAF throttling + direction hysteresis prevents noisy scroll toggles.
 function initNavbarScroll() {
   const navbar = document.querySelector('.navbar');
   if (!navbar) return;
 
-  let lastY = window.scrollY;
+  const mobileMenuButton = document.querySelector('.mobile-menu-btn');
+  const reducedMotion = window.matchMedia
+    ? window.matchMedia('(prefers-reduced-motion: reduce)')
+    : null;
+  const hysteresis = 10;
+  let lastY = Math.max(window.scrollY, 0);
+  let direction = 0;
+  let directionOriginY = lastY;
+  let frame = 0;
 
-  const handleScroll = () => {
-    const y = window.scrollY;
+  const isMobileMenuOpen = () =>
+    (mobileMenuButton && mobileMenuButton.getAttribute('aria-expanded') === 'true') ||
+    Boolean(document.querySelector('.mobile-menu.active'));
+
+  const revealAndReset = () => {
+    const y = Math.max(window.scrollY, 0);
+    navbar.classList.remove('nav-hidden');
+    lastY = y;
+    direction = 0;
+    directionOriginY = y;
+  };
+
+  const updateNavbar = () => {
+    frame = 0;
+    const y = Math.max(window.scrollY, 0);
     navbar.classList.toggle('scrolled', y > 50);
-    // 아래로 스크롤하면 숨기고, 위로 스크롤하면 다시 표시
-    navbar.classList.toggle('nav-hidden', y > lastY && y > 100);
+
+    const interactionLocked =
+      Boolean(reducedMotion && reducedMotion.matches) ||
+      navbar.matches(':focus-within') ||
+      isMobileMenuOpen();
+
+    if (interactionLocked || y <= 120) {
+      revealAndReset();
+      return;
+    }
+
+    const delta = y - lastY;
+    const nextDirection = delta > 0 ? 1 : delta < 0 ? -1 : direction;
+    if (nextDirection !== direction) {
+      direction = nextDirection;
+      directionOriginY = lastY;
+    }
+
+    const directionDistance = Math.abs(y - directionOriginY);
+    if (directionDistance >= hysteresis) {
+      navbar.classList.toggle('nav-hidden', direction > 0);
+    }
+
     lastY = y;
   };
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  handleScroll(); // Initial check
+  const requestNavbarUpdate = () => {
+    if (!frame) frame = window.requestAnimationFrame(updateNavbar);
+  };
+
+  window.addEventListener('scroll', requestNavbarUpdate, { passive: true });
+  navbar.addEventListener('focusin', revealAndReset);
+
+  if (mobileMenuButton) {
+    const menuStateObserver = new MutationObserver(() => {
+      if (isMobileMenuOpen()) revealAndReset();
+      requestNavbarUpdate();
+    });
+    menuStateObserver.observe(mobileMenuButton, {
+      attributes: true,
+      attributeFilter: ['aria-expanded', 'class']
+    });
+  }
+
+  if (reducedMotion) {
+    const handleMotionPreference = () => {
+      if (reducedMotion.matches) revealAndReset();
+      requestNavbarUpdate();
+    };
+    if (typeof reducedMotion.addEventListener === 'function') {
+      reducedMotion.addEventListener('change', handleMotionPreference);
+    } else if (typeof reducedMotion.addListener === 'function') {
+      reducedMotion.addListener(handleMotionPreference);
+    }
+  }
+
+  updateNavbar();
 }
 
 injectLayout();
+initMobileMenuButtonA11y();
 initNavbarScroll();
+
+// script.js builds the mobile clone on DOMContentLoaded. Initialize only the
+// desktop dropdowns in the next task so hidden state is not copied to mobile.
+const initDropdownsAfterMobileClone = () => window.setTimeout(initNavbarDropdowns, 0);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDropdownsAfterMobileClone, { once: true });
+} else {
+  initDropdownsAfterMobileClone();
+}
 
 // ============================================
 // Supabase (인증) 공통 설정

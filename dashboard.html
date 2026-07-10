@@ -22,24 +22,103 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Hero update-time line: lives on the DARK hero, so keep it light.
-       Toned down from 45px cyan neon to the shared heading scale + teal accent. */
-    .update-time-neo {
-      margin-top: 20px;
-      font-size: var(--title-banner);
+    .dashboard-legacy-update { display: none; }
+    .dashboard-intro { max-width: 720px; }
+
+    .dashboard-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 24px;
+      padding: 12px 14px;
+      border: 1px solid var(--border-light);
+      border-bottom: 0;
+      border-radius: 12px 12px 0 0;
+      background: var(--bg-card);
+    }
+
+    .dashboard-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .dashboard-status-dot {
+      width: 9px;
+      height: 9px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--text-muted);
+      box-shadow: 0 0 0 4px rgba(156, 163, 175, 0.15);
+    }
+    .dashboard-status[data-state="loading"] .dashboard-status-dot {
+      background: var(--accent-secondary);
+      box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.14);
+    }
+    .dashboard-status[data-state="success"] .dashboard-status-dot {
+      background: var(--accent-ink);
+      box-shadow: 0 0 0 4px rgba(7, 122, 100, 0.14);
+    }
+    .dashboard-status[data-state="error"] .dashboard-status-dot {
+      background: var(--btn-danger);
+      box-shadow: 0 0 0 4px rgba(179, 38, 30, 0.12);
+    }
+
+    .dashboard-status-label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+    .dashboard-update-time {
+      margin: 2px 0 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .dashboard-refresh {
+      min-height: 44px;
+      flex: 0 0 auto;
+      padding-block: 9px;
+    }
+
+    .dashboard-table-card {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      border-radius: 0 0 12px 12px;
+    }
+    .dashboard-table-card:hover {
+      transform: none;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-sm);
+    }
+    .dashboard-table th,
+    .dashboard-table td { vertical-align: middle; }
+    .dashboard-table th:first-child,
+    .dashboard-table td:first-child {
+      width: 22%;
+      color: var(--text-dark);
+      font-weight: 600;
+    }
+    .balance-heading,
+    .balance-cell {
+      text-align: right !important;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .balance-cell {
+      color: var(--text-dark) !important;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--accent-secondary);
-      opacity: 0;
-      animation: dashFadeIn 1.4s ease-out forwards;
     }
 
-    @keyframes dashFadeIn {
-      0% { opacity: 0; transform: translateY(12px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 주소 흐림 처리 (크롤링/봇 방지) */
+    /* 주소는 기본 흐림 처리하고, 마우스를 올릴 때만 확인합니다. */
     .address-cell {
       filter: blur(5px);
       transition: filter 0.3s ease;
@@ -51,11 +130,48 @@
       user-select: text;
     }
     .address-hint {
-      font-size: 13px;
-      color: var(--text-secondary);
       margin-top: 12px;
+      color: var(--text-secondary);
+      font-size: 13px;
     }
 
+    .dashboard-state-cell {
+      padding: 32px 20px !important;
+      color: var(--text-secondary) !important;
+      line-height: 1.6;
+      text-align: center !important;
+    }
+    .dashboard-state-cell strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--text-dark);
+      font-size: 14px;
+    }
+    .dashboard-state-detail {
+      display: block;
+      font-size: 13px;
+    }
+    .dashboard-visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .dashboard-refresh { width: 100%; }
+      .dashboard-table th:first-child,
+      .dashboard-table td:first-child { width: auto; }
+    }
   </style>
 </head>
 
@@ -63,40 +179,48 @@
   <div id="site-nav"></div>
 
 <section class="hero hero--subpage">
-  <div class="hero-bg"></div>
+  <div class="hero-bg" aria-hidden="true"></div>
   <div class="container hero-inner">
     <p class="eyebrow">네트워크 대시보드</p>
-    <h1>MST 네트워크 토큰 잔액 대시보드</h1>
+    <h1>MST 네트워크 모니터링</h1>
     <p class="sub">MST 네트워크의 주요 지갑 잔액을 실시간 모니터링합니다.</p>
-    <div id="updateTimeBig" class="update-time-neo"></div>
+    <span id="updateTimeBig" class="dashboard-legacy-update" aria-hidden="true"></span>
   </div>
 </section>
 
   <main>
     <section class="section">
       <div class="container">
-        <h2 class="section-title">MST 네이티브 토큰 잔액 대시보드</h2>
-        <p class="lead">아래 표는 MST 네트워크의 주요 지갑 잔액을 실시간으로 표시합니다.</p>
+        <div class="dashboard-intro">
+          <h2 class="section-title">주요 지갑 잔액</h2>
+          <p class="lead">운영 지갑별 MST 잔액과 API 동기화 상태를 확인하세요.</p>
+        </div>
 
-        <div id="updateTime" style="margin-top:10px;color:var(--text-secondary); display:none;"></div>
+        <div class="dashboard-toolbar cta-row" aria-label="잔액 표 도구">
+          <div id="dashboardStatus" class="dashboard-status" data-state="loading">
+            <span class="dashboard-status-dot" aria-hidden="true"></span>
+            <div>
+              <span class="dashboard-status-label">데이터 상태</span>
+              <p id="updateTime" class="dashboard-update-time" role="status" aria-live="polite" aria-atomic="true">잔액 데이터를 불러오는 중…</p>
+            </div>
+          </div>
+          <button id="refreshBalancesButton" type="button" class="btn primary dashboard-refresh" aria-controls="walletTable" onclick="loadBalances()">새로고침</button>
+        </div>
 
-        <div class="card" style="margin-top:24px;padding:0;overflow:hidden;">
-          <table class="table">
+        <div class="card dashboard-table-card">
+          <table class="table dashboard-table">
+            <caption class="dashboard-visually-hidden">MST 네트워크 주요 운영 지갑의 구분, 주소, 잔액</caption>
             <thead>
               <tr>
-                <th>구분</th>
-                <th>주소</th>
-                <th>잔액 (MST)</th>
+                <th scope="col">구분</th>
+                <th scope="col">주소</th>
+                <th scope="col" class="balance-heading">잔액 (MST)</th>
               </tr>
             </thead>
-            <tbody id="walletTable"></tbody>
+            <tbody id="walletTable" aria-busy="true"></tbody>
           </table>
         </div>
         <p class="address-hint">* 보안을 위해 지갑 주소가 흐림 처리되어 있습니다. 마우스를 올리면 확인할 수 있습니다.</p>
-
-        <div class="cta-row">
-          <button type="button" class="btn primary" onclick="loadBalances()">새로고침</button>
-        </div>
       </div>
     </section>
   </main>
@@ -116,14 +240,25 @@
 
       const tbody = document.getElementById("walletTable");
       const btn = document.querySelector(".cta-row .btn");
+      const dashboardStatus = document.getElementById("dashboardStatus");
+      const updateTime = document.getElementById("updateTime");
+      const setStatus = (message, state) => {
+        dashboardStatus.dataset.state = state;
+        updateTime.textContent = message;
+      };
       // 표 전체 폭(3칸)에 걸친 상태 메시지 표시
       const stateRow = (html) => {
         tbody.innerHTML =
-          `<tr><td colspan="3" style="text-align:center;padding:28px;color:var(--text-secondary);line-height:1.6">${html}</td></tr>`;
+          `<tr><td colspan="3" class="dashboard-state-cell">${html}</td></tr>`;
       };
 
-      stateRow("불러오는 중…");
-      if (btn) btn.disabled = true;
+      stateRow("<strong>잔액 데이터를 불러오는 중입니다</strong>");
+      setStatus("잔액 데이터를 불러오는 중…", "loading");
+      tbody.setAttribute("aria-busy", "true");
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "불러오는 중…";
+      }
 
       try {
         const res = await fetch(`${MST_CONFIG.api}/api/balances`, { cache: "no-store" });
@@ -133,18 +268,23 @@
 
         if (rows.length === 0) {
           stateRow("표시할 잔액 데이터가 없습니다.");
+          setStatus("연결됨 · 표시할 데이터 없음", "success");
         } else {
           tbody.innerHTML = "";
-          rows.forEach(row => {
+          rows.forEach((row) => {
             // API 응답 값은 textContent로만 주입 (서버 침해 시 XSS 전파 차단)
             const tr = document.createElement("tr");
             const tdLabel = document.createElement("td");
-            tdLabel.textContent = row.label ?? "-";
+            const label = String(row.label ?? "-");
+            const address = String(row.address ?? "-");
+            tdLabel.textContent = label;
+
             const tdAddr = document.createElement("td");
             tdAddr.className = "address-cell";
             tdAddr.title = "마우스를 올리면 주소가 표시됩니다";
-            tdAddr.textContent = row.address ?? "-";
+            tdAddr.textContent = address;
             const tdBal = document.createElement("td");
+            tdBal.className = "balance-cell";
             tdBal.textContent = Number(row.balance ?? 0).toLocaleString();
             tr.append(tdLabel, tdAddr, tdBal);
             tbody.appendChild(tr);
@@ -153,23 +293,29 @@
 
         // 업데이트 시각은 데이터 로드에 성공했을 때만 갱신
         if (json && json.updated) {
+          const formattedUpdate = new Date(json.updated).toLocaleString();
           const updateElem = document.getElementById("updateTimeBig");
-          updateElem.innerText = `업데이트 시각: ${new Date(json.updated).toLocaleString()}`;
-          updateElem.style.animation = "none";   // 재실행 위해 초기화
-          void updateElem.offsetWidth;            // 강제 리플로우
-          updateElem.style.animation = "";        // 애니메이션 재적용
+          updateElem.innerText = `업데이트 시각: ${formattedUpdate}`;
+          setStatus(`정상 · 마지막 업데이트 ${formattedUpdate}`, "success");
+        } else if (rows.length > 0) {
+          setStatus("조회 완료 · 서버 업데이트 시각 없음", "success");
         }
       } catch (err) {
         // 네트워크/서버/JSON 오류 → 빈 표 대신 명확한 안내 표시
         console.error("[dashboard] 잔액 로드 실패:", err);
         stateRow(
-          "잔액 데이터를 불러오지 못했습니다.<br>" +
-          `<span style="font-size:13px">API 서버(${MST_CONFIG.api.replace(/^https?:\/\//, "")})에 연결할 수 없습니다. ` +
-          "잠시 후 <b>새로고침</b>을 눌러 다시 시도하세요.</span>"
+          "<strong>잔액 데이터를 불러오지 못했습니다.</strong>" +
+          `<span class="dashboard-state-detail">API 서버(${MST_CONFIG.api.replace(/^https?:\/\//, "")})에 연결할 수 없습니다. ` +
+          "잠시 후 새로고침을 눌러 다시 시도하세요.</span>"
         );
+        setStatus("연결 오류 · 잔액 데이터를 불러오지 못했습니다", "error");
       } finally {
         _loadingBalances = false;
-        if (btn) btn.disabled = false;
+        tbody.setAttribute("aria-busy", "false");
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "새로고침";
+        }
       }
     }
 

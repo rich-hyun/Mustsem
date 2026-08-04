@@ -45,7 +45,7 @@
   --ring-color: rgba(0, 208, 156, 0.55);
 
   /* Fluid Typography */
-  --font-primary: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-primary: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
   /* 타입 램프: floor·ceiling·slope·base를 레벨 순서대로 정렬해 모든 뷰포트에서
      h1(hero/subpage) > h2(section) > h3(banner)이 교차 없이 단조 유지되도록 함 */
   --title-hero: clamp(2rem, 0.95rem + 3.5vw, 3.625rem);       /* h1(홈)    32 → 58px */

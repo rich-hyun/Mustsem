@@ -77,7 +77,8 @@
       background: var(--accent-gradient);
       border-radius: 14px;
       margin-bottom: 20px;
-      box-shadow: 0 8px 24px rgba(0, 208, 156, 0.25);
+      /* 액센트 글로우 대신 배경 색조를 띤 중립 그림자 */
+      box-shadow: 0 8px 20px rgba(15, 30, 56, 0.10);
     }
 
     .ipfs-feature-icon svg {
@@ -107,18 +108,18 @@
 
     .why-item {
       display: flex;
-      gap: 16px;
+      gap: 12px;
       align-items: flex-start;
     }
 
+    /* 카드 목록 마커(.card li::before)와 같은 크기·색으로 맞춘다. 네온 글로우는 제거. */
     .why-dot {
-      width: 10px;
-      height: 10px;
-      min-width: 10px;
+      width: 5px;
+      height: 5px;
+      min-width: 5px;
       border-radius: 50%;
-      background: var(--accent-gradient);
-      margin-top: 7px;
-      box-shadow: 0 0 8px rgba(0, 208, 156, 0.5);
+      background: var(--accent-primary);
+      margin-top: 9px;
     }
 
     .why-item h3 {
@@ -276,7 +277,6 @@
   <section class="ipfs-section">
     <div class="container">
       <div class="ipfs-section-inner">
-        <span class="section-badge">서비스 개요</span>
         <h2 class="section-title">AI 모델의 안전한 보관과 소유권 증명</h2>
         <p class="lead">
           접근제어 및 암호화 적용으로 허가된 사용자만 모델 열람 및 다운로드가 가능하며,
@@ -290,7 +290,6 @@
   <section class="ipfs-section">
     <div class="container">
       <div class="ipfs-section-inner wide">
-        <span class="section-badge">핵심 기능</span>
         <h2 class="section-title">3가지 핵심 보안 기능</h2>
 
         <div class="feature-grid">
@@ -351,7 +350,6 @@
   <section class="ipfs-section">
     <div class="container">
       <div class="ipfs-section-inner">
-        <span class="section-badge">주요 특징</span>
         <h2 class="section-title">왜 IPFS 보안 등록이 필요한가</h2>
 
         <div class="why-grid">
@@ -397,7 +395,6 @@
   <section class="ipfs-section">
     <div class="container">
       <div class="ipfs-section-inner wide">
-        <span class="section-badge">API 사용 예시</span>
         <h2 class="section-title">간편한 REST API 호출</h2>
 
         <div class="api-blocks">
@@ -440,7 +437,6 @@
   <section class="ipfs-section">
     <div class="container">
       <div class="ipfs-section-inner wide">
-        <span class="section-badge">머스트셈 서비스 체계</span>
         <h2 class="section-title">MustSEM 플랫폼 내 위치</h2>
 
         <div class="category-grid">
@@ -478,7 +474,7 @@
       <p>IPFS 분산 저장과 블록체인 소유권 증명으로 AI 자산을 보호합니다.</p>
       <div class="cta-row">
         <a href="api-guide.html" class="btn primary">API 문서 보기</a>
-        <a href="network.html#apply" class="btn">도입 문의</a>
+        <a href="network.html#apply" class="btn">도입 상담 요청</a>
       </div>
     </div>
   </section>

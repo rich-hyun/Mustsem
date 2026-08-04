@@ -256,7 +256,6 @@ function initScrollAnimations() {
     '.solution-phone',
     '.cta-card',
     '.faq-item',
-    '.portfolio-card',
     '.service-card-item',
     '.chart-card',
     '.banner-card'

@@ -915,19 +915,22 @@ section[id] {
   text-align: center;
 }
 
+/* 아이브로우는 사이트 전체에서 한 가지 표현만 쓴다.
+   기존의 알약 배지(틴트 배경 + 테두리)는 .section-kicker / .eyebrow 와 따로 놀아
+   같은 역할의 라벨이 페이지마다 다르게 보였다. 배지 표현을 폐지하고 커커에 맞춘다. */
 .section-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 16px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border-light);
-  background: rgba(0, 208, 156, 0.1);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--accent-ink);
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
   text-transform: uppercase;
 }
 
@@ -1031,119 +1034,26 @@ section[id] {
 }
 
 /* Portfolio Card - Hidden in IMS Style */
-.portfolio-card {
-  display: none;
-}
 
-.features-visual {
-  display: none;
-}
 
-.portfolio-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-light);
-}
 
-.portfolio-header span {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
 
-.portfolio-change {
-  color: var(--accent-primary) !important;
-  font-weight: 600;
-}
 
-.portfolio-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
 
-.portfolio-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px;
-  background: var(--bg-tertiary);
-  border-radius: 14px;
-  transition: var(--transition);
-}
 
-.portfolio-item:hover {
-  background: rgba(0, 208, 156, 0.05);
-}
 
-.portfolio-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 14px;
-}
 
-.portfolio-icon.btc {
-  background: linear-gradient(135deg, #00D09C 0%, #00B4D8 100%);
-  color: white;
-}
 
-.portfolio-icon.eth {
-  background: rgba(98, 126, 234, 0.2);
-  color: #627EEA;
-}
 
-.portfolio-icon.ltc {
-  background: rgba(255, 107, 107, 0.2);
-  color: #FF6B6B;
-}
 
-.portfolio-icon.pol {
-  background: rgba(0, 208, 156, 0.2);
-  color: var(--accent-primary);
-}
 
-.portfolio-icon svg {
-  width: 20px;
-  height: 20px;
-}
 
-.portfolio-info {
-  flex: 1;
-}
 
-.portfolio-info strong {
-  display: block;
-  font-size: 14px;
-}
 
-.portfolio-info span {
-  font-size: 12px;
-  color: var(--text-muted);
-}
 
-.portfolio-value {
-  text-align: right;
-}
 
-.portfolio-value strong {
-  display: block;
-  font-size: 14px;
-}
 
-.portfolio-value span {
-  font-size: 12px;
-}
 
-.portfolio-value .positive {
-  color: var(--accent-primary);
-}
 
 /* ============================================
    Stats Section - IMS Style (Dark Background with White Cards)
@@ -2016,11 +1926,13 @@ body.page .hero h1 {
   z-index: 10;
 }
 
+/* 어두운 서브페이지 헤더용 아이브로우. 색만 다르고 나머지 수치는 .section-kicker와 동일. */
 .eyebrow {
   margin: 0 0 12px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
   text-transform: uppercase;
   color: var(--accent-secondary);
 }
@@ -2164,14 +2076,40 @@ body.page .hero h1 {
   margin-bottom: 0;
 }
 
+/* 카드 안 목록: 브라우저 기본 disc 대신 시스템 마커를 쓴다.
+   액센트는 마커 한 점으로만 등장시키고 본문은 중립색으로 둔다. */
 .card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
   color: var(--text-secondary);
-  padding-left: 20px;
 }
 
 .card li {
-  margin-bottom: 8px;
-  padding-left: 4px;
+  position: relative;
+  margin-bottom: 10px;
+  padding-left: 17px;
+  line-height: 1.7;
+}
+
+.card li:last-child {
+  margin-bottom: 0;
+}
+
+.card li::before {
+  content: '';
+  position: absolute;
+  left: 1px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+}
+
+/* 중첩 목록은 마커를 한 단계 낮춘다. */
+.card li li::before {
+  background: var(--border-light);
 }
 
 .card strong {
@@ -2258,9 +2196,12 @@ body.page .hero h1 {
   transition: var(--transition);
 }
 
+/* --text-muted(#9ca3af)는 흰 입력창 위에서 2.54:1로 WCAG AA에 미달한다.
+   --text-secondary(#6b7280)는 4.83:1로 통과. */
 .field input::placeholder,
 .field textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  opacity: 1; /* Firefox 기본 감쇠 해제 */
 }
 
 .field textarea {
@@ -2435,7 +2376,6 @@ pre code {
 .crypto-card,
 .stat-card,
 .cta-card,
-.portfolio-card,
 .chart-card,
 .service-card-item,
 .solution-phone,
@@ -2463,7 +2403,6 @@ pre code {
 .crypto-card,
 .stat-card,
 .cta-card,
-.portfolio-item,
 .faq-item {
   position: relative;
   background: var(--bg-card);
@@ -2505,7 +2444,6 @@ pre code {
 
 /* --- LIGHT card surface (formerly dark glass) --- */
 .floating-card,
-.portfolio-card,
 .chart-card,
 .service-card-item,
 .solution-phone {
@@ -2520,7 +2458,6 @@ pre code {
   border-color: var(--border-light);
 }
 
-.portfolio-card:hover,
 .chart-card:hover,
 .service-card-item:hover {
   background: var(--bg-card-hover);
@@ -2614,30 +2551,8 @@ pre code {
 }
 
 /* --- Portfolio Item Shine Effect --- */
-.portfolio-item {
-  position: relative;
-  overflow: hidden;
-}
 
-.portfolio-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.05),
-    transparent
-  );
-  transition: left 0.6s ease;
-}
 
-.portfolio-item:hover::before {
-  left: 100%;
-}
 
 /* --- CTA Card Icon Pulse --- */
 .cta-icon {
@@ -2674,14 +2589,12 @@ pre code {
 
 /* --- Smooth Icon Transitions --- */
 .crypto-icon,
-.portfolio-icon,
 .service-card-icon,
 .card-icon {
   transition: var(--transition), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.crypto-card:hover .crypto-icon,
-.portfolio-item:hover .portfolio-icon {
+.crypto-card:hover .crypto-icon {
   transform: scale(1.1) rotate(-3deg);
 }
 
@@ -2782,9 +2695,6 @@ pre code {
     gap: 48px;
   }
 
-  .features-visual {
-    order: -1;
-  }
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2984,6 +2894,33 @@ body {
   background: var(--surface-page);
   color: var(--text-dark);
   text-rendering: optimizeLegibility;
+  /* 한국어 조판: 어절(단어) 중간에서 줄이 끊기지 않게 한다.
+     이게 없으면 "인프라 / 를", "설계 / 부터", "대 / 해"처럼 잘린다.
+     keep-all만 쓰면 긴 영문·해시·URL이 컨테이너를 넘치므로 break-word를 짝으로 둔다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 본문은 마지막 줄에 한 어절만 남는 고아 줄을 줄인다(미지원 브라우저는 무시). */
+p,
+li,
+dd,
+figcaption {
+  text-wrap: pretty;
+}
+
+/* 코드·주소·엔드포인트는 어절 규칙 대신 어디서든 끊어 넘침을 막는다. */
+pre,
+code,
+kbd,
+samp,
+.code-block,
+.mono,
+[class*="endpoint"],
+[class*="address"],
+[class*="hash"] {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 body.is-scroll-locked,
@@ -3397,6 +3334,64 @@ body.page .section {
   min-height: 112px;
 }
 
+/* 네이티브 select 크롬 대신 시스템 컨트롤로 통일. 화살표는 CSS 배경으로 그린다. */
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 17px 17px;
+  cursor: pointer;
+}
+
+/* 파일 선택도 브라우저 기본 위젯 대신 버튼 시스템에 맞춘다. */
+.field input[type='file'] {
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.field input[type='file']::file-selector-button {
+  margin-right: 12px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-control);
+  background: #f4f7fb;
+  color: var(--text-dark);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.field input[type='file']::file-selector-button:hover {
+  border-color: var(--accent-primary);
+  background: rgba(0, 208, 156, 0.09);
+}
+
+/* 결과 출력 영역의 빈 상태. JS가 값을 채우면 :empty가 풀려 자동으로 사라진다. */
+[data-empty]:empty::before {
+  content: attr(data-empty);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: normal;
+}
+
+pre[data-empty]:empty::before,
+div[data-empty]:empty::before {
+  display: block;
+}
+
+/* 이어지는 .section은 같은 배경 위에 놓여 하나의 흐름을 이룬다.
+   80px(아래) + 80px(위) = 160px 간격이 단계 사이를 끊어 리듬을 죽이므로
+   섹션 간 간격을 80px 한 값으로 통일한다.
+   개별 페이지가 인라인 padding으로 이미 조정한 곳은 인라인이 우선하므로 영향 없음. */
+body.page .section + .section {
+  padding-top: 0;
+}
+
 .btn,
 .btn-primary,
 .btn-secondary,
@@ -3471,7 +3466,8 @@ body.page .section {
 }
 
 .home .hero-content {
-  max-width: 760px;
+  /* h1 두 번째 줄("기업 전용 Web3 인프라를 시작하세요.")이 한 줄에 들어갈 폭. */
+  max-width: 940px;
 }
 
 .hero-eyebrow,
@@ -3492,28 +3488,18 @@ body.page .section {
   color: rgba(255, 255, 255, 0.72);
 }
 
-.hero-status-dot {
-  position: relative;
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: var(--accent-primary);
-  box-shadow: 0 0 0 5px rgba(0, 208, 156, 0.12);
-}
-
 .home .hero h1 {
   margin-bottom: 24px;
-  font-size: clamp(2.65rem, 4.3vw, 3.75rem);
+  font-size: clamp(2.65rem, 4vw, 3.5rem);
   font-weight: 500;
   line-height: 1.16;
   letter-spacing: -0.038em;
-  text-wrap: balance;
+  /* text-wrap: balance 제거 — 저자가 넣은 <br> 기준 2줄 구성을 재분배해 3줄로 만들었다. */
 }
 
+/* display:inline-block 금지 — 인라인 블록 경계에서 줄이 끊겨
+   "…Web3 인프라 / 를 시작하세요."처럼 조사가 떨어져 나갔다. */
 .home .hero h1 strong {
-  display: inline-block;
   color: #ffffff;
   font-weight: 750;
 }
@@ -3521,7 +3507,7 @@ body.page .section {
 .home .hero-desc {
   max-width: 650px;
   margin-bottom: 32px;
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(255, 255, 255, 0.84);
   font-size: 17px;
   line-height: 1.75;
 }
@@ -3559,40 +3545,6 @@ body.page .section {
 .home .hero-btns .btn-secondary:hover {
   border-color: rgba(255, 255, 255, 0.42);
   background: rgba(255, 255, 255, 0.11);
-}
-
-.hero-proof {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  width: fit-content;
-  list-style: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.hero-proof li {
-  display: grid;
-  gap: 1px;
-  min-width: 146px;
-  padding: 15px 24px 15px 0;
-}
-
-.hero-proof li + li {
-  padding-left: 24px;
-  border-left: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.hero-proof strong {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 750;
-  font-variant-numeric: tabular-nums;
-}
-
-.hero-proof span {
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 12px;
 }
 
 /* Editorial intro */
@@ -3644,7 +3596,10 @@ body.page .section {
   display: none;
 }
 
-/* Capability split with code-native status panel */
+/* Capability grid — 기존의 "네트워크 현황" 패널은 아래 stats 밴드와 같은 수치를
+   반복하는 div 기반 가짜 대시보드였고 정적 값에 "실시간" 배지까지 달려 있어 제거했다.
+   대신 4개 특징을 2열 규칙 그리드로 펼쳐 intro 섹션(좌 텍스트/우 비주얼)과
+   레이아웃 계열이 겹치지 않게 한다. */
 .home .features {
   padding: var(--section-padding) 0;
   background: var(--surface-page);
@@ -3652,33 +3607,31 @@ body.page .section {
 
 .home .features-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-  gap: 64px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   max-width: none;
 }
 
-.home .features-content .section-badge {
-  display: inline-flex;
-  margin-bottom: 18px;
-}
-
 .home .features-content h2 {
-  margin-bottom: 30px;
+  margin-bottom: 44px;
   font-size: var(--title-section);
   line-height: 1.23;
 }
 
 .home .feature-list {
-  gap: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 72px;
+  row-gap: 0;
 }
 
 .home .feature-item {
-  padding: 18px 0;
+  padding: 24px 0;
   border-top: 1px solid var(--border-default);
 }
 
-.home .feature-item:last-child {
+/* 마지막 행(2열이므로 뒤에서 2개)에만 마감선 */
+.home .feature-item:nth-last-child(-n + 2) {
   border-bottom: 1px solid var(--border-default);
 }
 
@@ -3699,75 +3652,16 @@ body.page .section {
   line-height: 1.65;
 }
 
-.home .features-visual,
-.home .portfolio-card {
-  display: block;
-}
 
-.home .portfolio-card {
-  position: relative;
-  overflow: hidden;
-  padding: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: var(--radius-feature);
-  background:
-    radial-gradient(620px 300px at 100% 0%, rgba(0, 180, 216, 0.16), transparent 58%),
-    #0a172a;
-  color: #ffffff;
-  box-shadow: 0 24px 60px rgba(15, 30, 56, 0.18);
-}
 
-.home .portfolio-header {
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-color: rgba(255, 255, 255, 0.1);
-}
 
-.home .portfolio-header span:first-child {
-  color: #ffffff;
-  font-weight: 650;
-}
 
-.home .portfolio-change {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #83f3d6 !important;
-}
 
-.home .portfolio-change::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-}
 
-.home .portfolio-list {
-  gap: 10px;
-}
 
-.home .portfolio-item {
-  min-height: 72px;
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.055);
-}
 
-.home .portfolio-info strong,
-.home .portfolio-value strong {
-  color: #ffffff;
-}
 
-.home .portfolio-info span,
-.home .portfolio-value span {
-  color: rgba(255, 255, 255, 0.52);
-}
 
-.home .portfolio-value .positive {
-  color: #83f3d6;
-}
 
 /* Quiet proof band */
 .home .stats {
@@ -4240,8 +4134,8 @@ body.page .section {
     margin: 0 auto;
   }
 
-  .home .features-visual {
-    order: 0;
+  .home .feature-list {
+    column-gap: 40px;
   }
 
   .home .service-icons {
@@ -4335,29 +4229,26 @@ body.page .section {
     margin-bottom: 36px;
   }
 
-  .hero-proof {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .hero-proof li,
-  .hero-proof li + li {
-    min-width: 0;
-    padding: 13px 12px;
-  }
-
-  .hero-proof li:first-child {
-    padding-left: 0;
-  }
-
-  .hero-proof strong {
-    font-size: 16px;
-  }
-
   .home .intro-layout,
   .home .features-layout {
     gap: 32px;
+  }
+
+  /* 2열 특징 그리드는 모바일에서 단일 열로 */
+  .home .feature-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home .feature-item:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .home .feature-item:last-child {
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .home .features-content h2 {
+    margin-bottom: 28px;
   }
 
   .home .intro-content h2 {
@@ -4392,13 +4283,7 @@ body.page .section {
     font-weight: 650;
   }
 
-  .home .portfolio-card {
-    padding: 18px;
-  }
 
-  .home .portfolio-item {
-    min-height: 68px;
-  }
 
   .home .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4531,20 +4416,8 @@ body.page .section {
     gap: 13px;
   }
 
-  .home .portfolio-item {
-    gap: 10px;
-    padding: 12px;
-  }
 
-  .home .portfolio-info span,
-  .home .portfolio-value span {
-    font-size: 11px;
-  }
 
-  .home .portfolio-value strong {
-    max-width: 90px;
-    overflow-wrap: anywhere;
-  }
 
   .home .banner-card .btn-banner {
     width: 100%;
@@ -4668,7 +4541,8 @@ body.page .section {
 
 /* Home-only: restore the original full-viewport moving-video hero. */
 .home .hero--full-video {
-  min-height: 100vh;
+  min-height: 100vh; /* svh 미지원 브라우저 폴백 */
+  min-height: 100svh; /* 모바일 주소창 때문에 100vh가 뷰포트를 넘기는 문제 방지 */
   height: 100svh;
   padding: 80px 0 60px;
 }
@@ -4677,8 +4551,19 @@ body.page .section {
   background: linear-gradient(135deg, rgba(10, 22, 40, 0.95) 0%, rgba(13, 27, 42, 0.9) 100%);
 }
 
+/* 좌측 카피 가독성용 스크림. 우측은 밝게 남겨 영상이 그대로 살아 있게 한다.
+   (기존에는 이 스크림을 꺼둬서 밝은 프레임에서 본문 대비가 떨어졌다.) */
 .home .hero--full-video .hero-bg::before {
-  display: none;
+  display: block;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 15, 28, 0.84) 0%,
+      rgba(5, 15, 28, 0.58) 44%,
+      rgba(5, 15, 28, 0.16) 76%,
+      transparent 100%
+    ),
+    linear-gradient(180deg, rgba(5, 15, 28, 0.42) 0%, transparent 24%, transparent 64%, rgba(5, 15, 28, 0.55) 100%);
 }
 
 .home .hero--full-video .hero-video.loaded {
@@ -4702,13 +4587,7 @@ body.page .section {
   transition: transform 260ms var(--ease-standard), color 200ms var(--ease-standard);
 }
 
-.home .portfolio-item::before {
-  display: none;
-}
 
-.home .portfolio-item:hover .portfolio-icon {
-  transform: none;
-}
 
 .home .platform-banner {
   display: none;

@@ -104,7 +104,7 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: #c1c1c1;
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   border: 2px solid var(--bg-gray);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -298,7 +298,7 @@ section[id] {
   padding: 10px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
   opacity: 0;
   visibility: hidden;
@@ -330,7 +330,7 @@ section[id] {
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px 10px 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   font-size: 14px;
   font-weight: 500;
   color: #555;
@@ -363,7 +363,7 @@ section[id] {
   font-size: 14px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.85);
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   transition: var(--transition);
 }
 
@@ -380,7 +380,7 @@ section[id] {
      hover(#00b386)에서도 어두운 글자 유지 — 흰 글자 재도입 금지. */
   color: var(--on-accent);
   background: var(--accent-primary);
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   box-shadow: none;
 }
 
@@ -410,7 +410,7 @@ section[id] {
   width: 24px;
   height: 2px;
   background: var(--text-primary);
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   transition: var(--transition);
 }
 
@@ -638,7 +638,7 @@ section[id] {
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   box-shadow: none;
   transition: var(--transition);
   position: relative;
@@ -669,7 +669,7 @@ section[id] {
   color: var(--text-dark);
   font-size: 14px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   transition: var(--transition);
 }
 
@@ -699,7 +699,7 @@ section[id] {
 .spline-container {
   position: absolute;
   inset: -150px;
-  border-radius: 24px;
+  border-radius: var(--radius-feature);
   overflow: visible;
 }
 
@@ -719,7 +719,7 @@ section[id] {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  border-radius: 28px;
+  border-radius: var(--radius-feature);
   overflow: hidden;
   background:
     radial-gradient(circle at 20% 20%, rgba(0, 208, 156, 0.12), transparent 55%),
@@ -736,7 +736,7 @@ section[id] {
   height: auto;
   max-width: 100%;
   max-height: 100%;
-  border-radius: 22px;
+  border-radius: var(--radius-feature);
   object-fit: contain;
   filter: saturate(1.02) contrast(1.02);
 }
@@ -760,7 +760,7 @@ section[id] {
   padding: 14px 18px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-md);
   animation: floatCard 6s ease-in-out infinite;
   z-index: 10;
@@ -788,7 +788,7 @@ section[id] {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
 }
 
 .card-icon svg {
@@ -865,7 +865,7 @@ section[id] {
 .intro-image svg {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-md);
 }
 
@@ -1009,7 +1009,7 @@ section[id] {
   align-items: center;
   justify-content: center;
   background: var(--bg-gray);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   flex-shrink: 0;
 }
 
@@ -1077,7 +1077,7 @@ section[id] {
 .stat-card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 32px 48px;
   text-align: center;
   transition: var(--transition);
@@ -1146,7 +1146,7 @@ section[id] {
   justify-content: center;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 16px;
+  border-radius: var(--radius-card);
   margin: 0 auto 16px;
   transition: var(--transition);
 }
@@ -1186,14 +1186,14 @@ section[id] {
   width: 280px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 32px;
+  border-radius: var(--radius-feature);
   padding: 16px;
   box-shadow: var(--shadow-lg);
 }
 
 .phone-screen {
   background: var(--bg-tertiary);
-  border-radius: 20px;
+  border-radius: var(--radius-feature);
   padding: 24px;
 }
 
@@ -1236,7 +1236,7 @@ section[id] {
 
 .phone-stat {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 12px;
   text-align: center;
 }
@@ -1264,7 +1264,7 @@ section[id] {
   padding: 6px 12px;
   background: rgba(0, 208, 156, 0.1);
   border: 1px solid rgba(0, 208, 156, 0.2);
-  border-radius: 20px;
+  border-radius: var(--radius-feature);
   font-size: 11px;
   font-weight: 600;
   color: var(--accent-primary);
@@ -1285,7 +1285,7 @@ section[id] {
   padding: 40px 48px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   gap: 40px;
   position: relative;
   overflow: hidden;
@@ -1338,7 +1338,7 @@ section[id] {
   font-size: 14px;
   font-weight: 600;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   white-space: nowrap;
   transition: var(--transition);
 }
@@ -1377,7 +1377,7 @@ section[id] {
   padding: 20px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 20px;
+  border-radius: var(--radius-feature);
   box-shadow: var(--shadow-md);
   margin-bottom: 16px;
 }
@@ -1392,7 +1392,7 @@ section[id] {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   font-weight: 700;
   font-size: 20px;
 }
@@ -1427,7 +1427,7 @@ section[id] {
   width: 80px;
   height: 40px;
   background: linear-gradient(to right, transparent, rgba(0, 208, 156, 0.3));
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   margin-left: auto;
 }
 
@@ -1481,7 +1481,7 @@ section[id] {
   color: #fff;
   font-weight: 700;
   font-size: 18px;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   transition: var(--transition);
 }
 
@@ -1524,7 +1524,7 @@ section[id] {
   display: inline-block;
   padding: 12px 32px;
   border: 1px solid var(--border-light);
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-dark);
@@ -1597,7 +1597,7 @@ section[id] {
 .chart-card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 24px;
+  border-radius: var(--radius-feature);
   padding: 24px;
   box-shadow: var(--shadow-lg);
 }
@@ -1622,7 +1622,7 @@ section[id] {
   align-items: center;
   justify-content: center;
   background: var(--accent-gradient);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   font-weight: 700;
   font-size: 14px;
 }
@@ -1785,7 +1785,7 @@ section[id] {
   justify-content: center;
   background: var(--bg-gray);
   border: 1px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   color: var(--text-secondary);
   transition: var(--transition);
 }
@@ -1844,7 +1844,7 @@ section[id] {
   padding: 12px 16px;
   background: var(--bg-gray);
   border: 1px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   margin-bottom: 12px;
   transition: var(--transition);
   color: var(--text-dark);
@@ -1879,7 +1879,7 @@ section[id] {
   padding: 8px 16px;
   background: var(--bg-gray);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
 }
 
 /* ============================================
@@ -2035,7 +2035,7 @@ body.page .hero h1 {
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 24px;
   box-shadow: var(--shadow-sm);
   transition: var(--transition);
@@ -2130,7 +2130,7 @@ body.page .hero h1 {
   justify-content: center;
   gap: 10px;
   padding: 12px 18px;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   border: 1px solid var(--border-light);
   background: var(--bg-card);
   color: var(--text-dark);
@@ -2171,7 +2171,7 @@ body.page .hero h1 {
 .field {
   background: var(--bg-gray);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 14px;
 }
 
@@ -2188,7 +2188,7 @@ body.page .hero h1 {
 .field textarea {
   width: 100%;
   padding: 12px 12px;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   border: 1px solid var(--border-light);
   background: var(--bg-card);
   color: var(--text-dark);
@@ -2221,7 +2221,7 @@ body.page .hero h1 {
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   overflow: hidden;
   background: var(--bg-card);
 }
@@ -2258,7 +2258,7 @@ pre {
   background: var(--bg-gray);
   border: 1px solid var(--border-light);
   padding: 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   overflow: auto;
   color: var(--text-dark);
 }
@@ -2267,7 +2267,7 @@ code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   background: var(--bg-gray);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   font-size: 0.9em;
   color: var(--text-dark);
 }
@@ -2288,7 +2288,7 @@ pre code {
 .category-box {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 18px;
   box-shadow: var(--shadow-sm);
 }
@@ -2311,7 +2311,7 @@ pre code {
   gap: 8px;
   text-align: center;
   padding: 18px;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   border: 1px solid var(--border-light);
   background: var(--bg-card);
   box-shadow: var(--shadow-sm);
@@ -2320,7 +2320,7 @@ pre code {
 .flow-item {
   width: min(520px, 100%);
   padding: 14px 18px;
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   border: 1px solid var(--border-light);
   background: var(--bg-gray);
   color: var(--text-dark);
@@ -2338,7 +2338,7 @@ pre code {
 
 .security-table {
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   overflow: auto;
   background: var(--bg-card);
 }
@@ -2681,7 +2681,7 @@ pre code {
 
   .hero-media {
     padding: 18px;
-    border-radius: 24px;
+    border-radius: var(--radius-feature);
   }
 
   .floating-card {
@@ -2786,7 +2786,7 @@ pre code {
 
   .hero-media {
     padding: 14px;
-    border-radius: 22px;
+    border-radius: var(--radius-feature);
   }
 
   .btn-primary,
@@ -2866,9 +2866,13 @@ pre code {
   --border-light: var(--border-default);
   --container-width: 1200px;
   --section-padding: clamp(72px, 7vw, 104px);
-  --radius-control: 10px;
-  --radius-card: 14px;
-  --radius-feature: 16px;
+  /* Shape lock — 모서리는 이 네 값만 쓴다. 이전에는 2/4/5/6/8/9/10/11/12/14/16/
+     18/20/22/24/28/32 가 뒤섞여 있어 면끼리 같은 시스템으로 읽히지 않았다.
+     예외는 알약(999px)과 원(50%) 둘뿐. */
+  --radius-xs: 6px;       /* 진행바 · 작은 마커 · 표 셀 */
+  --radius-control: 8px;  /* 버튼 · 입력 · 칩 */
+  --radius-card: 14px;    /* 카드 · 패널 · 코드블록 */
+  --radius-feature: 20px; /* 큰 특징 면 (배너 · CTA 셸 · 다이어그램 패널) */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration-fast: 120ms;
@@ -2946,7 +2950,7 @@ body.modal-open {
   left: 20px;
   z-index: 9999;
   padding: 11px 16px;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: #ffffff;
   color: var(--bg-primary);
   font-size: 14px;
@@ -3036,7 +3040,7 @@ body.modal-open {
   min-width: 232px;
   padding: 9px;
   border-color: var(--border-default);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   box-shadow: 0 20px 50px rgba(5, 18, 38, 0.18);
   transform: translateY(8px);
   transition:
@@ -3064,7 +3068,7 @@ body.modal-open {
 .nav-dropdown-menu .dropdown-link {
   min-height: 40px;
   padding: 9px 12px;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   color: #475569;
 }
 
@@ -3093,7 +3097,7 @@ body.modal-open {
 .btn-primary-nav {
   min-height: 42px;
   padding: 9px 16px;
-  border-radius: 9px;
+  border-radius: var(--radius-control);
 }
 
 .btn-primary-nav {
@@ -3110,7 +3114,7 @@ body.modal-open {
   gap: 5px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -3183,7 +3187,7 @@ body.modal-open {
   place-items: center;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
   font-size: 24px;
@@ -3208,7 +3212,7 @@ body.modal-open {
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   color: rgba(255, 255, 255, 0.92);
   font-size: 17px;
   font-weight: 650;
@@ -3252,7 +3256,7 @@ body.modal-open {
   justify-content: flex-start;
   padding: 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   background: rgba(255, 255, 255, 0.04) !important;
   color: rgba(255, 255, 255, 0.82);
   font-size: 14px;
@@ -3298,9 +3302,41 @@ body.page .hero {
 }
 
 body.page .section {
-  padding: clamp(64px, 6vw, 80px) 0;
+  padding: clamp(56px, 5vw, 72px) 0;
 }
 
+/* ============================================
+   SECTION RHYTHM
+   서브페이지는 모든 섹션이 같은 틴트 한 색이라(ipfs는 6개 연속) 스크롤이
+   한 덩어리로 읽혔다. 히어로 다음부터 밝은 면과 틴트를 번갈아 깔아
+   섹션 경계를 여백이 아니라 색으로 알린다.
+   순서: 히어로(네이비) → 밝음 → 틴트 → 밝음 → 틴트 …
+   ============================================ */
+body.page main > section:not(.hero):not(.platform-banner):nth-of-type(even) {
+  background: var(--surface-card);
+}
+
+body.page main > section:not(.hero):not(.platform-banner):nth-of-type(odd) {
+  background: var(--surface-page);
+}
+
+/* ============================================
+   ELEVATION LADDER
+   면의 역할을 테두리와 그림자로 나눈다. 둘을 같이 쓰면 모든 면이
+   같은 무게로 읽혀 페이지에 위계가 생기지 않는다. 규칙은 하나:
+   테두리 XOR 그림자.
+
+     L0 flat     카드를 쓰지 않는다. hairline과 여백으로만 묶는다
+                 (특징 목록 · FAQ · 스펙 행)
+     L1 surface  흰 면 + 1px 테두리, 그림자 없음   ← 기본. 정보를 담는 면
+     L2 raised   흰 면 + 그림자, 테두리 없음       ← 사용자가 행동하는 면
+     L3 invert   네이비 면                         ← 페이지당 1~2회의 강조
+
+   오버레이(드롭다운 · 모달 · 토스트)는 이 사다리 밖의 별도 레이어라
+   테두리와 그림자를 함께 쓴다.
+   ============================================ */
+
+/* L1 — 기본 면 */
 .card,
 .category-box,
 .architecture-flow,
@@ -3310,8 +3346,26 @@ body.page .section {
   border-radius: var(--radius-card);
 }
 
-.card {
-  box-shadow: var(--shadow-sm);
+.card,
+.category-box,
+.architecture-flow,
+.floating-card,
+.chart-card,
+.service-card-item,
+.solution-phone,
+.banner-card,
+.home .intro-diagram {
+  box-shadow: none;
+}
+
+/* L2 — 행동하는 면. 테두리를 빼고 그림자로 띄운다.
+   페이지에서 "여기서 뭔가 한다"가 한눈에 잡히게 하는 유일한 장치. */
+.card--raised,
+.apply-form,
+.auth-card,
+.home .services-layout {
+  border: 0;
+  box-shadow: var(--shadow-md);
 }
 
 .field {
@@ -3384,13 +3438,9 @@ div[data-empty]:empty::before {
   display: block;
 }
 
-/* 이어지는 .section은 같은 배경 위에 놓여 하나의 흐름을 이룬다.
-   80px(아래) + 80px(위) = 160px 간격이 단계 사이를 끊어 리듬을 죽이므로
-   섹션 간 간격을 80px 한 값으로 통일한다.
-   개별 페이지가 인라인 padding으로 이미 조정한 곳은 인라인이 우선하므로 영향 없음. */
-body.page .section + .section {
-  padding-top: 0;
-}
+/* 섹션 사이 간격은 이제 배경색 교대가 알려주므로 위/아래 패딩을 대칭으로 둔다.
+   (배경이 한 색일 때는 위쪽 패딩을 접어 간격을 줄였지만, 색이 바뀌는 지금은
+   접으면 제목이 색 경계에 붙어버린다.) */
 
 .btn,
 .btn-primary,
@@ -3415,8 +3465,32 @@ body.page .section + .section {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .card:hover {
+  /* L1 정보 카드는 뜨지 않는다. 마우스마다 떠오르면 클릭할 수 있는 것처럼
+     읽혀서, 실제로 누를 수 있는 면과 구분이 사라진다. 테두리만 또렷해진다. */
+  .card:hover,
+  .category-box:hover,
+  .architecture-flow:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #c3cdda;
+    background: var(--surface-card);
+  }
+
+  /* 실제로 누를 수 있는 면만 뜬다. */
+  a.card:hover,
+  .service-card-item:hover,
+  .service-icon-item:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* L2는 이미 떠 있으므로 hover에서 더 띄우지 않는다(폼·컨테이너). */
+  .card--raised:hover,
+  .apply-form:hover,
+  .auth-card:hover,
+  .home .services-layout:hover {
+    transform: none;
+    border: 0;
     box-shadow: var(--shadow-md);
   }
 }
@@ -3523,13 +3597,15 @@ body.page .section + .section {
 .home .hero-btns .btn-secondary {
   min-height: 48px;
   padding: 13px 22px;
-  border-radius: 10px;
+  border-radius: var(--radius-control);
 }
 
 .home .hero-btns .btn-primary {
   background: var(--accent-primary);
   color: var(--on-accent);
-  box-shadow: 0 12px 28px rgba(0, 208, 156, 0.18);
+  /* 액센트 글로우 제거 — 어두운 히어로 위에서는 거의 보이지 않으면서
+     네온 인상만 남긴다. 버튼은 색 자체로 충분히 튄다. */
+  box-shadow: none;
 }
 
 .home .hero-btns .btn-primary:hover {
@@ -3639,7 +3715,7 @@ body.page .section + .section {
   width: 44px;
   height: 44px;
   border: 1px solid rgba(0, 208, 156, 0.18);
-  border-radius: 11px;
+  border-radius: var(--radius-control);
   background: rgba(0, 208, 156, 0.08);
 }
 
@@ -3738,6 +3814,7 @@ body.page .section + .section {
 
 .home .services {
   padding: 40px 0 var(--section-padding);
+  /* 떠 있는 흰 카드(L2)를 담으므로 배경은 틴트여야 카드가 읽힌다. */
   background: var(--surface-page);
 }
 
@@ -3772,7 +3849,7 @@ body.page .section + .section {
   min-width: 0;
   padding: 18px 10px 14px;
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--surface-subtle);
   transition: var(--transition);
 }
@@ -3793,7 +3870,7 @@ body.page .section + .section {
   width: 48px;
   height: 48px;
   border: 1px solid rgba(0, 208, 156, 0.18);
-  border-radius: 11px;
+  border-radius: var(--radius-control);
   background: rgba(0, 208, 156, 0.09);
   color: var(--accent-ink);
   box-shadow: none;
@@ -3822,6 +3899,7 @@ body.page .section + .section {
 .home .cta {
   display: block;
   padding: var(--section-padding) 0;
+  /* 네이비 셸(L3)은 밝은 면 위에서 가장 세게 읽힌다. */
   background: #ffffff;
 }
 
@@ -3898,7 +3976,7 @@ body.page .section + .section {
 .cta-assurance {
   padding: 26px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
+  border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.055);
 }
 
@@ -4276,7 +4354,7 @@ body.page .section + .section {
     display: grid;
     place-items: center;
     border: 1px solid var(--border-default);
-    border-radius: 9px;
+    border-radius: var(--radius-control);
     background: var(--surface-subtle);
     color: var(--text-secondary);
     font-size: 12px;

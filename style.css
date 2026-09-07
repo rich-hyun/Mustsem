@@ -1801,7 +1801,8 @@ section[id] {
   height: 18px;
 }
 
-.footer-links h4 {
+.footer-links h4,
+.footer-links .footer-heading {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 20px;

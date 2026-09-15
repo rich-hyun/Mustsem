@@ -6,9 +6,8 @@
   <title>API 가이드 - 머스트셈 네트워크</title>
   <meta name="description" content="스마트 컨트랙트 호출을 일반 HTTP API처럼 사용하는 방법을 안내하는 초보자용 가이드입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/api-guide.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -31,7 +30,7 @@
       position: relative;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       padding: 24px;
       margin-bottom: 24px;
       box-shadow: var(--shadow-sm);
@@ -75,12 +74,12 @@
       align-items: center;
       justify-content: center;
       background: var(--accent-gradient);
-      border-radius: 14px;
+      border-radius: var(--radius-card);
       font-size: 20px;
       font-weight: 800;
       color: var(--bg-primary);
       flex-shrink: 0;
-      box-shadow: 0 8px 24px var(--accent-glow);
+      box-shadow: 0 8px 20px rgba(15, 30, 56, 0.10);
     }
 
     .guide-icon {
@@ -91,7 +90,7 @@
       justify-content: center;
       background: rgba(0, 208, 156, 0.1);
       border: 1px solid rgba(0, 208, 156, 0.2);
-      border-radius: 14px;
+      border-radius: var(--radius-card);
       flex-shrink: 0;
       transition: var(--transition);
     }
@@ -127,7 +126,7 @@
       padding: 4px 8px;
       background: rgba(0, 180, 216, 0.12);
       color: #0277a0;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -147,7 +146,7 @@
       position: relative;
       background: var(--bg-gray);
       border: 1px solid var(--border-light);
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       padding: 16px 20px;
       margin: 16px 0;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -177,7 +176,7 @@
       padding: 6px 10px;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       color: var(--text-secondary);
       font-size: 11px;
       cursor: pointer;
@@ -205,7 +204,7 @@
       padding: 14px 16px;
       background: var(--bg-gray);
       border: 1px solid var(--border-light);
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       transition: var(--transition);
     }
 
@@ -221,7 +220,7 @@
       align-items: center;
       justify-content: center;
       background: var(--accent-gradient);
-      border-radius: 8px;
+      border-radius: var(--radius-control);
       font-size: 13px;
       font-weight: 700;
       color: var(--bg-primary);
@@ -238,7 +237,7 @@
     .step-content code {
       background: rgba(0, 208, 156, 0.12);
       padding: 2px 8px;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       color: #006b54;
       font-size: 12px;
     }
@@ -252,7 +251,7 @@
       padding: 32px 24px;
       background: var(--bg-gray);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       margin: 32px 0;
     }
 
@@ -265,7 +264,7 @@
       padding: 18px 24px;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       box-shadow: var(--shadow-sm);
       transition: var(--transition);
     }
@@ -282,7 +281,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       flex-shrink: 0;
     }
 
@@ -345,7 +344,7 @@
     .example-box {
       background: linear-gradient(135deg, rgba(0, 208, 156, 0.08) 0%, rgba(0, 180, 216, 0.04) 100%);
       border: 1px solid rgba(0, 208, 156, 0.2);
-      border-radius: 14px;
+      border-radius: var(--radius-card);
       padding: 18px 20px;
       margin: 12px 0;
     }
@@ -398,7 +397,7 @@
       padding: 24px 20px;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       box-shadow: var(--shadow-sm);
       transition: var(--transition);
     }
@@ -416,9 +415,9 @@
       align-items: center;
       justify-content: center;
       background: var(--accent-gradient);
-      border-radius: 16px;
+      border-radius: var(--radius-card);
       margin: 0 auto 16px;
-      box-shadow: 0 8px 24px var(--accent-glow);
+      box-shadow: 0 8px 20px rgba(15, 30, 56, 0.10);
     }
 
     .quick-start-item .qs-icon svg {
@@ -469,7 +468,7 @@
   <main>
 
     <!-- ===== Hero ===== -->
-    <section class="hero hero--subpage">
+    <section class="hero hero--subpage hero--api">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="container hero-inner">
         <p class="eyebrow">API 사용 가이드</p>

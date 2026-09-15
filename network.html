@@ -6,9 +6,8 @@
   <title>네트워크 관리 - 머스트셈 네트워크</title>
   <meta name="description" content="MST 코인을 담보로 기업 전용 블록체인 네트워크 개설을 신청하는 페이지입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/network.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -22,11 +21,23 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Page-scoped spacing helpers (relocated from inline styles) */
+    /* 신청 페이지는 한 축(640px 컬럼)으로 읽히도록 제목·설명·폼·결과를 같은 폭에 맞춘다.
+       (이전에는 폼만 가운데 정렬돼 제목이 컨테이너 왼쪽 끝에 홀로 떨어져 있었다.) */
+    #apply .section-title,
+    .apply-lead,
+    .apply-form,
+    .apply-result {
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #apply .section-title,
+    .apply-lead { text-align: center; }
     .apply-lead { margin-bottom: 32px; }
-    .apply-form { max-width: 640px; margin: 0 auto; }
     .apply-result { text-align: center; margin-top: 12px; }
     .apply-form .cta-row { justify-content: center; }
+    /* 정책 카드도 같은 시각 축 안에 두어 폼과 분리돼 보이지 않게 한다. */
+    .policy-grid { max-width: 940px; margin-inline: auto; }
   </style>
 </head>
 
@@ -35,7 +46,7 @@
 
   <main>
     <!-- Hero Section -->
-    <section class="hero hero--subpage">
+    <section class="hero hero--subpage hero--infra">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="container hero-inner">
         <p class="eyebrow">네트워크</p>
@@ -84,7 +95,7 @@
 
     <!-- 정책 요약 Section -->
     <section class="section">
-      <div class="container grid cols-2">
+      <div class="container grid cols-2 policy-grid">
         <article class="card">
           <h3>서비스 개요</h3>
           <ul class="small">
@@ -97,7 +108,7 @@
         <article class="card">
           <h3>정책</h3>
           <ul class="small">
-            <li><strong>글로벌 담보정책</strong> — 무담보 발행 없음</li>
+            <li><strong>글로벌 담보정책</strong> - 무담보 발행 없음</li>
             <li>다운사이드 감액 금지(Non-Decreasing Collateral)</li>
             <li>락업된 MST는 네트워크 운영 기간 동안 담보 유지</li>
           </ul>

@@ -169,7 +169,7 @@ function renderFooter() {
           </div>
 
           <div class="footer-links">
-            <h4>플랫폼</h4>
+            <h2 class="footer-heading">플랫폼</h2>
             <a href="network.html">네트워크</a>
             <a href="bridge.html">브릿지</a>
             <a href="staking.html">스테이킹</a>
@@ -180,13 +180,13 @@ function renderFooter() {
           </div>
 
           <div class="footer-links">
-            <h4>개발자</h4>
+            <h2 class="footer-heading">개발자</h2>
             <a href="api.html">API 카탈로그</a>
             <a href="api-guide.html">API 가이드</a>
           </div>
 
           <div class="footer-links">
-            <h4>회사</h4>
+            <h2 class="footer-heading">회사</h2>
             <a href="security.html">보안</a>
             <a href="network.html#apply">문의하기</a>
             <a href="privacy.html">개인정보처리방침</a>

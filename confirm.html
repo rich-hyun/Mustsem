@@ -6,9 +6,8 @@
   <title>MUSTSEM - 이메일 인증</title>
   <meta name="description" content="MUSTSEM 계정 이메일 인증을 처리하는 페이지입니다." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/confirm.html">
   <meta name="robots" content="noindex">
   <meta property="og:type" content="website">
@@ -46,7 +45,7 @@
       margin: 0 auto 24px;
       animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
-    .icon-circle.success { background: var(--accent-gradient); box-shadow: 0 8px 32px var(--accent-glow); }
+    .icon-circle.success { background: var(--accent-gradient); box-shadow: 0 8px 20px rgba(15, 30, 56, 0.10); }
     .icon-circle.error { background: linear-gradient(135deg, #ef4444, #f87171); box-shadow: 0 8px 32px rgba(239, 68, 68, 0.25); }
     @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .icon-circle svg { width: 36px; height: 36px; stroke: #fff; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }

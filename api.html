@@ -6,9 +6,8 @@
   <title>API 카탈로그 - 머스트셈 네트워크</title>
   <meta name="description" content="NFT·SBT·RWA·토큰 정책·거버넌스·노드 운영까지, 머스트셈이 제공하는 전체 API 카탈로그입니다." />
   <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/api.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -53,7 +52,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       flex-shrink: 0;
     }
 
@@ -126,7 +125,7 @@
       padding: 3px 8px;
       background: rgba(0, 208, 156, 0.1);
       color: #00795b;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
     }
 
     /* Stats Row */
@@ -142,7 +141,7 @@
       padding: 24px 20px;
       background: linear-gradient(135deg, rgba(0, 208, 156, 0.08) 0%, rgba(0, 180, 216, 0.04) 100%);
       border: 1px solid rgba(0, 208, 156, 0.2);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
     }
 
     .stat-item .stat-num {
@@ -177,7 +176,7 @@
       padding: 12px 20px;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       font-size: 14px;
       font-weight: 600;
       color: var(--text-secondary);
@@ -207,7 +206,7 @@
       padding: 2px 7px;
       background: var(--bg-gray);
       color: var(--text-secondary);
-      border-radius: 10px;
+      border-radius: var(--radius-control);
     }
 
     .api-tab.active .count {
@@ -219,7 +218,7 @@
     .api-section {
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       padding: 28px;
       margin-bottom: 28px;
       box-shadow: var(--shadow-sm);
@@ -239,8 +238,8 @@
       align-items: center;
       justify-content: center;
       background: var(--accent-gradient);
-      border-radius: 14px;
-      box-shadow: 0 8px 24px var(--accent-glow);
+      border-radius: var(--radius-card);
+      box-shadow: 0 8px 20px rgba(15, 30, 56, 0.10);
     }
 
     .api-section-icon svg {
@@ -268,7 +267,7 @@
       border-spacing: 0;
       background: var(--bg-card);
       border: 1px solid var(--border-light);
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       overflow: hidden;
     }
 
@@ -310,7 +309,7 @@
       display: inline-flex;
       align-items: center;
       padding: 4px 10px;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       font-size: 11px;
       font-weight: 700;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -344,7 +343,7 @@
       padding: 6px 10px;
       background: var(--bg-gray);
       border: 1px solid var(--border-light);
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       color: var(--text-dark);
       white-space: nowrap;
     }
@@ -361,7 +360,7 @@
       padding: 3px 8px;
       background: var(--bg-gray);
       border: 1px solid var(--border-light);
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       color: var(--text-secondary);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
@@ -383,7 +382,7 @@
       padding: 10px 16px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       font-size: 13px;
       font-weight: 500;
       color: rgba(255, 255, 255, 0.85);
@@ -436,7 +435,7 @@
   <main>
 
     <!-- ===== Hero ===== -->
-    <section class="hero hero--subpage">
+    <section class="hero hero--subpage hero--api">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="container hero-inner">
         <p class="eyebrow">API 서비스</p>

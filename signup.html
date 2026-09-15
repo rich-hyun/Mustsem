@@ -6,9 +6,8 @@
   <title>MUSTSEM - 회원가입</title>
   <meta name="description" content="MUSTSEM Web3 인프라 플랫폼 계정을 만드는 회원가입 페이지입니다." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/signup.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -38,7 +37,7 @@
 
     /* Password strength meter — LIGHT track, semantic colors, teal "strong" */
     .strength-bar { display: flex; gap: 4px; margin-top: 10px; }
-    .strength-seg { height: 4px; flex: 1; border-radius: 2px; background: var(--bg-gray); border: 1px solid var(--border-light); transition: background 0.3s, border-color 0.3s; }
+    .strength-seg { height: 4px; flex: 1; border-radius: var(--radius-xs); background: var(--bg-gray); border: 1px solid var(--border-light); transition: background 0.3s, border-color 0.3s; }
     .strength-seg.active-weak { background: #ef4444; border-color: #ef4444; }
     .strength-seg.active-fair { background: #f59e0b; border-color: #f59e0b; }
     .strength-seg.active-good { background: #10b981; border-color: #10b981; }
@@ -47,14 +46,14 @@
 
     /* Terms section — LIGHT cards */
     .terms-section { margin-top: 4px; margin-bottom: 4px; }
-    .terms-all { padding: 14px 16px; background: rgba(0, 208, 156, 0.06); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 10px; }
+    .terms-all { padding: 14px 16px; background: rgba(0, 208, 156, 0.06); border: 1px solid var(--border-light); border-radius: var(--radius-control); margin-bottom: 10px; }
     .terms-list { display: flex; flex-direction: column; gap: 8px; }
-    .terms-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-gray); border: 1px solid var(--border-light); border-radius: 8px; }
+    .terms-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-gray); border: 1px solid var(--border-light); border-radius: var(--radius-control); }
     .terms-check { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
     .terms-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent-primary); cursor: pointer; flex-shrink: 0; }
     .terms-check-label { font-size: 13px; color: var(--text-secondary); cursor: pointer; }
     .terms-check-label.all { font-weight: 600; color: var(--text-dark); }
-    .terms-view-btn { font-size: 12px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: color 0.2s, background 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .terms-view-btn { font-size: 12px; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-xs); transition: color 0.2s, background 0.2s; white-space: nowrap; flex-shrink: 0; }
     .terms-view-btn:hover { color: var(--accent-primary); background: rgba(0, 208, 156, 0.08); }
 
     .error-msg { text-align: center; color: #ef4444; font-size: 13px; margin-top: 14px; min-height: 20px; }
@@ -65,7 +64,7 @@
     /* Modals — LIGHT card surfaces */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10, 22, 40, 0.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.active { display: flex; }
-    .modal-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); }
+    .modal-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-card); width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow-lg); }
     .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-light); }
     .modal-header h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); }
     .modal-close { background: none; border: none; color: var(--text-muted); font-size: 22px; cursor: pointer; line-height: 1; padding: 0 4px; transition: color 0.2s; }
@@ -84,12 +83,12 @@
     .modal-body ul, .modal-body ol { margin: 0 0 10px; padding-left: 20px; }
     .modal-body li { margin-bottom: 4px; }
     .modal-body li::marker { color: var(--accent-primary); }
-    .modal-body .legal-meta { display: flex; gap: 12px; flex-wrap: wrap; padding: 10px 14px; background: rgba(0, 208, 156, 0.06); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: 16px; font-size: 12px; }
+    .modal-body .legal-meta { display: flex; gap: 12px; flex-wrap: wrap; padding: 10px 14px; background: rgba(0, 208, 156, 0.06); border: 1px solid var(--border-light); border-radius: var(--radius-control); margin-bottom: 16px; font-size: 12px; }
     .modal-body .legal-meta strong { color: var(--text-dark); font-weight: 600; }
     .modal-body .legal-table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 12px; }
     .modal-body .legal-table th, .modal-body .legal-table td { border: 1px solid var(--border-light); padding: 8px 10px; text-align: left; vertical-align: top; line-height: 1.5; }
     .modal-body .legal-table th { background: var(--bg-gray); color: var(--text-dark); font-weight: 600; }
-    .modal-body .legal-contact { padding: 12px 16px; background: var(--bg-gray); border: 1px solid var(--border-light); border-radius: 8px; margin-top: 8px; }
+    .modal-body .legal-contact { padding: 12px 16px; background: var(--bg-gray); border: 1px solid var(--border-light); border-radius: var(--radius-control); margin-top: 8px; }
     .modal-body .legal-contact a { color: var(--accent-primary); }
   </style>
 </head>

@@ -6,9 +6,8 @@
   <title>머스트셈 네트워크 - 엔터프라이즈 Web3 & 토큰화 API 플랫폼</title>
   <meta name="description" content="머스트셈은 초당 10,000건 처리 가능한 고성능 Web3 인프라와 토큰화 API를 제공하는 탈중앙화 네트워크 전문 기업입니다.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -21,6 +20,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="home.css">
 </head>
 <body class="home">
   <div id="site-nav"></div>
@@ -37,48 +37,44 @@
     </div>
     <div class="hero-container">
       <div class="hero-content">
-        <p class="hero-eyebrow"><span class="hero-status-dot"></span> Enterprise Web3 Infrastructure</p>
+        <p class="hero-eyebrow">Enterprise Web3 Infrastructure</p>
         <h1 id="home-hero-title">
           24시간 안에,<br>
           <strong>기업 전용 Web3 인프라</strong>를 시작하세요.
         </h1>
         <p class="hero-desc">
-          전용 네트워크 구축부터 자산 토큰화, 스마트컨트랙트 연동까지.<br>
+          전용 네트워크 구축부터 자산 토큰화, 스마트컨트랙트 연동까지. <br>
           검증된 보안 체계 위에서 귀사의 Web3 서비스를 빠르게 시작합니다.
         </p>
         <div class="hero-btns" aria-label="시작하기">
           <a href="network.html#apply" class="btn-primary hero-primary-action">
-            도입 상담 시작
+            도입 상담 요청
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6"/>
             </svg>
           </a>
           <a href="api.html" class="btn-secondary hero-secondary-action">API 살펴보기</a>
         </div>
-        <ul class="hero-proof" aria-label="핵심 성능">
-          <li><strong>10K</strong><span>TPS 처리 성능</span></li>
-          <li><strong>EVM</strong><span>완전 호환</span></li>
-          <li><strong>24H</strong><span>구축 목표</span></li>
-        </ul>
       </div>
     </div>
   </section>
 
   <!-- Intro Section -->
-  <section class="intro-section">
+  <section class="intro-section" aria-labelledby="intro-title">
     <div class="container">
       <div class="intro-layout">
         <div class="intro-content">
           <span class="section-kicker">Why MUSTSEM</span>
-          <h2>당신의 플랫폼 성장을 위한<br>Web3 인프라 ─<br><strong>머스트셈</strong></h2>
-          <p>머스트셈은 기업이 자체적으로 운영 가능한 전용 Web3 네트워크를 제공하는 인프라 전문 기업입니다.</p>
-          <p>초당 10,000건 처리 가능한 고성능 탈중앙화 네트워크를 기업별로 생성하며, 검증된 보안 정책과 거버넌스 템플릿으로 안전한 운영을 보장합니다.</p>
+          <h2 id="intro-title">비즈니스에 필요한 Web3,<br><strong>하나의 전용 네트워크에서.</strong></h2>
+          <p>기업이 직접 운영하는 네트워크 위에 자산 발행과 서비스 연동을 더하세요. 머스트셈은 구축부터 운영까지 필요한 Web3 인프라를 제공합니다.</p>
+          <p>EVM 호환 네트워크와 REST API를 바탕으로, 기존 시스템에 필요한 기능부터 연결할 수 있습니다.</p>
+          <a class="home-text-link" href="#services">우리 기업에 맞는 서비스 찾기 <span aria-hidden="true">→</span></a>
         </div>
         <div class="intro-image">
           <!-- 전용 네트워크 구성도: 로고의 육각형 모티프를 잇는 자체 일러스트 (외부 이미지 의존 없음)
                구성: 점선 궤도(구조) · 허브 펄스(흐름) · 텍스트 폭에 맞춘 알약형 노드 -->
           <svg class="intro-diagram" viewBox="0 0 600 420" role="img"
-               aria-label="머스트셈 전용 네트워크 구성도 — 기업 전용 체인을 중심으로 브릿지, 스테이킹, NFT, SBT, RWA, API가 하나의 궤도로 연결된 구조">
+               aria-label="머스트셈 전용 네트워크 구성도. 기업 전용 체인을 중심으로 브릿지, 스테이킹, NFT, SBT, RWA, API가 하나의 궤도로 연결된 구조">
             <defs>
               <linearGradient id="introGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stop-color="#00D09C"/>
@@ -180,118 +176,12 @@
     </div>
   </section>
 
-  <!-- Live Crypto Updates -->
-  <section class="crypto-updates">
-    <div class="container">
-      <div class="section-header center">
-        <span class="section-badge">실시간 업데이트</span>
-        <h2>Web3 네트워크 핵심 지표</h2>
-      </div>
-      <div class="crypto-grid">
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon mst">
-              <span>M</span>
-            </div>
-            <div class="crypto-name">
-              <strong>TPS</strong>
-              <span>처리 성능</span>
-            </div>
-          </div>
-          <div class="crypto-price">10K</div>
-          <div class="crypto-change positive">TPS</div>
-        </div>
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon eth">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5zM5 14.2L12 22.5l7-8.3-7 4.2-7-4.2z"/>
-              </svg>
-            </div>
-            <div class="crypto-name">
-              <strong>ETH</strong>
-              <span>Ethereum</span>
-            </div>
-          </div>
-          <div class="crypto-price">호환</div>
-          <div class="crypto-change neutral">EVM 기반</div>
-        </div>
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon nft">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-            <div class="crypto-name">
-              <strong>토큰화</strong>
-              <span>API</span>
-            </div>
-          </div>
-          <div class="crypto-price">무제한</div>
-          <div class="crypto-change positive">발행 가능</div>
-        </div>
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon rwa">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-              </svg>
-            </div>
-            <div class="crypto-name">
-              <strong>실물자산</strong>
-              <span>토큰화</span>
-            </div>
-          </div>
-          <div class="crypto-price">지원</div>
-          <div class="crypto-change positive">완료</div>
-        </div>
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon sbt">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            <div class="crypto-name">
-              <strong>SBT</strong>
-              <span>소울바운드</span>
-            </div>
-          </div>
-          <div class="crypto-price">신원</div>
-          <div class="crypto-change neutral">인증됨</div>
-        </div>
-        <div class="crypto-card">
-          <div class="crypto-header">
-            <div class="crypto-icon bridge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 14a1 1 0 011-1h14a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1v-7z"/>
-                <path d="M8 13V5a4 4 0 018 0v8"/>
-              </svg>
-            </div>
-            <div class="crypto-name">
-              <strong>Bridge</strong>
-              <span>크로스체인</span>
-            </div>
-          </div>
-          <div class="crypto-price">멀티</div>
-          <div class="crypto-change positive">체인</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- Features Section -->
-  <section id="features" class="features">
+  <section id="features" class="features" aria-labelledby="features-title">
     <div class="container">
       <div class="features-layout">
         <div class="features-content">
-          <span class="section-badge">왜 머스트셈인가</span>
-          <h2>엔터프라이즈 Web3<br>플랫폼의 특징</h2>
+          <h2 id="features-title">구축은 간결하게,<br>운영은 체계적으로.</h2>
           <div class="feature-list">
             <div class="feature-item">
               <div class="feature-icon">
@@ -314,7 +204,8 @@
               </div>
               <div class="feature-text">
                 <h3>엔터프라이즈급 보안</h3>
-                <p>검증된 보안 정책과 거버넌스 템플릿으로 안전한 운영을 보장합니다.</p>
+                <p>암호화, 키 관리, 서명 과정을 분리한 보안 아키텍처를 제공합니다.</p>
+                <a class="home-text-link" href="security.html">보안 설계 확인 <span aria-hidden="true">→</span></a>
               </div>
             </div>
             <div class="feature-item">
@@ -326,7 +217,8 @@
               </div>
               <div class="feature-text">
                 <h3>REST API 연동</h3>
-                <p>간단한 REST API로 기업 시스템과 쉽게 연동할 수 있습니다.</p>
+                <p>API 호출로 토큰 발행과 스마트컨트랙트 실행을 기존 시스템에 연결합니다.</p>
+                <a class="home-text-link" href="api-guide.html">개발 가이드 보기 <span aria-hidden="true">→</span></a>
               </div>
             </div>
             <div class="feature-item">
@@ -343,82 +235,12 @@
             </div>
           </div>
         </div>
-        <div class="features-visual">
-          <div class="portfolio-card">
-            <div class="portfolio-header">
-              <span>네트워크 현황</span>
-              <span class="portfolio-change">실시간</span>
-            </div>
-            <div class="portfolio-list">
-              <div class="portfolio-item">
-                <div class="portfolio-icon btc">
-                  <span>M</span>
-                </div>
-                <div class="portfolio-info">
-                  <strong>처리 성능</strong>
-                  <span>머스트셈 네트워크</span>
-                </div>
-                <div class="portfolio-value">
-                  <strong>10K</strong>
-                  <span class="positive">TPS</span>
-                </div>
-              </div>
-              <div class="portfolio-item">
-                <div class="portfolio-icon eth">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5z"/>
-                  </svg>
-                </div>
-                <div class="portfolio-info">
-                  <strong>이더리움</strong>
-                  <span>브릿지 지원</span>
-                </div>
-                <div class="portfolio-value">
-                  <strong>EVM</strong>
-                  <span class="positive">호환</span>
-                </div>
-              </div>
-              <div class="portfolio-item">
-                <div class="portfolio-icon ltc">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <path d="M21 15l-5-5L5 21"/>
-                  </svg>
-                </div>
-                <div class="portfolio-info">
-                  <strong>디지털 자산</strong>
-                  <span>토큰화 API</span>
-                </div>
-                <div class="portfolio-value">
-                  <strong>무제한</strong>
-                  <span class="positive">발행</span>
-                </div>
-              </div>
-              <div class="portfolio-item">
-                <div class="portfolio-icon pol">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                </div>
-                <div class="portfolio-info">
-                  <strong>보안</strong>
-                  <span>HSM/Vault 기반</span>
-                </div>
-                <div class="portfolio-value">
-                  <strong>엔터프라이즈</strong>
-                  <span class="positive">급</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
 
   <!-- Stats Section -->
-  <section id="benefits" class="stats">
+  <section id="benefits" class="stats" aria-label="네트워크 주요 사양">
     <div class="container">
       <div class="stats-grid">
         <div class="stat-card" aria-label="초당 1만 건 처리 성능">
@@ -429,292 +251,120 @@
           <div class="stat-value">EVM</div>
           <div class="stat-label">완전 호환 네트워크</div>
         </div>
-        <div class="stat-card" aria-label="디지털 자산 토큰화 무제한">
-          <div class="stat-value">무제한</div>
-          <div class="stat-label">디지털 자산 토큰화</div>
+        <div class="stat-card" aria-label="REST API 기반 시스템 연동">
+          <div class="stat-value">REST</div>
+          <div class="stat-label">API 기반 시스템 연동</div>
         </div>
         <div class="stat-card" aria-label="24시간 내 네트워크 구축">
           <div class="stat-value">24H</div>
-          <div class="stat-label">네트워크 구축</div>
+          <div class="stat-label">내부 확인 후 네트워크 구축</div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Solution Section -->
-  <section class="solution">
-    <div class="container">
-      <div class="section-header center">
-        <span class="section-badge">최적의 솔루션</span>
-        <h2>구축과 확장의 자유를 제공하는<br>다양한 옵션의 통합 플랫폼</h2>
-      </div>
-      <div class="solution-grid">
-        <div class="solution-item">
-          <div class="solution-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2V3z"/>
-              <path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7V3z"/>
-            </svg>
-          </div>
-          <h3>기획</h3>
-          <p>전문 템플릿으로 Web3 프로젝트 범위를 설계하세요</p>
-        </div>
-        <div class="solution-center">
-          <div class="solution-phone">
-            <div class="phone-screen">
-              <div class="phone-header">
-                <span>거래소</span>
-              </div>
-              <div class="phone-balance">
-                <span class="balance-label">잔액</span>
-                <span class="balance-value">5,500.25 <small>ETH</small></span>
-              </div>
-              <div class="phone-stats">
-                <div class="phone-stat">
-                  <span>네트워크</span>
-                  <strong>$7,892.47</strong>
-                </div>
-                <div class="phone-stat">
-                  <span>스테이킹</span>
-                  <strong>25.40%</strong>
-                </div>
-              </div>
-              <div class="phone-coins">
-                <span class="coin-badge">MST</span>
-                <span class="coin-badge">토큰화</span>
-                <span class="coin-badge">실물자산</span>
-                <span class="coin-badge">SBT</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="solution-item right">
-          <div class="solution-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-              <line x1="12" y1="22.08" x2="12" y2="12"/>
-            </svg>
-          </div>
-          <h3>고도화</h3>
-          <p>더 나은 성능을 위해 네트워크 설정을 개선하고 최적화하세요</p>
-        </div>
-        <div class="solution-item">
-          <div class="solution-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
-            </svg>
-          </div>
-          <h3>프로토타입</h3>
-          <p>제품과 앱을 위한 Web3 네트워크를 빠르게 구축하세요</p>
-        </div>
-        <div class="solution-item right">
-          <div class="solution-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-              <polyline points="17 6 23 6 23 12"/>
-            </svg>
-          </div>
-          <h3>확장 및 지원</h3>
-          <p>신속한 프로덕션 배포와 전문 지원을 보장합니다</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Platform Banner -->
-  <section class="platform-banner">
-    <div class="container">
-      <div class="banner-card">
-        <div class="banner-content">
-          <span class="section-kicker">Deployment ready</span>
-          <h3>구축보다 중요한 운영까지 준비합니다</h3>
-          <p>전용 네트워크, 토큰화 API, 보안 정책을 하나의 도입 흐름으로 연결해 검토 시간을 줄입니다.</p>
-        </div>
-        <a href="network.html#apply" class="btn-banner">구축 상담 요청 <span aria-hidden="true">→</span></a>
-      </div>
+      <p class="home-spec-note">처리 성능과 구축 일정은 네트워크 구성 및 내부 확인 조건에 따라 달라질 수 있습니다.</p>
     </div>
   </section>
 
   <!-- Services Section -->
-  <section id="services" class="services">
+  <section id="services" class="services home-services" aria-labelledby="services-title">
     <div class="container">
-      <div class="services-layout">
-        <div class="services-content">
-          <h2>지금 바로 기업 전용<br>Web3 네트워크를 구축하세요</h2>
-          <p class="services-desc">머스트셈은 최고의 시작점이 되는 다양한 기능을 제공합니다.<br>완전한 유연성을 갖춘 엔터프라이즈급 인프라입니다.</p>
-          <div class="service-icons">
-            <a href="network.html" class="service-icon-item">
-              <div class="service-icon-box">M</div>
-              <span>네트워크</span>
-            </a>
-            <a href="bridge.html" class="service-icon-item">
-              <div class="service-icon-box blue">
-                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                  <path d="M12 1.5l-7 10.8 7 4.2 7-4.2L12 1.5z"/>
-                </svg>
-              </div>
-              <span>브릿지</span>
-            </a>
-            <a href="nft.html" class="service-icon-item">
-              <div class="service-icon-box green">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                  <rect x="3" y="3" width="18" height="18" rx="2"/>
-                  <circle cx="8.5" cy="8.5" r="1.5"/>
-                  <path d="M21 15l-5-5L5 21"/>
-                </svg>
-              </div>
-              <span>NFT</span>
-            </a>
-            <a href="rwa.html" class="service-icon-item">
-              <div class="service-icon-box orange">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
-              </div>
-              <span>RWA</span>
-            </a>
-            <a href="sbt.html" class="service-icon-item">
-              <div class="service-icon-box purple">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
-                </svg>
-              </div>
-              <span>SBT</span>
-            </a>
-            <a href="api.html" class="service-icon-item">
-              <div class="service-icon-box navy">API</div>
-              <span>토큰화 API</span>
-            </a>
+      <div class="home-section-heading">
+        <span class="section-kicker">Explore the platform</span>
+        <h2 id="services-title">필요한 서비스부터 연결하세요.</h2>
+        <p>전용 네트워크를 구축하거나, 기존 서비스에 토큰화 기능을 더하세요.<br> 비즈니스의 목적에 맞는 시작점을 선택할 수 있습니다.</p>
+      </div>
+      <div class="home-product-grid">
+        <a href="network.html" class="home-product">
+          <div class="home-product-copy">
+            <span class="home-product-category">독립적인 인프라가 필요하다면</span>
+            <h3>기업 전용 네트워크</h3>
+            <p>기업별 전용 체인과 운영 정책으로 우리 서비스의 기반을 구축하세요.</p>
+            <span class="home-product-action">네트워크 알아보기 <span aria-hidden="true">→</span></span>
           </div>
-          <a href="api-guide.html" class="btn-more">개발 가이드 보기 <span aria-hidden="true">→</span></a>
-        </div>
+          <img src="assets/hero-infra.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+        </a>
+        <a href="api.html" class="home-product">
+          <div class="home-product-copy">
+            <span class="home-product-category">기존 시스템에 Web3를 더하려면</span>
+            <h3>토큰화 API</h3>
+            <p>자산 발행과 스마트컨트랙트 실행을 API로 연결하세요.</p>
+            <span class="home-product-action">API 살펴보기 <span aria-hidden="true">→</span></span>
+          </div>
+          <img src="assets/hero-api.webp" width="1536" height="1024" loading="lazy" decoding="async" alt="">
+        </a>
+      </div>
+      <div class="home-service-heading">
+        <h3>서비스에 맞춰 확장하세요</h3>
+        <a class="home-text-link" href="api-guide.html">개발 가이드 보기 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="home-service-grid">
+        <a href="nft.html" class="home-service-link"><span><strong>NFT</strong><span>디지털 자산 발행과 소유권 관리</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
+        <a href="sbt.html" class="home-service-link"><span><strong>SBT</strong><span>양도할 수 없는 자격·인증 토큰</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
+        <a href="rwa.html" class="home-service-link"><span><strong>RWA</strong><span>실물자산 정보의 등록과 토큰화</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
+        <a href="bridge.html" class="home-service-link"><span><strong>브릿지</strong><span>네트워크 간 자산 이동과 래핑</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
+        <a href="staking.html" class="home-service-link"><span><strong>스테이킹</strong><span>wMST 예치와 보상 관리</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
+        <a href="ipfs.html" class="home-service-link"><span><strong>IPFS</strong><span>AI 모델 분산 저장과 무결성 검증</span></span><span class="home-link-arrow" aria-hidden="true">↗</span></a>
       </div>
     </div>
   </section>
 
-  <!-- Upgrade Section -->
-  <section id="pricing" class="upgrade">
+  <!-- Adoption process: preserve the existing pricing anchor. -->
+  <section id="pricing" class="home-process" aria-labelledby="process-title">
     <div class="container">
-      <div class="upgrade-layout">
-        <div class="upgrade-content">
-          <span class="section-badge">기업 업그레이드</span>
-          <h2>지금 바로 Web3<br>인프라를 업그레이드하세요</h2>
-          <p class="upgrade-desc">중앙 장애점 없이 더 빠르고, 안전하며, 합리적인 가격의 엔터프라이즈급 솔루션을 제공합니다.</p>
-          <div class="upgrade-features">
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>100% 보안</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>무료 설정</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>더 높은 확장성</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>강력한 성능</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>더 쉬운 사용</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>기업을 위한 설계</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>합리적인 비용</span>
-            </div>
-            <div class="upgrade-feature">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <span>100% 무료 API 템플릿</span>
-            </div>
-          </div>
-        </div>
-        <div class="upgrade-visual">
-          <div class="chart-card">
-            <div class="chart-header">
-              <div class="chart-pair">
-                <span class="pair-icon">M</span>
-                <span>MST Network</span>
-              </div>
-              <div class="chart-value">
-                <span>처리 성능</span>
-                <strong>10K TPS</strong>
-              </div>
-            </div>
-            <div class="chart-stats">
-              <div class="chart-stat">
-                <span>합의 알고리즘</span>
-                <strong class="positive">고속</strong>
-              </div>
-              <div class="chart-stat">
-                <span>네트워크 호환</span>
-                <strong>EVM</strong>
-              </div>
-            </div>
-            <div class="chart-graph">
-              <svg viewBox="0 0 400 100" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#00D09C" stop-opacity="0.3"/>
-                    <stop offset="100%" stop-color="#00D09C" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0,80 Q50,70 100,60 T200,40 T300,50 T400,20 V100 H0 Z" fill="url(#chartGrad)"/>
-                <path d="M0,80 Q50,70 100,60 T200,40 T300,50 T400,20" stroke="#00D09C" stroke-width="2" fill="none"/>
-              </svg>
-            </div>
-            <div class="chart-prices">
-              <span>$750K</span>
-              <span>$500K</span>
-              <span>$250K</span>
-              <span>$100K</span>
-            </div>
-          </div>
-        </div>
+      <div class="home-section-heading">
+        <h2 id="process-title">도입의 시작부터 운영까지.</h2>
+        <p>서비스 검토에 필요한 내용을 순서대로 확인하세요.</p>
+      </div>
+      <ol class="home-process-list">
+        <li><h3>요구사항 정리</h3><p>서비스 목적과 필요한 기능, 연동할 시스템을 정리합니다.</p><a class="home-text-link" href="#services">서비스 범위 살펴보기 <span aria-hidden="true">→</span></a></li>
+        <li><h3>네트워크 구성 확인</h3><p>전용 체인의 운영 정책과 MST 담보 조건, 구축 범위를 확인합니다.</p><a class="home-text-link" href="network.html">구축 조건 확인 <span aria-hidden="true">→</span></a></li>
+        <li><h3>API 연동과 운영 준비</h3><p>호출 방식과 보안 구성을 확인하고, 서비스에 필요한 기능을 연결합니다.</p><a class="home-text-link" href="api-guide.html">개발 가이드 보기 <span aria-hidden="true">→</span></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq" aria-labelledby="faq-title">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="faq-title">도입 전에<br>궁금한 점을 확인하세요.</h2>
+        <p>구축 조건부터 연동과 보안까지,<br>검토에 필요한 내용을 모았습니다.</p>
+      </div>
+      <div class="faq-list">
+        <details class="home-faq-item" name="home-faq" open>
+          <summary>어떤 서비스부터 시작하면 되나요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>독립적인 인프라가 필요하면 기업 전용 네트워크를, 기존 시스템에 자산 발행이나 컨트랙트 실행을 연결하려면 토큰화 API를 먼저 확인하세요. <a href="#services">서비스별 용도 보기</a></p></div>
+        </details>
+        <details class="home-faq-item" name="home-faq">
+          <summary>24시간 안에 네트워크가 구축되나요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>네트워크 생성은 신청 정보의 내부 확인 후 24시간 이내 진행을 기준으로 안내합니다. 필요한 설정과 운영 조건은 신청 전에 확인해 주세요. <a href="network.html">네트워크 구축 조건 보기</a></p></div>
+        </details>
+        <details class="home-faq-item" name="home-faq">
+          <summary>기존 시스템이나 스마트컨트랙트와 연동할 수 있나요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>EVM 호환 네트워크와 REST API를 제공합니다. 기존 시스템의 구성에 맞춰 호출 방식과 컨트랙트 연동 범위를 확인할 수 있습니다. <a href="api-guide.html">API 동작 흐름과 사용 예시 보기</a></p></div>
+        </details>
+        <details class="home-faq-item" name="home-faq">
+          <summary>어떤 보안 구조를 사용하나요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>AES 기반 암호화, Vault 키 관리, HSM 내부 서명으로 역할을 나눈 보안 아키텍처를 안내합니다. 서비스에 적용할 범위와 운영 환경은 도입 시 확인할 수 있습니다. <a href="security.html">보안 아키텍처 확인</a></p></div>
+        </details>
+        <details class="home-faq-item" name="home-faq">
+          <summary>도입 비용과 MST 담보 조건은 어떻게 되나요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>전용 네트워크는 MST를 담보로 개설하며, 수수료와 확장 비용도 MST 기준으로 안내합니다. 필요한 구성과 운영 범위에 따라 조건이 달라질 수 있으므로 도입 전에 확인해 주세요. <a href="network.html">서비스 개요와 정책 보기</a></p></div>
+        </details>
+        <details class="home-faq-item" name="home-faq">
+          <summary>도입 전에 무엇을 준비하면 좋을까요?<span class="home-faq-symbol" aria-hidden="true"></span></summary>
+          <div class="home-faq-answer"><p>서비스 목적, 필요한 기능, 기존 시스템의 연동 방식과 희망 일정을 정리해 주세요. 네트워크 신청 시에는 회사명, 연락처, MST 예치 수량과 기타 요청사항을 입력합니다.</p></div>
+        </details>
       </div>
     </div>
   </section>
 
   <!-- CTA Section -->
-  <section class="cta" id="contact">
+  <section class="cta" id="contact" aria-labelledby="contact-title">
     <div class="container">
       <div class="cta-shell">
         <div class="cta-copy">
-          <p class="cta-label"><span class="hero-status-dot"></span> Build with MUSTSEM</p>
-          <h2>귀사에 맞는 Web3 인프라,<br>구조 설계부터 함께합니다.</h2>
+          <p class="cta-label">Build with MUSTSEM</p>
+          <h2 id="contact-title">귀사에 맞는 Web3 인프라, <br>구조 설계부터 함께합니다.</h2>
           <p class="cta-desc">요구사항을 알려주시면 네트워크 구성과 API 연동 범위를 빠르게 정리해드립니다.</p>
           <div class="cta-actions">
             <a href="network.html#apply" class="btn-primary">도입 상담 요청</a>
@@ -728,91 +378,6 @@
             <li><span aria-hidden="true">✓</span> 자산 토큰화 API</li>
             <li><span aria-hidden="true">✓</span> Vault · HSM 보안 설계</li>
           </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section id="faq" class="faq">
-    <div class="container">
-      <div class="section-header center">
-        <span class="section-badge">자주 묻는 질문</span>
-        <h2>머스트셈에 대해 더 알아보세요</h2>
-        <p>궁금한 점을 확인하고 Web3 인프라 도입을 시작하세요</p>
-      </div>
-      <div class="faq-list">
-        <div class="faq-item active">
-          <button class="faq-question" type="button">
-            <span>머스트셈은 어떤 서비스인가요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>머스트셈은 기업이 자체적으로 운영 가능한 전용 Web3 네트워크를 제공하는 인프라 전문 기업입니다. 초당 10,000건 처리 가능한 고성능 탈중앙화 네트워크를 기업별로 생성해드립니다.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>글로벌 서비스가 가능한가요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>네, 머스트셈 서비스는 전 세계에서 이용 가능합니다. 전용 Web3 네트워크와 토큰화 API 서비스를 통해 글로벌 기업들을 지원합니다.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>어떤 Web3 기술을 지원하나요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>머스트셈은 EVM 호환 고성능 탈중앙화 네트워크를 제공하며, Ethereum 브릿지, 디지털 자산 토큰화, SBT, 실물자산 토큰화 등 다양한 Web3 기술을 지원합니다.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>데이터 보안은 안전한가요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>물론입니다. 머스트셈은 엔드투엔드 암호화, 다중 서명 지갑, 정기 보안 감사를 포함한 엔터프라이즈급 보안 체계를 갖추고 있습니다. 업계 최고 수준의 보안 프로토콜로 고객의 데이터와 자산을 안전하게 보호합니다.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>설정비나 유지보수 비용이 있나요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>기업 맞춤형 유연한 요금제를 제공합니다. 귀사의 요구사항에 맞는 견적을 위해 영업팀에 문의해 주세요.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>개발자용 API를 제공하나요?</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-          </button>
-          <div class="faq-answer">
-            <p>네! 디지털 자산 토큰화, 토큰 관리, 지갑 운영, 네트워크 모니터링을 위한 종합 REST API를 제공합니다. 개발자를 위한 전체 API 문서와 SDK도 준비되어 있습니다.</p>
-          </div>
         </div>
       </div>
     </div>

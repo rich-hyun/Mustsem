@@ -6,9 +6,8 @@
   <title>RWA · Mustsem</title>
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <meta name="description" content="IPFS · MetaMask 연동으로 실물자산(RWA)을 온체인 토큰으로 발행합니다." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="canonical" href="https://www.mustsem.co.kr/rwa.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="MUSTSEM">
@@ -28,14 +27,14 @@
       border: 1px solid var(--border-light);
       height: 10px;
       width: 100%;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       overflow: hidden;
     }
     .progress-fill {
       background: var(--accent-primary);
       width: 0%;
       height: 100%;
-      border-radius: 6px;
+      border-radius: var(--radius-xs);
       transition: width 0.2s ease;
     }
   </style>
@@ -47,7 +46,7 @@
 
 <main>
   <!-- HERO -->
-  <section class="hero hero--subpage">
+  <section class="hero hero--subpage hero--token">
     <div class="hero-bg"></div>
     <div class="container hero-inner">
       <p class="eyebrow">실물자산 토큰화(RWA)</p>
@@ -108,9 +107,9 @@
         </p>
 
         <div class="card mono" style="margin-top:16px; padding:12px;">
-          <div><b>CID:</b> <span id="cidOut"></span></div>
-          <div><b>IPFS URI:</b> <span id="ipfsOut"></span></div>
-          <div><b>Gateway URL:</b> <span id="gwOut"></span></div>
+          <div><b>CID:</b> <span id="cidOut" data-empty="업로드 후 생성"></span></div>
+          <div><b>IPFS URI:</b> <span id="ipfsOut" data-empty="업로드 후 생성"></span></div>
+          <div><b>Gateway URL:</b> <span id="gwOut" data-empty="업로드 후 생성"></span></div>
         </div>
       </div>
     </div>
@@ -134,7 +133,8 @@
 
       <div class="card" style="margin-top:16px;">
         <h3>생성된 Solidity / ethers.js 코드</h3>
-        <pre id="codeOut" class="mono" style="white-space:pre-wrap;"></pre>
+        <pre id="codeOut" class="mono" style="white-space:pre-wrap;"
+             data-empty="받는 지갑 주소를 입력하고 코드 스니펫 생성을 누르면 여기에 표시됩니다."></pre>
       </div>
     </div>
   </section>
@@ -150,7 +150,8 @@
 
       <div class="card" style="margin-top:16px;">
         <h3>트랜잭션 로그</h3>
-        <pre id="logOut" class="mono" style="white-space:pre-wrap;"></pre>
+        <pre id="logOut" class="mono" style="white-space:pre-wrap;"
+             data-empty="민팅을 실행하면 트랜잭션 해시와 진행 상태가 여기에 기록됩니다."></pre>
       </div>
     </div>
   </section>

@@ -1,0 +1,51 @@
+.copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  height: 30px;
+  min-width: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    background-color var(--duration) var(--ease);
+}
+
+.copy:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.iconOnly {
+  width: 30px;
+  padding: 0;
+}
+
+.done {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.failed {
+  color: var(--danger);
+}
+
+[data-surface='dark'] .copy {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--on-navy-muted);
+}
+
+[data-surface='dark'] .copy:hover {
+  color: var(--on-navy);
+}

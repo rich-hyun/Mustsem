@@ -1,0 +1,447 @@
+.summary {
+  display: grid;
+  gap: 20px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ink-4);
+  box-shadow: 0 0 0 4px rgba(106, 118, 137, 0.15);
+}
+
+.status[data-state='loading'] .dot {
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.16);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.status[data-state='ready'] .dot {
+  position: relative;
+  background: var(--success);
+  box-shadow: 0 0 0 4px rgba(15, 122, 87, 0.15);
+}
+
+/* 연결 정상: 실제 상태를 나타내는 점이라 퍼져 나가는 고리로 살아 있음을 알린다 */
+@media (prefers-reduced-motion: no-preference) {
+  .status[data-state='ready'] .dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--success);
+    animation: live-ring 2.4s var(--ease-out) infinite;
+  }
+}
+
+@keyframes live-ring {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+.status[data-state='error'] .dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px rgba(179, 38, 30, 0.13);
+}
+
+.statusLabel {
+  display: block;
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.statusText {
+  margin-top: 2px;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.table {
+  margin-top: 16px;
+}
+
+.addressWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* 주소는 기본 흐림 — 마우스를 올리거나 포커스하면 보인다 */
+.address {
+  min-width: 0;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+  filter: blur(5px);
+  transition: filter 240ms var(--ease);
+  user-select: none;
+}
+
+.address:hover,
+.address:focus {
+  filter: none;
+  user-select: text;
+  outline: none;
+}
+
+.address:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.balance {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.stateCell {
+  padding: 36px 20px !important;
+  color: var(--ink-3) !important;
+  text-align: center !important;
+}
+
+.stateCell strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: var(--text-sm);
+}
+
+.stateInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 불러오는 동안: 결과와 같은 모양의 뼈대 위로 빛이 흐른다 */
+.bone {
+  position: relative;
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.bone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  transform: translateX(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bone::after {
+    animation: bone-shimmer 1.4s var(--ease) infinite;
+  }
+
+  /* 데이터가 들어오면 행이 차례로 들어온다 (새로고침으로 같은 행이 유지되면 다시 움직이지 않는다) */
+  .rows tr:not(.skeletonRow) {
+    animation: row-in 460ms var(--ease-out) both;
+  }
+
+  .rows tr:nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .rows tr:nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .rows tr:nth-child(4) {
+    animation-delay: 150ms;
+  }
+  .rows tr:nth-child(5) {
+    animation-delay: 200ms;
+  }
+  .rows tr:nth-child(n + 6) {
+    animation-delay: 250ms;
+  }
+}
+
+@keyframes bone-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+.hint {
+  margin-top: 12px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ── 가치 변화 차트 ─────────────────────────────────────────────── */
+.market {
+  display: grid;
+  gap: 16px;
+}
+
+.marketToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* 요약 수치와 그래프를 한 면(L1)에 담는다 */
+.marketCard {
+  overflow: hidden;
+}
+
+.marketStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+
+.marketStat {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 18px 22px;
+}
+
+.marketStat + .marketStat {
+  border-left: 1px solid var(--line);
+}
+
+.marketName {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  background: var(--swatch, var(--ink-4));
+}
+
+.marketValue {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.marketChange {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.marketChange[data-dir='up'] {
+  color: var(--accent-ink);
+}
+
+.marketChange[data-dir='down'] {
+  color: var(--danger);
+}
+
+.marketRaw {
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.marketSource {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+}
+
+.chartWrap {
+  position: relative;
+  height: 380px;
+  padding: 18px 16px 12px;
+}
+
+.chartWrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chartState {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--surface);
+}
+
+/* 불러오는 동안: 그래프 자리 전체가 뼈대 면이 된다 */
+.chartSkeleton {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+  overflow: hidden;
+}
+
+.chartSkeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  transform: translateX(-100%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .chartSkeleton::after {
+    animation: bone-shimmer 1.4s var(--ease) infinite;
+  }
+}
+
+.chartError {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.chartError strong {
+  color: var(--ink);
+}
+
+.chartError button {
+  margin-top: 8px;
+}
+
+.sources {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.sources ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 720px) {
+  .marketToolbar > :last-child {
+    width: 100%;
+  }
+
+  .marketToolbar > :last-child button {
+    flex: 1 1 0;
+  }
+
+  .marketStats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .marketStat {
+    padding: 14px 16px;
+  }
+
+  .marketStat + .marketStat {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .marketValue {
+    font-size: 1.25rem;
+  }
+
+  .chartWrap {
+    height: 280px;
+    padding: 12px 8px 8px;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 16px;
+  }
+
+  .metrics > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .toolbar > :last-child {
+    width: 100%;
+  }
+
+  /* 쌓기 모드에서도 상태 안내 행은 가운데 한 덩어리로 */
+  .stateCell {
+    display: block !important;
+  }
+
+  .stateCell::before {
+    display: none;
+  }
+}

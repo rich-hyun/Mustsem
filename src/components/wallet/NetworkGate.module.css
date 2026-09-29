@@ -1,0 +1,38 @@
+.ready {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ready .account {
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(15, 122, 87, 0.18);
+}
+
+.checking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}

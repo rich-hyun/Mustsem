@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /confirm.html
-
-Sitemap: https://www.mustsem.co.kr/sitemap.xml

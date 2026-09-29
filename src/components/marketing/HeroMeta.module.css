@@ -1,0 +1,51 @@
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badges code {
+  color: var(--on-navy);
+  font-size: inherit;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--navy-line);
+}
+
+/* 머리 글이 자리 잡은 뒤 배지가 하나씩 켜진다 */
+@media (prefers-reduced-motion: no-preference) {
+  .badges > li {
+    animation: badge-in 520ms var(--ease-out) both;
+    animation-delay: calc(560ms + var(--badge-i, 0) * 80ms);
+  }
+
+  .badges > li:nth-child(2) {
+    --badge-i: 1;
+  }
+  .badges > li:nth-child(3) {
+    --badge-i: 2;
+  }
+  .badges > li:nth-child(4) {
+    --badge-i: 3;
+  }
+}
+
+@keyframes badge-in {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+  to {
+    opacity: 1;
+    scale: none;
+  }
+}

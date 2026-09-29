@@ -1,0 +1,44 @@
+/* 고도 사다리 — 테두리 XOR 그림자 */
+.card {
+  position: relative;
+  min-width: 0;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+/* L0 평면: 면 없이 여백으로만 구분 */
+.flat {
+  background: transparent;
+}
+
+/* L1 면: 정보를 담는 기본 면. 테두리만, hover로 떠오르지 않는다 */
+.surface {
+  border: 1px solid var(--line);
+}
+
+/* L2 조작 면: 사용자가 입력·실행하는 면. 그림자만 */
+.raised {
+  box-shadow: var(--shadow-raised);
+}
+
+.padMd {
+  padding: 24px;
+}
+
+.padLg {
+  padding: clamp(24px, 3vw, 36px);
+}
+
+.padNone {
+  padding: 0;
+}
+
+.feature {
+  border-radius: var(--radius-feature);
+}
+
+@media (max-width: 480px) {
+  .padMd {
+    padding: 20px;
+  }
+}

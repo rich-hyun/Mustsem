@@ -1,0 +1,402 @@
+/* ── Icon tile ───────────────────────────────────────────────────── */
+.iconTile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-control);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+[data-surface='dark'] .iconTile {
+  border-color: rgba(0, 208, 156, 0.3);
+  background: rgba(0, 208, 156, 0.1);
+  color: var(--teal);
+}
+
+/* ── Feature grid ────────────────────────────────────────────────── */
+.featureGrid {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cols2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cols3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cols4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.feature {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+
+.featureTitle {
+  font-size: var(--text-h3);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.featureText {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+}
+
+[data-surface='dark'] .featureText {
+  color: var(--on-navy-muted);
+}
+
+.featureBody {
+  display: grid;
+  gap: 8px;
+}
+
+/* ── Text link ───────────────────────────────────────────────────── */
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  color: var(--accent-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  text-underline-offset: 4px;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.textLink svg {
+  transition: transform var(--duration) var(--ease);
+}
+
+.textLink:hover svg {
+  transform: translateX(2px);
+}
+
+[data-surface='dark'] .textLink {
+  color: var(--teal);
+}
+
+/* ── Stat row ────────────────────────────────────────────────────── */
+/* 특징 격자와 같은 열 간격(48px)을 써서 아래 행과 세로 정렬을 맞춘다 */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 48px;
+  margin: 0;
+  border-block: 1px solid var(--line);
+}
+
+.stat {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 24px 0;
+}
+
+.statValue {
+  order: -1;
+  color: var(--ink);
+  font-size: clamp(1.5rem, 1.1rem + 1.1vw, 2rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+[data-surface='dark'] .stats {
+  border-color: var(--navy-line);
+}
+
+
+[data-surface='dark'] .statValue {
+  color: var(--on-navy);
+}
+
+[data-surface='dark'] .statLabel {
+  color: var(--on-navy-muted);
+}
+
+/* ── Numbered steps (순차 번호) ──────────────────────────────────── */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(var(--step-cols, 3), minmax(0, 1fr));
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.step {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 20px;
+  border-top: 2px solid var(--accent-line);
+  counter-increment: step;
+}
+
+.step::before {
+  content: counter(step, decimal-leading-zero);
+  color: var(--accent-ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepTitle {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.stepText {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+}
+
+/* ── CTA banner (L3 네이비) ──────────────────────────────────────── */
+.cta {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  padding: clamp(32px, 5vw, 56px);
+  border-radius: var(--radius-feature);
+  background:
+    radial-gradient(90% 120% at 100% 0%, rgba(0, 180, 216, 0.16) 0%, transparent 60%),
+    var(--navy-900);
+  color: var(--on-navy);
+  overflow: hidden;
+}
+
+/* 네이비 면 위를 천천히 떠도는 빛 (화면 밖에선 멈춘다) */
+.aurora {
+  position: absolute;
+  inset: -60% -25%;
+  background:
+    radial-gradient(38% 46% at 28% 42%, rgba(0, 208, 156, 0.2), transparent 70%),
+    radial-gradient(34% 42% at 72% 58%, rgba(0, 180, 216, 0.18), transparent 70%);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aurora {
+    animation: aurora-drift 20s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-6%, -4%, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(5%, 3%, 0) rotate(7deg) scale(1.08);
+  }
+  100% {
+    transform: translate3d(9%, -3%, 0) rotate(-5deg) scale(1.02);
+  }
+}
+
+.ctaBody,
+.bannerBody,
+.bannerAction {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.ctaLabel {
+  margin-bottom: 14px;
+  color: var(--teal);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ctaTitle {
+  font-size: clamp(1.5rem, 1.1rem + 1.3vw, 2.125rem);
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+}
+
+.ctaText {
+  margin-top: 14px;
+  color: var(--on-navy-muted);
+  font-size: var(--text-md);
+  line-height: 1.75;
+}
+
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.checklist {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--navy-line);
+  border-radius: var(--radius-card);
+}
+
+.checklist ul {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklistTitle {
+  color: var(--on-navy-subtle);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--on-navy);
+  font-size: var(--text-sm);
+  font-weight: 550;
+}
+
+.checklist svg {
+  flex: 0 0 auto;
+  color: var(--teal);
+}
+
+/* ── Banner row (한 줄 CTA) ──────────────────────────────────────── */
+.banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: clamp(24px, 3.5vw, 36px) clamp(24px, 4vw, 40px);
+  border-radius: var(--radius-card);
+  background: var(--navy-900);
+  color: var(--on-navy);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.bannerTitle {
+  font-size: var(--text-h3);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.bannerText {
+  margin-top: 6px;
+  color: var(--on-navy-muted);
+  font-size: var(--text-sm);
+}
+
+/* 밝은 배너: 흰 카드(L1) + 오른쪽 위 틸 빛. 원본 API 카탈로그의 CTA 모양 */
+.bannerLight {
+  padding: clamp(28px, 3.5vw, 40px) clamp(24px, 4vw, 48px);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.bannerLight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 200px at 100% 0%, rgba(0, 208, 156, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
+.bannerLight .bannerTitle {
+  font-size: clamp(1.25rem, 0.85rem + 1.1vw, 1.625rem);
+  font-weight: 700;
+}
+
+.bannerLight .bannerText {
+  margin-top: 8px;
+  color: var(--ink-3);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1024px) {
+  .cols4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+  }
+
+  .stat:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+
+  [data-surface='dark'] .stat:nth-child(n + 3) {
+    border-top-color: var(--navy-line);
+  }
+
+  .cta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .cols2,
+  .cols3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cols4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat {
+    padding: 20px 0;
+  }
+}

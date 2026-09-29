@@ -1,0 +1,222 @@
+/* ── Key–value list ─────────────────────────────────────────────── */
+.kv {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.kvRow {
+  display: grid;
+  grid-template-columns: minmax(96px, 34%) minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.kvRow:first-child {
+  padding-top: 0;
+}
+
+.kvRow:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.kvRow dt {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.kvRow dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.kvValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.kvMono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.stacked .kvRow {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+}
+
+/* ── Metric ──────────────────────────────────────────────────────── */
+.metric {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.metricLabel {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.metricValue {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  color: var(--ink);
+  font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.metricUnit {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.metricHint {
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+}
+
+.metricMuted .metricValue {
+  color: var(--ink-4);
+}
+
+/* ── Badge ───────────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: var(--radius-xs);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pill {
+  border-radius: var(--radius-pill);
+}
+
+.badgeNeutral {
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+}
+
+.badgeAccent {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.badgeSuccess {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.badgeWarning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.badgeDanger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badgeInfo {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.badgeOnDark {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--on-navy-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* ── Code block ──────────────────────────────────────────────────── */
+.code {
+  margin: 0;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface-tint);
+  overflow: hidden;
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 8px 6px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.codeTitle {
+  color: var(--ink-3);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.codeBody {
+  margin: 0;
+  padding: 16px 18px;
+  overflow: auto;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  tab-size: 4;
+}
+
+.codeScroll {
+  max-height: 440px;
+}
+
+.wrap .codeBody {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────── */
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

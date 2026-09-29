@@ -1,9 +1,26 @@
-# Local dev / review artifacts (not for deployment)
-_review/
+# dependencies
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# env
+.env*.local
+.env
+
+# logs / OS
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# local review artifacts
+/_review/
+
+# 원본 저장소에서 이어받은 제외 규칙 (업무 문서 · 로컬 검토 자료, 사이트 배포 대상 아님)
 .playwright-cli/
-
-
-# 업무 문서 / 자료 (사이트 배포 대상 아님)
 *.pdf
 EMS_*
 image.png

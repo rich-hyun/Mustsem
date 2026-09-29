@@ -1,0 +1,199 @@
+/* 법적 문서 본문 — /terms·/privacy 페이지와 회원가입 모달이 같은 스타일을 쓴다 */
+.doc {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* 읽기 진행 표시: 헤더 위(z 60)에 얹히는 얇은 선 */
+.progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 61;
+    display: block;
+    height: 3px;
+    background: var(--brand-gradient);
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: legal-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes legal-progress {
+  to {
+    transform: none;
+  }
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin-bottom: 32px;
+  padding: 14px 18px;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+}
+
+.meta strong {
+  margin-right: 8px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.heading {
+  margin: 40px 0 14px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+/* 첫 조항 제목은 구분선 없이 시작한다 (도입 문단이 앞에 있으면 간격만 둔다) */
+.heading:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.doc p + .heading:first-of-type {
+  margin-top: 28px;
+}
+
+.doc p,
+.doc li {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.85;
+}
+
+.doc p {
+  margin: 0 0 12px;
+}
+
+.doc ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.doc li {
+  margin-bottom: 6px;
+}
+
+.doc li::marker {
+  color: var(--accent-ink);
+}
+
+.doc a {
+  color: var(--accent-ink);
+  font-weight: 550;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tableWrap {
+  margin: 12px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+}
+
+.table th,
+.table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  background: var(--surface-tint);
+  color: var(--ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table td {
+  min-width: 120px;
+  color: var(--ink-2);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.contact {
+  margin-top: 12px;
+  padding: 18px 20px;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+}
+
+.contact p {
+  margin: 0 0 6px;
+}
+
+.contact p:last-child {
+  margin: 0;
+}
+
+.contact strong {
+  margin-right: 8px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 모달 안: 더 촘촘하게 */
+.compact .meta {
+  margin-bottom: 20px;
+}
+
+.compact .heading {
+  margin: 28px 0 10px;
+  padding-top: 20px;
+  font-size: var(--text-md);
+}
+
+.compact .heading:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.compact p + .heading:first-of-type {
+  margin-top: 20px;
+}
+
+.compact p,
+.compact li {
+  font-size: var(--text-xs);
+  line-height: 1.8;
+}
+
+.subheading {
+  margin: 20px 0 8px;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.subheading:first-child {
+  margin-top: 0;
+}

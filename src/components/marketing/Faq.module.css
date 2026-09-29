@@ -1,0 +1,105 @@
+.faq {
+  border-top: 1px solid var(--line-strong);
+}
+
+.item {
+  border-bottom: 1px solid var(--line);
+}
+
+.question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 72px;
+  padding: 20px 4px;
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 650;
+  line-height: 1.55;
+  list-style: none;
+  cursor: pointer;
+  transition: color var(--duration) var(--ease);
+}
+
+.question::-webkit-details-marker {
+  display: none;
+}
+
+.question:hover,
+.item[open] .question {
+  color: var(--accent-ink);
+}
+
+.icon {
+  flex: 0 0 auto;
+  transition: transform 220ms var(--ease);
+}
+
+.item[open] .icon {
+  transform: rotate(45deg);
+}
+
+.answer p {
+  max-width: 64ch;
+  padding: 0 40px 24px 4px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.8;
+}
+
+.answer a {
+  color: var(--accent-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* 열고 닫을 때 높이가 부드럽게 바뀐다 (지원 브라우저만, 나머지는 즉시 전환) */
+@supports selector(::details-content) {
+  @media (prefers-reduced-motion: no-preference) {
+    .item {
+      interpolate-size: allow-keywords;
+    }
+
+    .item::details-content {
+      height: 0;
+      overflow: clip;
+      transition:
+        height 380ms var(--ease-out),
+        content-visibility 380ms allow-discrete;
+    }
+
+    .item[open]::details-content {
+      height: auto;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .item[open] .answer p {
+    animation: faq-answer 420ms var(--ease-out) both;
+  }
+}
+
+@keyframes faq-answer {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .question {
+    gap: 16px;
+    font-size: var(--text-sm);
+  }
+
+  .answer p {
+    padding-right: 8px;
+  }
+}

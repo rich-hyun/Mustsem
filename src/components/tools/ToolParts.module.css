@@ -1,0 +1,47 @@
+/* 발행 도구(NFT·SBT·RWA) 공용 보조 스타일 — Tool.module.css를 보완한다 */
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.stack:empty {
+  display: none;
+}
+
+.outcome {
+  display: grid;
+  gap: 16px;
+}
+
+/* TxStatus 기본 위 여백을 결과 패널 첫 줄에서는 없앤다 */
+.outcome > :first-child {
+  margin-top: 0;
+}
+
+.note {
+  margin-bottom: 12px;
+}
+
+.inlineError {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 10px;
+  color: var(--danger);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.inlineError svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}

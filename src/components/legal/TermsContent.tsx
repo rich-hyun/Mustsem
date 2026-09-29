@@ -1,0 +1,129 @@
+import { SITE } from '@/config/site'
+import { LegalContact, LegalDocument, LegalHeading, LegalMeta, type LegalContentProps } from './LegalMeta'
+
+/** 서비스 이용약관 원문 — /terms 페이지와 회원가입 모달이 함께 쓴다 */
+export function TermsContent({ headingLevel = 'h2', compact }: LegalContentProps) {
+  return (
+    <LegalDocument compact={compact}>
+      <LegalMeta />
+
+      <LegalHeading level={headingLevel}>제1조 (목적)</LegalHeading>
+      <p>
+        이 약관은 머스트셈 네트워크(이하 &quot;회사&quot;)가 제공하는 Web3 및 토큰화 API 플랫폼과 이에 부수하는 제반
+        서비스(이하 &quot;서비스&quot;)의 이용과 관련하여 회사와 이용자 간의 권리, 의무 및 책임 사항, 기타 필요한 사항을
+        규정함을 목적으로 합니다.
+      </p>
+
+      <LegalHeading level={headingLevel}>제2조 (정의)</LegalHeading>
+      <ul>
+        <li>
+          &quot;서비스&quot;란 회사가 제공하는 블록체인 네트워크, 토큰화 API, 대시보드, 브릿지, 스테이킹, NFT/SBT/RWA 관련
+          기능 등 일체의 서비스를 말합니다.
+        </li>
+        <li>&quot;이용자&quot;란 이 약관에 동의하고 회사가 제공하는 서비스를 이용하는 회원 및 비회원을 말합니다.</li>
+        <li>&quot;회원&quot;이란 이메일 또는 Google 계정 등으로 가입하여 계정을 부여받은 자를 말합니다.</li>
+        <li>&quot;API 키&quot;란 회원이 서비스의 API를 호출하기 위해 발급받는 인증 수단을 말합니다.</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제3조 (약관의 효력 및 변경)</LegalHeading>
+      <ul>
+        <li>이 약관은 서비스 화면에 게시하거나 기타의 방법으로 공지함으로써 효력이 발생합니다.</li>
+        <li>
+          회사는 관련 법령을 위배하지 않는 범위에서 이 약관을 개정할 수 있으며, 개정 시 적용일자 및 개정 사유를 명시하여
+          적용일 7일 전부터 공지합니다. 이용자에게 불리한 변경의 경우 30일 전에 공지합니다.
+        </li>
+        <li>이용자가 개정 약관의 적용에 동의하지 않는 경우 회원 탈퇴를 통해 이용계약을 해지할 수 있습니다.</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제4조 (회원가입 및 계정 관리)</LegalHeading>
+      <ul>
+        <li>회원가입은 이용자가 약관에 동의하고 회사가 정한 절차에 따라 신청하면, 회사가 이를 승낙함으로써 성립합니다.</li>
+        <li>
+          이용자는 Google OAuth 2.0 등 소셜 로그인을 통해 가입할 수 있으며, 이 경우 해당 제공자의 약관 및 정책이 함께 적용될
+          수 있습니다.
+        </li>
+        <li>계정 및 API 키의 관리 책임은 회원 본인에게 있으며, 이를 제3자에게 양도하거나 대여할 수 없습니다.</li>
+        <li>회원은 언제든지 탈퇴를 요청할 수 있으며, 회사는 지체 없이 처리합니다.</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제5조 (서비스의 제공 및 변경)</LegalHeading>
+      <ul>
+        <li>회사는 이용자에게 블록체인 인프라, 토큰화 API, 대시보드 등의 서비스를 제공합니다.</li>
+        <li>
+          회사는 운영상·기술상 필요에 따라 제공하는 서비스의 전부 또는 일부를 변경하거나 중단할 수 있으며, 중요한 변경
+          사항은 사전에 공지합니다.
+        </li>
+        <li>서비스는 연중무휴 제공을 원칙으로 하나, 시스템 점검·장애·불가항력 등의 사유로 일시 중단될 수 있습니다.</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제6조 (이용자의 의무)</LegalHeading>
+      <p>이용자는 다음 각 호의 행위를 해서는 안 됩니다.</p>
+      <ul>
+        <li>가입 신청 또는 정보 변경 시 허위 내용을 등록하는 행위</li>
+        <li>타인의 계정, API 키 또는 개인정보를 도용하는 행위</li>
+        <li>서비스의 정상적인 운영을 방해하는 행위 (비정상적 대량 호출, 취약점 악용 등)</li>
+        <li>자금세탁, 사기, 불법 자금 조달 등 법령에 위반되는 목적으로 서비스를 이용하는 행위</li>
+        <li>회사 또는 제3자의 지식재산권을 침해하는 행위</li>
+        <li>기타 관련 법령 및 이 약관에 위반되는 행위</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제7조 (지식재산권)</LegalHeading>
+      <p>
+        서비스 및 서비스 내 회사가 제작한 콘텐츠에 대한 저작권 및 지식재산권은 회사에 귀속됩니다. 이용자는 회사의 사전
+        승낙 없이 이를 복제, 전송, 출판, 배포, 방송 기타 방법으로 영리 목적으로 이용하거나 제3자에게 이용하게 해서는 안
+        됩니다.
+      </p>
+
+      <LegalHeading level={headingLevel}>제8조 (블록체인 및 디지털 자산 관련 고지)</LegalHeading>
+      <ul>
+        <li>블록체인 네트워크에 기록된 트랜잭션은 그 특성상 취소하거나 되돌릴 수 없습니다.</li>
+        <li>
+          서비스에서 제공하는 정보는 투자 권유 또는 자문에 해당하지 않으며, 디지털 자산의 가치 변동에 따른 손실 책임은
+          이용자 본인에게 있습니다.
+        </li>
+        <li>이용자가 관리하는 지갑의 개인키·니모닉 분실에 대해 회사는 책임을 지지 않습니다.</li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제9조 (서비스 이용의 제한 및 계약 해지)</LegalHeading>
+      <p>
+        회사는 이용자가 이 약관 또는 관련 법령을 위반한 경우, 사전 통지 후 서비스 이용을 제한하거나 이용계약을 해지할 수
+        있습니다. 다만, 긴급한 위험 방지가 필요한 경우 사후에 통지할 수 있습니다.
+      </p>
+
+      <LegalHeading level={headingLevel}>제10조 (면책 조항)</LegalHeading>
+      <ul>
+        <li>
+          회사는 천재지변, 블록체인 네트워크 자체의 장애, 이용자의 귀책사유 등 회사의 합리적인 통제를 벗어난 사유로 발생한
+          손해에 대해 책임을 지지 않습니다.
+        </li>
+        <li>
+          회사는 이용자가 서비스를 통해 얻은 정보나 자료로 인한 손해에 대해 고의 또는 중대한 과실이 없는 한 책임을 지지
+          않습니다.
+        </li>
+        <li>
+          무료로 제공되는 서비스의 장애 또는 중단에 대하여 회사는 관련 법령에 특별한 규정이 없는 한 책임을 지지 않습니다.
+        </li>
+      </ul>
+
+      <LegalHeading level={headingLevel}>제11조 (준거법 및 재판관할)</LegalHeading>
+      <p>
+        이 약관과 서비스 이용에 관한 분쟁에는 대한민국 법령을 적용하며, 분쟁이 발생한 경우 민사소송법상의 관할 법원에 소를
+        제기할 수 있습니다.
+      </p>
+
+      <LegalHeading level={headingLevel}>제12조 (문의처)</LegalHeading>
+      <LegalContact>
+        <p>
+          <strong>운영 주체</strong>머스트셈 네트워크
+        </p>
+        <p>
+          <strong>이메일</strong>
+          <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
+        </p>
+      </LegalContact>
+
+      <LegalHeading level={headingLevel}>부칙</LegalHeading>
+      <p>이 약관은 2026년 7월 6일부터 시행합니다.</p>
+    </LegalDocument>
+  )
+}

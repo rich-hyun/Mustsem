@@ -1,0 +1,142 @@
+.button {
+  --btn-h: 44px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--btn-h);
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-decoration: none;
+  transition:
+    background-color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease),
+    transform 140ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 눌림: 손끝에 닿는 짧은 반응 */
+.button:not(:disabled):active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.button svg {
+  flex: 0 0 auto;
+}
+
+.sm {
+  --btn-h: 36px;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: var(--text-xs);
+}
+
+.lg {
+  --btn-h: 50px;
+  padding: 0 22px;
+  font-size: var(--text-md);
+}
+
+.block {
+  width: 100%;
+}
+
+/* 밝은 면의 주 버튼 — 네이비 */
+.primary {
+  background: var(--navy-800);
+  color: var(--on-navy);
+}
+.primary:not(:disabled):hover {
+  background: var(--navy-700);
+}
+
+.secondary {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+.secondary:not(:disabled):hover {
+  border-color: var(--ink-4);
+  background: var(--surface-tint);
+}
+
+.ghost {
+  color: var(--ink-2);
+}
+.ghost:not(:disabled):hover {
+  background: var(--surface-tint);
+  color: var(--ink);
+}
+
+/* 어두운 면 전용: 틸 채움 + 네이비 글자(9:1). 올리면 빛이 한 번 스친다 */
+.accent {
+  background: var(--teal);
+  color: var(--navy-900);
+  overflow: hidden;
+  isolation: isolate;
+}
+.accent:not(:disabled):hover {
+  background: var(--teal-hover);
+}
+.accent::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, 0.5) 50%, transparent 68%);
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .accent:not(:disabled):hover::after {
+    transform: translateX(120%);
+    transition: transform 760ms var(--ease-out);
+  }
+}
+
+/* 어두운 면 전용 — 반투명 외곽선 */
+.onDark {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--on-navy);
+}
+.onDark:not(:disabled):hover {
+  border-color: rgba(255, 255, 255, 0.44);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.danger {
+  border-color: #eec3c0;
+  background: var(--surface);
+  color: var(--danger);
+}
+.danger:not(:disabled):hover {
+  background: var(--danger-soft);
+}
+
+.button:disabled {
+  opacity: 0.5;
+}
+
+.button[aria-busy='true'] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

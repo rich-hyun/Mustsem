@@ -1,0 +1,387 @@
+/* ── 도구 페이지 레이아웃: 단계(본문) + 상태 패널(오른쪽) ───────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  align-items: start;
+}
+
+.main {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.aside {
+  position: sticky;
+  top: calc(var(--header-h) + 20px);
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* 넓은 2열 도구(NFT·SBT·RWA): 입력(왼쪽) + 결과(오른쪽) */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Panel (L1 정보 면) ─────────────────────────────────────────── */
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panelTitle {
+  font-size: var(--text-md);
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.panelNote {
+  margin-top: 14px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+.metrics {
+  display: grid;
+  gap: 16px;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px 24px;
+}
+
+.divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--line);
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--ink-3);
+}
+
+.iconButton:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+}
+
+.spinning {
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── 폼 ─────────────────────────────────────────────────────────── */
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.maxButton {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--surface-tint);
+  color: var(--ink-2);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+}
+
+.maxButton:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.summary {
+  display: grid;
+  gap: 0;
+  padding: 4px 16px;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+}
+
+.details {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.details summary {
+  color: var(--ink-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.details[open] summary {
+  margin-bottom: 12px;
+}
+
+/* ── 단계 목록 ──────────────────────────────────────────────────── */
+.steps {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 16px;
+}
+
+/* 번호 사이를 잇는 선 */
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  bottom: -16px;
+  left: 17px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.marker {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker {
+  transition:
+    background-color 300ms var(--ease),
+    border-color 300ms var(--ease),
+    color 300ms var(--ease);
+}
+
+.step[data-state='done'] .marker {
+  border-color: var(--success);
+  background: var(--success);
+  color: #fff;
+}
+
+/* 단계를 마치면 번호가 튀어 오르고, 다음 단계로 이어지는 선이 채워진다 */
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 40px;
+  bottom: -16px;
+  left: 17px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--success) 0%, var(--success) 55%, var(--line) 100%);
+  transform: scaleY(0);
+  transform-origin: top center;
+  transition: transform 700ms var(--ease-out);
+}
+
+.step[data-state='done']:not(:last-child)::after {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .step[data-state='done'] .marker {
+    animation: marker-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+}
+
+@keyframes marker-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.stepHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.stepTitle {
+  font-size: var(--text-h3);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.stepMeta {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.stepDesc {
+  margin-bottom: 18px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+/* ── 결과 콘솔 (NFT·SBT·RWA) ────────────────────────────────────── */
+.console {
+  display: grid;
+  gap: 12px;
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  min-height: 180px;
+  padding: 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.empty svg {
+  color: var(--ink-4);
+}
+
+.generated {
+  position: relative;
+  min-width: 0;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .generated {
+    animation: code-in 360ms var(--ease-out) both;
+  }
+
+  .generated::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 80px;
+    background: linear-gradient(180deg, transparent, rgba(0, 208, 156, 0.16), transparent);
+    transform: translateY(-100%);
+    animation: code-scan 900ms cubic-bezier(0.45, 0, 0.25, 1) 120ms both;
+    pointer-events: none;
+  }
+}
+
+@keyframes code-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes code-scan {
+  from {
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(700%);
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .aside {
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .formRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .step {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .step:not(:last-child)::before,
+  .step:not(:last-child)::after {
+    display: none;
+  }
+
+  .marker {
+    width: 30px;
+    height: 30px;
+    font-size: var(--text-xs);
+  }
+}

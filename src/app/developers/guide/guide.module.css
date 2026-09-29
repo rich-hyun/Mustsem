@@ -1,0 +1,237 @@
+/* ── 동작 흐름: 설명 + 흐름도 ─────────────────────────────────────── */
+.flowLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+/* SectionHeading 기본 아래 여백보다 우선하도록 부모 선택자를 붙인다 */
+.flowLayout .flowHeading {
+  margin-bottom: 0;
+}
+
+/* ── 문서 레이아웃: 목차 + 본문 ───────────────────────────────────── */
+.docLayout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+
+.toc {
+  position: sticky;
+  top: calc(var(--header-h) + 32px);
+}
+
+.tocTitle {
+  margin-bottom: 12px;
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.tocList {
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--line);
+  list-style: none;
+}
+
+.tocList a {
+  display: block;
+  margin-left: -1px;
+  padding: 7px 0 7px 16px;
+  border-left: 2px solid transparent;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  transition:
+    color var(--duration) var(--ease),
+    border-color var(--duration) var(--ease);
+}
+
+.tocList a:hover {
+  border-left-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.tocList a[aria-current] {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* 지금 읽는 글 표시줄: 항목 사이를 미끄러져 옮겨 간다 */
+.tocTrack {
+  position: relative;
+}
+
+.tocBar {
+  position: absolute;
+  top: 0;
+  left: -1px;
+  z-index: 1;
+  width: 2px;
+  height: 36px;
+  border-radius: 2px;
+  background: var(--brand-gradient);
+  opacity: 0;
+  transition:
+    transform 420ms var(--ease-out),
+    opacity 240ms var(--ease);
+  pointer-events: none;
+}
+
+.tocBar[data-on] {
+  opacity: 1;
+}
+
+.docBody {
+  min-width: 0;
+  max-width: 800px;
+}
+
+.article {
+  padding-block: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.article:last-child {
+  padding-bottom: 0;
+}
+
+.articleHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.articleTitle {
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.article p {
+  color: var(--ink-2);
+  font-size: var(--text-md);
+  line-height: 1.8;
+}
+
+.article p + p {
+  margin-top: 12px;
+}
+
+.article code {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xs);
+  background: var(--surface-tint);
+  color: var(--accent-ink-strong);
+  font-size: 0.8125rem;
+}
+
+.em {
+  color: var(--accent-ink);
+  font-weight: 650;
+}
+
+.callout {
+  margin-top: 18px;
+}
+
+/* 사용 절차 — 순차 번호 */
+.procedure {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: procedure;
+}
+
+.procedure li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  counter-increment: procedure;
+}
+
+.procedure li::before {
+  content: counter(procedure);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--navy-800);
+  color: var(--on-navy);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 예시 */
+.examples {
+  display: grid;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exampleHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.exampleTitle {
+  font-size: var(--text-md);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.article .exampleText {
+  margin-top: 2px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+.article .closing {
+  margin-top: 28px;
+}
+
+.bannerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 1024px) {
+  .flowLayout,
+  .docLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .flowLayout .flowHeading {
+    margin-bottom: 8px;
+  }
+
+  .toc {
+    display: none;
+  }
+}

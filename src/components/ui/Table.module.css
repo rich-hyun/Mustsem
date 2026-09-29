@@ -1,0 +1,105 @@
+/* 데이터 표 — L1 면(테두리만). 좁은 화면에서는 stack 모드로 행을 카드처럼 쌓는다. */
+.wrap {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table th {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-tint);
+  color: var(--ink-2);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  line-height: 1.6;
+  vertical-align: middle;
+  transition: background-color 160ms var(--ease);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover td {
+  background: #fafcfd;
+}
+
+/* 셀 보조 클래스 */
+.numeric {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.strong {
+  color: var(--ink) !important;
+  font-weight: 600;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 720px) {
+  /* 열 너비(colgroup)가 남아 있으면 쌓인 행 전체가 첫 열 폭에 갇혀 글자가 한 자씩 꺾인다 */
+  .stack colgroup,
+  .stack thead {
+    display: none;
+  }
+
+  .stack tbody tr {
+    display: block;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stack tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .stack td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+    border-bottom: 0;
+    text-align: right;
+  }
+
+  .stack td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--ink-3);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .stack td.numeric {
+    text-align: right;
+  }
+}

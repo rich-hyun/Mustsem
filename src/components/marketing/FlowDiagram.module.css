@@ -1,0 +1,160 @@
+/* 세로 흐름도: 노드는 L1 면(테두리만), 노드 사이는 신호가 지나가는 연결선과 경유 라벨 */
+.flow {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+}
+
+.via {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  min-height: 46px;
+}
+
+.wire {
+  position: relative;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.wire::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 5px;
+  left: 50%;
+  width: 1px;
+  translate: -0.5px 0;
+  background: var(--line-strong);
+}
+
+.caret {
+  position: relative;
+  margin-bottom: -2px;
+  color: var(--line-strong);
+}
+
+/* 요청 신호: FlowPlayer가 연결선을 따라 내려 보낸다 */
+.packet {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 0 4px rgba(0, 208, 156, 0.18);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.viaLabel {
+  grid-column: 3;
+  align-self: center;
+  padding-left: 10px;
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.node {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  transition:
+    border-color 420ms var(--ease),
+    box-shadow 420ms var(--ease),
+    opacity 420ms var(--ease),
+    translate 420ms var(--ease);
+}
+
+.nodeIcon {
+  transition:
+    background-color 420ms var(--ease),
+    border-color 420ms var(--ease),
+    color 420ms var(--ease);
+}
+
+/* 신호가 도착한 노드 · 지나간 노드 · 연동 목록에서 제외된 노드 */
+.node[data-flow-state='active'] {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 4px rgba(0, 208, 156, 0.12);
+  translate: 0 -1px;
+}
+
+.node[data-flow-state='active'] .nodeIcon {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--navy-900);
+}
+
+.node[data-flow-state='active'] .nodeBadge {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--navy-900);
+}
+
+.node[data-flow-state='passed'] {
+  border-color: var(--accent-line);
+}
+
+.node[data-flow-state='dim'] {
+  opacity: 0.5;
+}
+
+.nodeText {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.nodeTitle {
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.nodeDesc {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+}
+
+.nodeBadge {
+  flex: 0 0 auto;
+  transition:
+    background-color 420ms var(--ease),
+    border-color 420ms var(--ease),
+    color 420ms var(--ease);
+}
+
+@media (max-width: 480px) {
+  .node {
+    flex-wrap: wrap;
+  }
+
+  .nodeText {
+    flex-basis: calc(100% - 58px);
+  }
+
+  .nodeBadge {
+    margin-left: 58px;
+  }
+}

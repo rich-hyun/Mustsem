@@ -1,0 +1,108 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius-control);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+}
+
+.icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.body {
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 650;
+}
+
+.body > :not(.title) {
+  color: var(--ink-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.info {
+  background: var(--info-soft);
+}
+.info .icon,
+.info .title {
+  color: var(--info);
+}
+
+.success {
+  background: var(--success-soft);
+}
+.success .icon,
+.success .title {
+  color: var(--success);
+}
+
+.warning {
+  background: var(--warning-soft);
+}
+.warning .icon,
+.warning .title {
+  color: var(--warning);
+}
+
+.danger {
+  background: var(--danger-soft);
+}
+.danger .icon,
+.danger .title {
+  color: var(--danger);
+}
+
+.neutral {
+  background: var(--surface-tint);
+}
+.neutral .icon {
+  color: var(--ink-3);
+}
+
+/* 조작 결과로 나타나는 안내(live)만 들어오는 동작을 준다 */
+@media (prefers-reduced-motion: no-preference) {
+  .notice[role='status'] {
+    animation: notice-in 380ms var(--ease-out) both;
+  }
+
+  .notice[role='status'] .icon {
+    animation: notice-icon 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms both;
+  }
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    translate: 0 -6px;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes notice-icon {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

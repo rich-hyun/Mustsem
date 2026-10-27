@@ -241,3 +241,290 @@
     justify-content: flex-end;
   }
 }
+
+/* 자동 개설: 옵션 · 진행 · 결과 */
+.options {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+}
+
+.options legend {
+  padding: 0 6px;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent-ink);
+}
+
+.sub {
+  padding-left: 26px;
+}
+
+.progress {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  color: var(--ink-4);
+  font-size: var(--text-sm);
+}
+
+.step_run {
+  color: var(--ink);
+}
+
+.step_done {
+  color: var(--ink);
+}
+
+.step_done svg {
+  color: var(--success);
+}
+
+.spin {
+  color: var(--accent-ink);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spin {
+    animation: net-spin 900ms linear infinite;
+  }
+}
+
+@keyframes net-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result {
+  display: grid;
+  gap: 16px;
+}
+
+.resultActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 이상탐지 모니터: 위험도 구간을 초록 · 주황 · 빨강으로 구분한다. 색만으로 전달하지 않도록 구간 이름과 점수를 함께 쓴다. */
+.monitor {
+  --risk-ok: #1a9f6a;
+  --risk-warn: #e0a100;
+  --risk-crit: #d93025;
+  display: grid;
+  gap: 16px;
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gauge {
+  display: grid;
+  gap: 8px;
+}
+
+.track {
+  position: relative;
+  display: flex;
+  height: 16px;
+  border-radius: var(--radius-pill);
+}
+
+.zone {
+  display: block;
+}
+
+.zoneOk {
+  border-radius: var(--radius-pill) 0 0 var(--radius-pill);
+  background: var(--risk-ok);
+}
+
+.zoneWarn {
+  background: var(--risk-warn);
+}
+
+.zoneCrit {
+  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  background: var(--risk-crit);
+}
+
+.marker {
+  position: absolute;
+  top: -6px;
+  width: 4px;
+  height: 28px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .marker {
+    transition: left 350ms var(--ease-out);
+  }
+}
+
+.zoneLabels {
+  display: flex;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.zoneLabels span {
+  white-space: nowrap;
+}
+
+.gaugeNow {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+.chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 80px;
+  padding: 6px;
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+}
+
+.chart i {
+  flex: 1;
+  min-width: 3px;
+  border-radius: 2px 2px 0 0;
+}
+
+.bar_ok {
+  background: var(--risk-ok);
+}
+
+.bar_warn {
+  background: var(--risk-warn);
+}
+
+.bar_critical,
+.bar_blocked {
+  background: var(--risk-crit);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.feed {
+  display: grid;
+  gap: 4px;
+  max-height: 300px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.feed li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-left: 3px solid var(--risk-ok);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  line-height: 1.5;
+}
+
+.feed .row_warn {
+  border-left-color: var(--risk-warn);
+  background: var(--warning-soft);
+}
+
+.feed .row_critical,
+.feed .row_blocked {
+  border-left-color: var(--risk-crit);
+  background: var(--danger-soft);
+}
+
+.meter {
+  flex: none;
+  width: 56px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.meter b {
+  display: block;
+  height: 100%;
+  background: var(--risk-ok);
+}
+
+.row_warn .meter b {
+  background: var(--risk-warn);
+}
+
+.row_critical .meter b,
+.row_blocked .meter b {
+  background: var(--risk-crit);
+}
+
+.level {
+  flex: none;
+  width: 4.4em;
+  white-space: nowrap;
+  font-weight: 650;
+}
+
+.txText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

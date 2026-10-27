@@ -2,20 +2,21 @@ import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
 import { PageHero } from '@/components/ui/PageHero'
 import { Section, SectionHeading } from '@/components/ui/Section'
+import { AnomalyMonitor } from './AnomalyMonitor'
 import { ApplyForm } from './ApplyForm'
 import { NetworkDirectory } from './NetworkDirectory'
 import styles from './network.module.css'
 
 export const metadata: Metadata = {
   title: '전용 네트워크',
-  description: 'MST 코인을 담보로 기업 전용 블록체인 네트워크 개설을 신청하는 페이지입니다.',
+  description: 'MST 코인을 담보로 기업 전용 블록체인 네트워크를 자동 개설하고, 온체인 이상거래 탐지를 함께 적용하는 페이지입니다.',
   alternates: { canonical: '/network' },
 }
 
 const FLOW = [
-  { name: '신청 정보 입력', text: '회사명, 연락처, 예치할 MST 수량을 남겨 주세요.' },
-  { name: '내부 확인', text: '담보 조건과 요청사항을 확인하고 구성을 정리합니다.' },
-  { name: '24시간 내 개설', text: '확인 후 24시간 이내에 네트워크를 개설해 안내드립니다.' },
+  { name: '정보 입력', text: '회사명, 네트워크명, 심볼, 예치할 MST 수량과 구성 옵션을 입력합니다.' },
+  { name: '사양 자동 생성', text: '체인 ID 할당, 발행량 계산, 제네시스 설정이 자동으로 만들어집니다.' },
+  { name: '단계별 자동 개설', text: '담보 락업 확인, 검증자 노드 배포, RPC 개설, 이상탐지 적용 순으로 진행됩니다.' },
 ]
 
 export default function NetworkPage() {
@@ -26,22 +27,22 @@ export default function NetworkPage() {
         eyebrow="네트워크"
         title={
           <>
-            귀사 전용 네트워크를{' '}
+            정보만 입력하면{' '}
             <br />
-            최대 24시간 내 개설합니다
+            전용 네트워크가 자동 개설됩니다
           </>
         }
-        lead="MST 코인을 담보로 귀사 전용 네트워크를 개설합니다."
+        lead="MST 담보 예치부터 체인 ID 할당, 제네시스 생성, 검증자 노드 배포, RPC 개설까지 한 번에 진행하고 이상거래 탐지를 함께 적용합니다."
       />
 
       <Section id="apply" tone="tint" labelledBy="apply-title">
         <div className={styles.layout}>
           <Card elevation="raised" padding="lg" feature>
             <h2 id="apply-title" className={styles.formTitle}>
-              네트워크 생성 신청
+              네트워크 자동 개설
             </h2>
             <p id="apply-lead" className={styles.formLead}>
-              아래 정보를 입력하시면 내부 확인 후 <strong>24시간 이내</strong> 생성이 진행됩니다.
+              아래 정보를 입력하고 개설을 누르면 <strong>체인 사양이 자동으로 생성</strong>되고 단계별로 네트워크가 구성됩니다.
             </p>
             <ApplyForm />
           </Card>
@@ -68,7 +69,7 @@ export default function NetworkPage() {
                 </li>
                 <li>GT(거버넌스 토큰)는 원하는 경우 추가 발행 가능</li>
                 <li>모든 수수료 및 확장 비용은 MST로 결제</li>
-                <li>신청 후 24시간 이내 생성 완료</li>
+                <li>고위험 거래는 지갑 동결과 블랙리스트 등록으로 자동 대응</li>
               </ul>
             </Card>
             <Card>
@@ -85,7 +86,16 @@ export default function NetworkPage() {
         </div>
       </Section>
 
-      <Section tone="white" labelledBy="directory-title">
+      <Section tone="white" id="anomaly" labelledBy="anomaly-title">
+        <SectionHeading
+          id="anomaly-title"
+          title="온체인 이상거래 탐지"
+          lead="거래마다 위험도를 0~100으로 산출해 정상, 경고, 고위험 구간으로 나누고, 고위험 거래는 정책에 따라 자동 대응합니다. 아래는 가상 거래로 동작을 확인하는 시연 화면이며 실제 체인 데이터가 아닙니다."
+        />
+        <AnomalyMonitor />
+      </Section>
+
+      <Section tone="tint" labelledBy="directory-title">
         <SectionHeading
           id="directory-title"
           title="지원 네트워크"

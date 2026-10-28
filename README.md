@@ -40,6 +40,7 @@ Node.js 20.9 이상이 필요합니다.
 | `/security` | 보안 아키텍처 |
 | `/dashboard` | 머스트리 코인 가치 변화 차트(MST·BTC·QQQ, 1일/1주/1달) · 운영 지갑 잔액 모니터링 |
 | `/api/market-data` | 차트용 일별 시세 (서버 함수, 30분 CDN 캐시) |
+| `/agent` · `/api/agent` | Biz-Ops AI 에이전트 (내부용, 허용 계정만, 검색 비노출). 서버 함수가 로그인·허용 목록을 확인하고 에이전트 게이트웨이로 넘긴다 |
 | `/login` · `/signup` · `/confirm` | 계정 (Supabase) |
 | `/privacy` · `/terms` | 개인정보처리방침 · 이용약관 |
 
@@ -83,6 +84,16 @@ public/
 기존 저장소 루트의 `api/market-data.js`(Vercel 함수)는 이 프로젝트에서 `src/app/api/market-data/route.ts`로 옮겼습니다. Next.js 프로젝트에서는 이쪽이 같은 주소로 배포됩니다.
 
 옮긴 함수는 원본과 달리 오류 원문(`errors`)을 응답에 싣지 않고 누락된 시세 이름(`missing`)만 알려 주며, 외부 사이트가 무료 프록시로 쓰지 못하도록 CORS를 열지 않습니다.
+
+### Biz-Ops 에이전트 환경변수 (Vercel 프로젝트 설정 → Environment Variables)
+
+| 이름 | 값 |
+| --- | --- |
+| `BIZOPS_AGENT_URL` | 에이전트 게이트웨이(`bizops_agent/scripts/serve_api.py`)의 공개 HTTPS 주소 |
+| `BIZOPS_AGENT_TOKEN` | 게이트웨이의 `BIZOPS_API_TOKEN` 과 같은 값 |
+| `BIZOPS_AGENT_ALLOWED_EMAILS` | 쓸 수 있는 계정 이메일, 쉼표 구분. 비어 있으면 아무도 못 쓴다 (회원가입이 열려 있어 로그인만으로는 열지 않는다) |
+
+값이 없으면 `/api/agent`는 503을 돌려주고 나머지 사이트는 그대로 동작한다. 로컬에서는 같은 값을 `.env.local`에 둔다.
 
 ## 디자인·코드 규칙
 

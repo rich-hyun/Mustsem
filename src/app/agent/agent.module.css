@@ -39,7 +39,17 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 12px 16px;
+}
+
+.quota {
+  margin-right: auto;
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  word-break: keep-all;
 }
 
 .history {

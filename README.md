@@ -40,7 +40,7 @@ Node.js 20.9 이상이 필요합니다.
 | `/security` | 보안 아키텍처 |
 | `/dashboard` | 머스트리 코인 가치 변화 차트(MST·BTC·QQQ, 1일/1주/1달) · 운영 지갑 잔액 모니터링 |
 | `/api/market-data` | 차트용 일별 시세 (서버 함수, 30분 CDN 캐시) |
-| `/agent` · `/api/agent` | Biz-Ops AI 에이전트 (내부용, 허용 계정만, 검색 비노출). 서버 함수가 로그인·허용 목록을 확인하고 에이전트 게이트웨이로 넘긴다 |
+| `/agent` · `/api/agent` | Biz-Ops AI 에이전트 (회원 전용, 시범 운영 중이라 검색 비노출). 허용 계정은 내부용(고객 관리 포함), 그 밖의 회원은 공개용(고객사 정보 없음, 하루 횟수 제한). 서버 함수가 로그인·허용 목록을 확인하고 에이전트 게이트웨이로 넘긴다 |
 | `/login` · `/signup` · `/confirm` | 계정 (Supabase) |
 | `/privacy` · `/terms` | 개인정보처리방침 · 이용약관 |
 
@@ -91,7 +91,8 @@ public/
 | --- | --- |
 | `BIZOPS_AGENT_URL` | 에이전트 게이트웨이(`bizops_agent/scripts/serve_api.py`)의 공개 HTTPS 주소 |
 | `BIZOPS_AGENT_TOKEN` | 게이트웨이의 `BIZOPS_API_TOKEN` 과 같은 값 |
-| `BIZOPS_AGENT_ALLOWED_EMAILS` | 쓸 수 있는 계정 이메일, 쉼표 구분. 비어 있으면 아무도 못 쓴다 (회원가입이 열려 있어 로그인만으로는 열지 않는다) |
+| `BIZOPS_AGENT_ALLOWED_EMAILS` | 내부용(고객 관리 데이터 포함)을 쓸 계정 이메일, 쉼표 구분. 여기 없는 회원은 공개용을 쓴다 |
+| `BIZOPS_PUBLIC_DAILY_LIMIT` | (선택) 화면에 안내할 공개용 하루 질문 수. 기본 5. 실제 한도는 게이트웨이의 같은 이름 환경변수가 정한다 |
 
 값이 없으면 `/api/agent`는 503을 돌려주고 나머지 사이트는 그대로 동작한다. 로컬에서는 같은 값을 `.env.local`에 둔다.
 

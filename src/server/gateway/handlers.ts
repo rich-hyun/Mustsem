@@ -24,15 +24,11 @@ import {
 } from '@/config/contracts'
 import { getNetwork, type ChainNetwork } from '@/config/networks'
 import { IPFS_GATEWAY } from '@/config/site'
+import { loadSeries } from '@/server/market-data'
 import { SCAN_BLOCKS, scanAnomalies } from './anomaly'
 import { GatewayError, addressParam, cached, fromHex, hashParam, networkOf, readContracts, requireCode, rpcBatch, textParam, toHex, uintParam } from './rpc'
 
-export interface HandlerContext {
-  /** 같은 사이트의 다른 API를 부를 때 쓰는 출처 (https://www.mustsem.co.kr) */
-  origin: string
-}
-
-type Handler = (params: URLSearchParams, context: HandlerContext) => Promise<unknown>
+type Handler = (params: URLSearchParams) => Promise<unknown>
 
 const networkInfo = (network: ChainNetwork) => ({ name: network.name, chainId: network.chainId, symbol: network.symbol })
 const iso = (seconds: bigint | number) => new Date(Number(seconds) * 1000).toISOString()
@@ -236,28 +232,21 @@ const rwaHolders: Handler = async (params) => {
 
 /* ── 오라클 ─────────────────────────────────────────────────────── */
 
-/** 온체인 피드가 없을 때 쓰는 참고 시세 (일별 종가, /api/market-data와 같은 원본) */
+/** 온체인 피드가 없을 때 쓰는 참고 시세 (일별 종가, /api/market-data와 같은 원본을 직접 부른다) */
 const REFERENCE_PAIRS: Record<string, 'btc' | 'qqq'> = { 'BTC/USD': 'btc', 'QQQ/USD': 'qqq' }
 
-async function referencePrice(pair: string, origin: string) {
+async function referencePrice(pair: string) {
   const series = REFERENCE_PAIRS[pair]
   if (!series) throw new GatewayError('not_found')
+  const to = new Date().toISOString().slice(0, 10)
   const from = new Date(Date.now() - 14 * 86_400_000).toISOString().slice(0, 10)
-  let body: { data?: Record<string, Array<{ date?: unknown; close?: unknown }>>; sources?: Record<string, unknown> }
-  try {
-    const response = await fetch(`${origin}/api/market-data?from=${from}`, { signal: AbortSignal.timeout(12_000), cache: 'no-store' })
-    if (!response.ok) throw new Error(`status ${response.status}`)
-    body = (await response.json()) as typeof body
-  } catch (error) {
-    console.error('[gateway] reference price failed:', error instanceof Error ? error.message : error)
-    throw new GatewayError('upstream_unavailable')
-  }
-  const last = body.data?.[series]?.at(-1)
-  if (!last || typeof last.close !== 'number' || typeof last.date !== 'string') throw new GatewayError('upstream_unavailable')
+  const found = await loadSeries(series, from, to)
+  const last = found?.rows.at(-1)
+  if (!last) throw new GatewayError('upstream_unavailable')
   return { price: String(last.close), date: last.date }
 }
 
-const oraclePrice: Handler = async (params, { origin }) => {
+const oraclePrice: Handler = async (params) => {
   const network = networkOf(params)
   const pair = textParam(params, 'pair', PAIR)
   const oracle = PRICE_ORACLE_CONTRACTS[network.key]
@@ -279,7 +268,7 @@ const oraclePrice: Handler = async (params, { origin }) => {
     }
   }
   // 온체인 오라클이 배포되기 전: 참고 시세를 돌려주고, 온체인 값이 아님을 응답에 밝힌다
-  const reference = await cached(`reference:${pair}`, 300_000, () => referencePrice(pair, origin))
+  const reference = await cached(`reference:${pair}`, 300_000, () => referencePrice(pair))
   return {
     network: networkInfo(network),
     pair,

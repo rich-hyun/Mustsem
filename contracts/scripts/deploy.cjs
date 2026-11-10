@@ -43,9 +43,11 @@ async function deployAll(signer, options = {}) {
     ...(relayers.length > 0 ? [['BridgeGateway', [owner, relayers, threshold]]] : []),
   ]
   const deployed = {}
+  // 순번(nonce)을 직접 센다: 블록이 빨리 만들어지는 체인에서 직전 배포가 반영되기 전의 순번을 다시 쓰지 않게 한다
+  let nonce = await signer.getNonce('pending')
   for (const [name, args] of plan) {
     const { abi, bytecode } = artifact(name)
-    const contract = await new ContractFactory(abi, bytecode, signer).deploy(...args)
+    const contract = await new ContractFactory(abi, bytecode, signer).deploy(...args, { nonce: nonce++ })
     await contract.waitForDeployment()
     deployed[name] = await contract.getAddress()
     log(`${name}: ${deployed[name]}`)

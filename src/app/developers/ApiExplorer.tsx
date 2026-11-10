@@ -1,12 +1,17 @@
 'use client'
 
 import {
+  ArrowsLeftRightIcon,
   BuildingsIcon,
+  ChartLineUpIcon,
   CoinsIcon,
   HardDrivesIcon,
+  IdentificationCardIcon,
   ImageSquareIcon,
   MagnifyingGlassIcon,
+  PlayIcon,
   SealCheckIcon,
+  StackIcon,
   UsersThreeIcon,
   XIcon,
 } from '@phosphor-icons/react/ssr'
@@ -15,6 +20,7 @@ import { API_GROUPS, type ApiEndpoint, type ApiGroupId, type HttpMethod } from '
 import { Button } from '@/components/ui/Button'
 import { Badge, type BadgeTone } from '@/components/ui/DataDisplay'
 import { Table, cell } from '@/components/ui/Table'
+import { TryDialog } from './TryDialog'
 import styles from './developers.module.css'
 
 const METHOD_TONE: Record<HttpMethod, BadgeTone> = {
@@ -31,13 +37,19 @@ const GROUP_ICON = {
   token: CoinsIcon,
   governance: UsersThreeIcon,
   node: HardDrivesIcon,
+  oracle: ChartLineUpIcon,
+  bridge: ArrowsLeftRightIcon,
+  did: IdentificationCardIcon,
+  composite: StackIcon,
 } satisfies Record<ApiGroupId, unknown>
 
 type GroupFilter = 'all' | ApiGroupId
 
 function matches(endpoint: ApiEndpoint, query: string): boolean {
   if (!query) return true
-  const haystack = [endpoint.name, endpoint.description, endpoint.method, endpoint.path, ...endpoint.params].join(' ').toLowerCase()
+  const haystack = [endpoint.name, endpoint.description, endpoint.method, endpoint.path, ...endpoint.params, endpoint.isNew ? '신규' : '', endpoint.tryIt ? '호출' : '']
+    .join(' ')
+    .toLowerCase()
   return query.split(/\s+/).every((word) => haystack.includes(word))
 }
 
@@ -48,6 +60,7 @@ export function ApiExplorer() {
   const [group, setGroup] = useState<GroupFilter>('all')
   // 그룹을 바꾼 뒤부터 결과가 새로 들어오는 전환을 보여 준다 (첫 화면은 정적)
   const [touched, setTouched] = useState(false)
+  const [trying, setTrying] = useState<ApiEndpoint | null>(null)
   const normalized = useDeferredValue(query).trim().toLowerCase()
 
   // 검색어 기준 그룹별 일치 수 (그룹 선택과 무관하게 칩에 표시)
@@ -184,6 +197,7 @@ export function ApiExplorer() {
                       <tr key={`${endpoint.method} ${endpoint.path}`}>
                         <td data-label="API 이름" className={cell.strong}>
                           {endpoint.name}
+                          {endpoint.isNew && <span className={styles.newTag}>신규</span>}
                         </td>
                         <td data-label="설명">{endpoint.description}</td>
                         <td data-label="메서드">
@@ -192,7 +206,15 @@ export function ApiExplorer() {
                           </Badge>
                         </td>
                         <td data-label="엔드포인트">
-                          <code className={styles.endpoint}>{endpoint.path}</code>
+                          <span className={styles.endpointCell}>
+                            <code className={styles.endpoint}>{endpoint.path}</code>
+                            {endpoint.tryIt && (
+                              <button type="button" className={styles.tryButton} onClick={() => setTrying(endpoint)} aria-label={`${endpoint.name} 호출해 보기`}>
+                                <PlayIcon size={11} weight="fill" aria-hidden />
+                                호출해 보기
+                              </button>
+                            )}
+                          </span>
                         </td>
                         <td data-label="주요 파라미터">
                           <span className={styles.params}>
@@ -212,6 +234,7 @@ export function ApiExplorer() {
           })}
         </div>
       )}
+      <TryDialog endpoint={trying} onClose={() => setTrying(null)} />
     </div>
   )
 }

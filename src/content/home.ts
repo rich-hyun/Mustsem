@@ -22,6 +22,43 @@ export const START_PATHS = [
   },
 ] as const
 
+/** 올인원 구성: 구축 · 운영 · 보호. 메뉴(src/config/navigation.ts PRODUCT_GROUPS)와 같은 묶음 */
+export const PILLARS: { id: 'build' | 'operate' | 'protect'; name: string; english: string; text: string; links: { href: string; icon: NavIconKey; label: string; text: string }[] }[] = [
+  {
+    id: 'build',
+    name: '구축',
+    english: 'Build',
+    text: '전용 네트워크와 스마트 컨트랙트 API로 서비스의 기반을 만듭니다.',
+    links: [
+      { href: '/network#apply', icon: 'network', label: '전용 네트워크 자동 개설', text: '정보 입력만으로 체인 사양 생성' },
+      { href: '/developers', icon: 'catalog', label: '스마트 컨트랙트 API 50종', text: '오라클, 크로스체인, DID, RWA까지' },
+      { href: '/nft', icon: 'nft', label: 'NFT · SBT · RWA 발행', text: '지갑으로 바로 쓰는 토큰화 도구' },
+    ],
+  },
+  {
+    id: 'operate',
+    name: '운영',
+    english: 'Operate',
+    text: 'Biz-Ops AI 에이전트와 운영 도구로 서비스를 굴립니다.',
+    links: [
+      { href: '/agent', icon: 'agent', label: 'Biz-Ops AI 에이전트', text: '지원사업 준비와 운영 질의응답' },
+      { href: '/dashboard', icon: 'dashboard', label: '운영 대시보드', text: '운영 지갑 잔액과 코인 가치 추이' },
+      { href: '/bridge', icon: 'bridge', label: '브릿지 · 스테이킹', text: '네트워크 간 자산 이동과 예치' },
+    ],
+  },
+  {
+    id: 'protect',
+    name: '보호',
+    english: 'Protect',
+    text: '실제 체인 거래를 읽어 이상거래를 찾고 자산을 지킵니다.',
+    links: [
+      { href: '/network#anomaly', icon: 'anomaly', label: '온체인 이상거래 탐지', text: '위험도 분석과 동결·블랙리스트 대응' },
+      { href: '/ipfs', icon: 'ipfs', label: 'IPFS 보안 등록', text: '분산 저장과 무결성 검증' },
+      { href: '/security', icon: 'ipfs', label: '보안 아키텍처', text: 'Vault · AES · HSM 키 관리' },
+    ],
+  },
+]
+
 export const SERVICES: { href: string; icon: NavIconKey; title: string; text: string }[] = [
   { href: '/nft', icon: 'nft', title: 'NFT', text: '디지털 자산 발행과 소유권 관리' },
   { href: '/sbt', icon: 'sbt', title: 'SBT', text: '양도할 수 없는 자격·인증 토큰' },

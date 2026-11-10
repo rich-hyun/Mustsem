@@ -4,7 +4,7 @@
  */
 
 export const CATALOG_STATS = [
-  { value: '40+', label: '제공 API 수', description: '40개 이상의 API 제공' },
+  { value: '50', label: '제공 API 수', description: '10개 분야 50종의 API 제공' },
   { value: '8', label: '산업 분야', description: '8개 산업 분야' },
   { value: '15+', label: '구축 사례', description: '15건 이상의 구축 사례' },
   { value: '99.9%', label: '가동률', description: '가동률 99.9퍼센트' },
@@ -153,15 +153,32 @@ export const INDUSTRIES: Industry[] = [
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
+/** "호출해 보기" 입력 칸. value는 처음 채워 두는 예시 값 */
+export interface TryField {
+  name: string
+  value: string
+  hint?: string
+}
+
 export interface ApiEndpoint {
   name: string
   description: string
   method: HttpMethod
   path: string
   params: string[]
+  /** 2026년 확장분(33종 → 50종) */
+  isNew?: boolean
+  /**
+   * 이 사이트 서버(/api + path)에서 바로 호출해 볼 수 있는 조회 API. 체인을 읽기만 하고 서명 키가 필요 없다.
+   * 처리 코드는 src/server/gateway/handlers.ts
+   */
+  tryIt?: TryField[]
 }
 
-export type ApiGroupId = 'nft' | 'sbt' | 'rwa' | 'token' | 'governance' | 'node'
+export type ApiGroupId = 'nft' | 'sbt' | 'rwa' | 'token' | 'governance' | 'node' | 'oracle' | 'bridge' | 'did' | 'composite'
+
+/** 호출해 보기의 기본 네트워크 (지금 RPC가 응답하는 Mustsem 메인넷) */
+const CHAIN: TryField = { name: 'chainId', value: '7601', hint: '네트워크 체인 ID' }
 
 export interface ApiGroup {
   id: ApiGroupId
@@ -184,7 +201,7 @@ export const API_GROUPS: ApiGroup[] = [
       { name: 'NFT 전송', description: '보유자 간 NFT 전송', method: 'POST', path: '/v1/nfts/transfer', params: ['contract', 'tokenId', 'from', 'to'] },
       { name: 'NFT 소각', description: '영구 소각', method: 'POST', path: '/v1/nfts/burn', params: ['contract', 'tokenId'] },
       { name: '메타데이터 업데이트', description: '온체인/오프체인 수정', method: 'PUT', path: '/v1/nfts/metadata', params: ['contract', 'tokenId', 'metadataURI'] },
-      { name: 'NFT 조회', description: '소유자별/단일 토큰 조회', method: 'GET', path: '/v1/nfts', params: ['owner', 'tokenId'] },
+      { name: 'NFT 조회', description: '소유자별/단일 토큰 조회', method: 'GET', path: '/v1/nfts', params: ['owner', 'tokenId'], tryIt: [CHAIN, { name: 'contract', value: '', hint: '비우면 해당 네트워크의 기본 NFT 컨트랙트' }, { name: 'tokenId', value: '1' }, { name: 'owner', value: '', hint: '보유 수량을 볼 지갑 주소 (선택)' }] },
       { name: '컬렉션 등록', description: '프로젝트 초기 등록', method: 'POST', path: '/v1/nfts/collection', params: ['name', 'symbol', 'baseURI'] },
       { name: '화이트리스트 민팅', description: '사전 허용 사용자만 민팅', method: 'POST', path: '/v1/nfts/mint-whitelist', params: ['contract', 'whitelistProof'] },
     ],
@@ -197,7 +214,7 @@ export const API_GROUPS: ApiGroup[] = [
     endpoints: [
       { name: 'SBT 발행', description: '양도 불가 토큰 발행', method: 'POST', path: '/v1/sbts/mint', params: ['contract', 'to', 'metadataURI'] },
       { name: 'SBT 폐기', description: '만료/철회 시 회수', method: 'POST', path: '/v1/sbts/revoke', params: ['contract', 'tokenId'] },
-      { name: 'SBT 검증', description: '보유/유효성 체크', method: 'GET', path: '/v1/sbts/verify', params: ['contract', 'holder'] },
+      { name: 'SBT 검증', description: '보유/유효성 체크', method: 'GET', path: '/v1/sbts/verify', params: ['contract', 'holder'], tryIt: [CHAIN, { name: 'contract', value: '', hint: '비우면 해당 네트워크의 기본 SBT 컨트랙트' }, { name: 'holder', value: '', hint: '확인할 지갑 주소' }, { name: 'tokenId', value: '', hint: '특정 토큰만 확인 (선택)' }] },
       { name: '메타데이터 갱신', description: '온체인 상태 갱신', method: 'PUT', path: '/v1/sbts/metadata', params: ['contract', 'tokenId'] },
     ],
   },
@@ -212,7 +229,9 @@ export const API_GROUPS: ApiGroup[] = [
       { name: '담보 설정', description: '대출 등을 위한 담보 등록', method: 'POST', path: '/v1/rwa/collateralize', params: ['contract', 'tokenId', 'loanId'] },
       { name: '담보 해제', description: '담보 해제 처리', method: 'POST', path: '/v1/rwa/uncollateralize', params: ['contract', 'tokenId'] },
       { name: '거래(양도)', description: 'RWA 소유권 이전', method: 'POST', path: '/v1/rwa/transfer', params: ['contract', 'from', 'to'] },
-      { name: '인증서 조회', description: '감정/문서 등 연계 자료 조회', method: 'GET', path: '/v1/rwa/certificate', params: ['contract', 'tokenId'] },
+      { name: '인증서 조회', description: '감정/문서 등 연계 자료 조회', method: 'GET', path: '/v1/rwa/certificate', params: ['contract', 'tokenId'], tryIt: [CHAIN, { name: 'contract', value: '', hint: '비우면 해당 네트워크의 기본 RWA 컨트랙트' }, { name: 'tokenId', value: '1' }] },
+      { name: '수익 분배', description: '지분 보유자에게 수익을 지분율대로 분배', method: 'POST', path: '/v1/rwa/distribute', params: ['vault', 'amount'], isNew: true },
+      { name: '지분 보유 조회', description: '보유 지분, 지분율, 받을 수익 조회', method: 'GET', path: '/v1/rwa/holders', params: ['vault', 'holder'], isNew: true, tryIt: [CHAIN, { name: 'vault', value: '', hint: 'RWA 지분 토큰(RWAVault) 주소' }, { name: 'holder', value: '', hint: '보유자 지갑 주소' }] },
     ],
   },
   {
@@ -227,7 +246,7 @@ export const API_GROUPS: ApiGroup[] = [
       { name: '분할 토큰 생성', description: 'NFT → ERC20 분할 발행', method: 'POST', path: '/v1/tokens/fractionalize', params: ['nftContract', 'tokenId', 'parts'] },
       { name: '토큰 스왑', description: 'Token-to-token 교환', method: 'POST', path: '/v1/swaps/execute', params: ['fromToken', 'toToken', 'amount'] },
       { name: '브릿지', description: '체인 간 자산 이동', method: 'POST', path: '/v1/bridge/transfers', params: ['sourceChain', 'targetChain', 'token'] },
-      { name: '토큰 상태 조회', description: '발행/소각/유통량', method: 'GET', path: '/v1/tokens/status', params: ['contract'] },
+      { name: '토큰 상태 조회', description: '발행/소각/유통량', method: 'GET', path: '/v1/tokens/status', params: ['contract'], tryIt: [CHAIN, { name: 'contract', value: '0x2affeb7a958851645092cce8de9d2dbc88f2adf1', hint: '토큰 컨트랙트 주소' }] },
     ],
   },
   {
@@ -250,9 +269,60 @@ export const API_GROUPS: ApiGroup[] = [
     description: '트랜잭션 로그, 모니터링, 노드 관리',
     endpoints: [
       { name: '트랜잭션 로그', description: 'API 요청/응답 감사 로그', method: 'GET', path: '/v1/logs/transactions', params: ['tenant', 'fromDate', 'toDate'] },
-      { name: '체인 상태 모니터링', description: '블록/노드/TPS/가스', method: 'GET', path: '/v1/chain/status', params: ['chainId'] },
+      { name: '체인 상태 모니터링', description: '블록/노드/TPS/가스', method: 'GET', path: '/v1/chain/status', params: ['chainId'], tryIt: [CHAIN] },
       { name: '노드 등록', description: '검증자 노드 추가', method: 'POST', path: '/v1/nodes/register', params: ['nodeAddress', 'role'] },
       { name: '노드 스테이킹', description: '검증자 토큰 예치', method: 'POST', path: '/v1/nodes/stake', params: ['validator', 'amount'] },
     ],
   },
+  {
+    id: 'oracle',
+    title: '오라클 가격 피드 API',
+    short: '오라클',
+    description: '외부 시세를 온체인에 올리고 컨트랙트와 서비스가 같은 가격을 읽는다',
+    endpoints: [
+      { name: '최신 가격 조회', description: '피드의 최신 가격과 갱신 시각', method: 'GET', path: '/v1/oracle/prices', params: ['pair'], isNew: true, tryIt: [CHAIN, { name: 'pair', value: 'BTC/USD', hint: '예: BTC/USD, QQQ/USD' }] },
+      { name: '가격 이력 조회', description: '라운드별 과거 가격', method: 'GET', path: '/v1/oracle/prices/history', params: ['pair', 'roundId'], isNew: true, tryIt: [CHAIN, { name: 'pair', value: 'BTC/USD' }, { name: 'roundId', value: '1' }] },
+      { name: '가격 피드 등록', description: '거래쌍, 소수 자릿수, 갱신 주기 등록', method: 'POST', path: '/v1/oracle/feeds', params: ['pair', 'decimals', 'heartbeat'], isNew: true },
+      { name: '가격 제출', description: '허가된 리포터의 가격 기록', method: 'POST', path: '/v1/oracle/prices', params: ['pair', 'price', 'observedAt'], isNew: true },
+    ],
+  },
+  {
+    id: 'bridge',
+    title: '크로스체인 브릿지 API',
+    short: '크로스체인',
+    description: '체인 간 전송 경로, 진행 상태, 수령과 환불',
+    endpoints: [
+      { name: '전송 상태 조회', description: '잠금, 수령, 환불 진행 상태', method: 'GET', path: '/v1/bridge/transfers/status', params: ['transferId'], isNew: true, tryIt: [CHAIN, { name: 'transferId', value: '', hint: '전송 요청 때 받은 ID (0x로 시작하는 64자리)' }] },
+      { name: '지원 경로 조회', description: '체인·토큰별 경로, 수수료, 한도', method: 'GET', path: '/v1/bridge/routes', params: ['sourceChain', 'targetChain', 'token'], isNew: true, tryIt: [] },
+      { name: '도착 체인 수령', description: '릴레이어 서명으로 도착 체인에서 수령', method: 'POST', path: '/v1/bridge/claim', params: ['transferId', 'recipient', 'signatures'], isNew: true },
+      { name: '전송 환불', description: '처리 불가 건을 출발 체인에서 환불', method: 'POST', path: '/v1/bridge/refund', params: ['transferId', 'signatures'], isNew: true },
+    ],
+  },
+  {
+    id: 'did',
+    title: 'DID 신원인증 API',
+    short: 'DID',
+    description: '분산 신원(DID) 등록과 자격증명 발급, 검증, 폐기',
+    endpoints: [
+      { name: 'DID 등록', description: '신원 식별자와 문서 주소 등록', method: 'POST', path: '/v1/did/register', params: ['did', 'documentURI'], isNew: true },
+      { name: 'DID 조회', description: '컨트롤러, 문서 주소, 활성 여부', method: 'GET', path: '/v1/did/resolve', params: ['did'], isNew: true, tryIt: [CHAIN, { name: 'did', value: 'did:mst:example', hint: 'DID 문자열' }] },
+      { name: '자격증명 발급', description: '자격증명 해시를 온체인에 기록', method: 'POST', path: '/v1/did/credentials/issue', params: ['issuer', 'subject', 'credentialHash'], isNew: true },
+      { name: '자격증명 검증', description: '발급, 만료, 폐기 여부 확인', method: 'GET', path: '/v1/did/credentials/verify', params: ['credentialHash'], isNew: true, tryIt: [CHAIN, { name: 'credentialHash', value: '', hint: '자격증명 해시 (0x로 시작하는 64자리)' }] },
+      { name: '자격증명 폐기', description: '발급자가 자격증명을 무효화', method: 'POST', path: '/v1/did/credentials/revoke', params: ['credentialHash'], isNew: true },
+    ],
+  },
+  {
+    id: 'composite',
+    title: '복합 컨트랙트 API',
+    short: '복합 실행',
+    description: '여러 컨트랙트 호출을 한 트랜잭션으로 묶어 실행',
+    endpoints: [
+      { name: '복합 실행', description: '여러 호출을 한 번에, 하나라도 실패하면 전부 취소', method: 'POST', path: '/v1/composite/execute', params: ['calls', 'atomic'], isNew: true },
+      { name: '실행 시뮬레이션', description: '실행 전에 호출별 결과 미리 확인', method: 'POST', path: '/v1/composite/simulate', params: ['calls'], isNew: true },
+    ],
+  },
 ]
+
+/** 전체 API 수와 확장분 수 (화면 문구와 점검에 쓴다) */
+export const API_TOTAL = API_GROUPS.reduce((sum, group) => sum + group.endpoints.length, 0)
+export const API_NEW_TOTAL = API_GROUPS.reduce((sum, group) => sum + group.endpoints.filter((endpoint) => endpoint.isNew).length, 0)

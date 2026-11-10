@@ -24,3 +24,8 @@ Thumbs.db
 *.pdf
 EMS_*
 image.png
+
+# 컨트랙트 컴파일 산출물 (배포용 ABI·바이트코드는 contracts/artifacts에 커밋)
+/contracts/cache/
+/contracts/build/
+/contracts/node_modules/

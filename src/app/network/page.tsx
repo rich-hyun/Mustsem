@@ -90,7 +90,7 @@ export default function NetworkPage() {
         <SectionHeading
           id="anomaly-title"
           title="온체인 이상거래 탐지"
-          lead="거래마다 위험도를 0~100으로 산출해 정상, 경고, 고위험 구간으로 나누고, 고위험 거래는 정책에 따라 자동 대응합니다. 아래는 가상 거래로 동작을 확인하는 시연 화면이며 실제 체인 데이터가 아닙니다."
+          lead="거래마다 위험도를 0~100으로 산출해 정상, 경고, 고위험 구간으로 나누고, 고위험 거래에는 지갑 동결과 블랙리스트 등록을 대응으로 제시합니다. 기본 화면은 Mustsem 메인넷의 실제 거래를 읽은 결과입니다."
         />
         <AnomalyMonitor />
       </Section>

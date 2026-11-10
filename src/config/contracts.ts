@@ -114,3 +114,61 @@ export const STAKING_ABI = [
   'function stakes(address user) view returns (uint256 amount, uint256 accrued, uint256 lastUpdate, uint256 lastClaimTime)',
   'function minClaimInterval() view returns (uint256)',
 ] as const
+
+/* ── 확장 컨트랙트 (소스: contracts/src, 배포용 ABI·바이트코드: contracts/artifacts) ──
+ * 아직 어느 네트워크에도 배포하지 않았다. 배포한 뒤 주소를 넣으면 /api/v1의 해당 조회 API가 그 컨트랙트를 읽는다.
+ * 주소가 null이면 해당 API는 contract_not_deployed로 응답한다.
+ */
+const NOT_DEPLOYED: ContractMap = { mustsem: null, 'jkk-tmz': null, kukminbank: null, mdpcd: null, nabizam: null }
+
+/** 오라클 가격 피드 (PriceOracle.sol) */
+export const PRICE_ORACLE_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+/** DID 신원·자격증명 (DIDRegistry.sol) */
+export const DID_REGISTRY_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+/** 크로스체인 브릿지 게이트웨이 (BridgeGateway.sol) */
+export const BRIDGE_GATEWAY_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+/** 복합 컨트랙트 실행기 (CompositeExecutor.sol) */
+export const COMPOSITE_EXECUTOR_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+/** 이상거래 대응: 지갑 동결·블랙리스트 (ComplianceGuard.sol) */
+export const COMPLIANCE_GUARD_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+
+export const PRICE_ORACLE_ABI = [
+  'function latestPrice(string pair) view returns (uint80 roundId, int256 answer, uint8 decimals_, uint64 observedAt, uint64 updatedAt, bool stale)',
+  'function getRound(string pair, uint80 roundId) view returns (int256 answer, uint64 observedAt, uint64 updatedAt, address reporter)',
+  'function getFeed(string pair) view returns (uint8 decimals_, uint32 heartbeat, uint80 latestRound)',
+  'function feedCount() view returns (uint256)',
+  'function feedAt(uint256 index) view returns (string pair, uint8 decimals_, uint32 heartbeat, uint80 latestRound)',
+] as const
+
+export const DID_REGISTRY_ABI = [
+  'function resolve(bytes32 did) view returns (address controller, string documentURI, uint64 createdAt, uint64 updatedAt, bool active)',
+  'function verifyCredential(bytes32 credentialHash) view returns (bool valid, bytes32 issuer, bytes32 subject, uint64 issuedAt, uint64 expiresAt, bool revoked)',
+] as const
+
+export const BRIDGE_GATEWAY_ABI = [
+  'function getRoute(uint256 dstChainId, address token) view returns (bool enabled, uint16 feeBps, uint256 minAmount, uint256 maxAmount)',
+  'function getTransfer(bytes32 transferId) view returns (address sender, address token, uint256 amount, uint256 fee, uint256 dstChainId, address recipient, uint64 createdAt, uint8 status)',
+  'function isClaimed(uint256 srcChainId, bytes32 transferId) view returns (bool)',
+] as const
+
+export const RWA_VAULT_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function totalSupply() view returns (uint256)',
+  'function totalDistributed() view returns (uint256)',
+  'function distributionCount() view returns (uint256)',
+  'function holderInfo(address holder) view returns (uint256 shares, uint256 shareBps, uint256 withdrawable, uint256 withdrawn)',
+] as const
+
+export const COMPLIANCE_GUARD_ABI = [
+  'function frozen(address account) view returns (bool)',
+  'function blacklisted(address account) view returns (bool)',
+] as const
+
+export const ERC20_READ_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+  'function totalSupply() view returns (uint256)',
+  'function balanceOf(address owner) view returns (uint256)',
+] as const

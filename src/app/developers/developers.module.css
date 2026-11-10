@@ -446,3 +446,99 @@
     translate: none;
   }
 }
+
+/* ── 신규 표시 · 호출해 보기 ────────────────────────────────────── */
+.newTag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
+.endpointCell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  max-width: 100%;
+}
+
+.tryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--text-2xs);
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--ease),
+    color 160ms var(--ease);
+}
+
+.tryButton:hover {
+  border-color: var(--navy-800);
+  color: var(--ink);
+}
+
+.try {
+  display: grid;
+  gap: 16px;
+}
+
+.tryLead {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.tryFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tryRequest {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface-tint);
+}
+
+.tryUrl {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.tryResult {
+  margin-top: 12px;
+  max-height: 360px;
+}
+
+@media (max-width: 560px) {
+  .tryFields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tryRequest {
+    flex-wrap: wrap;
+  }
+}

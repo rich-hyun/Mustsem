@@ -1,0 +1,27 @@
+# Amplify Hosting 빌드 설정. 저장소의 이 파일이 콘솔의 빌드 설정보다 우선한다(이 파일이 있는 브랜치에만 적용).
+#
+# - Node.js: Next.js 16은 20.9 이상이 필요하다. 빌드 이미지 기본값에 기대지 않고 22로 고정한다.
+# - 환경변수: Amplify는 콘솔 환경변수를 빌드 때만 넘긴다. 서버(Route Handler)가 실행 중에 읽으려면
+#   .env.production에 적어 두어야 한다. 해당 변수가 하나도 없어도 빌드가 실패하지 않게 `|| true`를 붙인다.
+# - AWS 액세스 키는 환경변수로 넘기지 않는다. 서버는 컴퓨트 역할(IAM Role)의 임시 자격 증명을 쓴다.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - nvm install 22
+        - nvm use 22
+        - node -v
+        - npm ci
+    build:
+      commands:
+        - env | grep -E '^(BIZOPS_|COGNITO_|MEMBERS_|LEGACY_SUPABASE_MIGRATION=)' >> .env.production || true
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*

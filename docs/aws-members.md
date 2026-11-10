@@ -3,9 +3,8 @@
 회원가입, 로그인, 내 정보, 관리자 회원 관리를 AWS에 실제로 저장하는 구성입니다.
 코드는 이 저장소에 모두 있고, AWS 리소스는 `infra/aws/members-stack.yaml`(CloudFormation) 한 번 배포로 만듭니다.
 
-> 이 문서의 AWS 명령은 아직 실제 계정에서 실행되지 않았습니다. 개발 중에는 AWS 자격 증명이 없어
-> 로컬 에뮬레이터(cognito-local, dynalite)로만 검증했습니다. 아래 "4. 배포 순서"를 따라 처음 적용할 때
-> "6. 배포 후 확인"을 꼭 실행해 주세요.
+> CloudFormation 스택 `mustsem-members`는 서울 리전에 만들어졌습니다(4-1 완료). 앱 코드는 아직 로컬
+> 에뮬레이터(cognito-local, dynalite)로만 검증했으므로, 4-2부터 진행한 뒤 "6. 배포 후 확인"을 꼭 실행해 주세요.
 
 ## 1. 구조
 
@@ -111,11 +110,19 @@ aws cloudformation describe-stacks --stack-name mustsem-members --region ap-nort
 
 ### 4-2. 컴퓨트 역할 연결 (새 역할을 만든 경우)
 
+운영 브랜치(main)에 영향을 주지 않으려면 먼저 **브랜치 단위**로 연결합니다.
+
 ```bash
+# 이 브랜치에만 (권장: 검증이 끝날 때까지)
+aws amplify update-branch --app-id <Amplify 앱 ID> --branch-name feature/aws-members \
+  --compute-role-arn <출력 ComputeRoleArn> --region ap-northeast-2
+
+# 앱 전체(모든 브랜치)에 연결할 때
 aws amplify update-app --app-id <Amplify 앱 ID> --compute-role-arn <출력 ComputeRoleArn> --region ap-northeast-2
 ```
 
-콘솔: Amplify → 앱 → Hosting → **IAM roles** → Compute role.
+콘솔: Amplify → 앱 → App settings → **IAM roles** → Compute role (Default role = 앱 전체, 아래 표에서 브랜치별 지정).
+역할은 재배포 없이 바로 적용됩니다.
 
 ### 4-3. 앱에 리소스 ID 알려 주기
 
@@ -125,12 +132,16 @@ aws amplify update-app --app-id <Amplify 앱 ID> --compute-role-arn <출력 Comp
   Amplify 빌드 설정을 건드릴 필요가 없습니다.
 - **환경변수**: Amplify 콘솔 → Hosting → Environment variables에 `COGNITO_USER_POOL_ID`, `COGNITO_CLIENT_ID`
   (테이블 이름을 바꿨다면 `MEMBERS_TABLE`, `MEMBERS_AUDIT_TABLE`, 리전이 다르면 `MEMBERS_REGION`).
-  Amplify의 Next.js SSR은 콘솔 환경변수를 **빌드 때만** 넘기므로, 빌드 설정(amplify.yml)의 build 단계에 아래 줄이 있어야 서버가 읽습니다.
-  `/api/agent`의 `BIZOPS_*` 값이 이미 동작 중이라면 같은 방식의 줄이 이미 있을 것이니 접두사만 추가하세요.
+  Amplify의 Next.js SSR은 콘솔 환경변수를 **빌드 때만** 넘기므로, 저장소의 `amplify.yml`이 build 단계에서
+  아래 줄로 `.env.production`에 적어 서버가 읽게 합니다(값을 바꾸면 다시 빌드해야 반영). 콘솔에서 변수를
+  브랜치별로 덮어쓸 수 있으니, 검증 중에는 `feature/aws-members` 브랜치에만 넣으면 됩니다.
 
   ```yaml
-  - env | grep -E '^(BIZOPS_|COGNITO_|MEMBERS_|LEGACY_SUPABASE_MIGRATION)' >> .env.production
+  - env | grep -E '^(BIZOPS_|COGNITO_|MEMBERS_|LEGACY_SUPABASE_MIGRATION=)' >> .env.production || true
   ```
+
+  저장소의 `amplify.yml`은 콘솔에 적어 둔 빌드 설정보다 우선합니다. 콘솔 빌드 설정에 따로 넣어 둔 명령이
+  있다면 `amplify.yml`에 옮겨 주세요.
 
 이름이 `AWS_`로 시작하는 환경변수는 Amplify가 막아서 쓰지 않습니다. AWS 키 환경변수는 만들지 마세요.
 

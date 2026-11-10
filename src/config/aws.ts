@@ -12,9 +12,9 @@
 export const AWS_MEMBERS = {
   region: 'ap-northeast-2',
   /** 예: ap-northeast-2_AbCdEf123 */
-  userPoolId: '',
+  userPoolId: 'ap-northeast-2_7hnvEWJRX',
   /** 비밀키 없는(public) 앱 클라이언트 ID */
-  clientId: '',
+  clientId: 'msnmhmqq5vjbsqiv4bcmub3b3',
   usersTable: 'mustsem-members',
   auditTable: 'mustsem-member-audit',
 } as const

@@ -305,9 +305,9 @@ export const API_GROUPS: ApiGroup[] = [
     description: '분산 신원(DID) 등록과 자격증명 발급, 검증, 폐기',
     endpoints: [
       { name: 'DID 등록', description: '신원 식별자와 문서 주소 등록', method: 'POST', path: '/v1/did/register', params: ['did', 'documentURI'], isNew: true },
-      { name: 'DID 조회', description: '컨트롤러, 문서 주소, 활성 여부', method: 'GET', path: '/v1/did/resolve', params: ['did'], isNew: true, tryIt: [CHAIN, { name: 'did', value: 'did:mst:example', hint: 'DID 문자열' }] },
+      { name: 'DID 조회', description: '컨트롤러, 문서 주소, 활성 여부', method: 'GET', path: '/v1/did/resolve', params: ['did'], isNew: true, tryIt: [CHAIN, { name: 'did', value: 'did:mst:mustsem', hint: 'DID 문자열 (예: 머스트셈 회사 DID)' }] },
       { name: '자격증명 발급', description: '자격증명 해시를 온체인에 기록', method: 'POST', path: '/v1/did/credentials/issue', params: ['issuer', 'subject', 'credentialHash'], isNew: true },
-      { name: '자격증명 검증', description: '발급, 만료, 폐기 여부 확인', method: 'GET', path: '/v1/did/credentials/verify', params: ['credentialHash'], isNew: true, tryIt: [CHAIN, { name: 'credentialHash', value: '', hint: '자격증명 해시 (0x로 시작하는 64자리)' }] },
+      { name: '자격증명 검증', description: '발급, 만료, 폐기 여부 확인', method: 'GET', path: '/v1/did/credentials/verify', params: ['credentialHash'], isNew: true, tryIt: [CHAIN, { name: 'credentialHash', value: '0xc3b05b8627199f49fbfea364951eae3a9e2d41a2b9f410ed061018d7f718f867', hint: '자격증명 해시 (예시는 시연용 자격증명)' }] },
       { name: '자격증명 폐기', description: '발급자가 자격증명을 무효화', method: 'POST', path: '/v1/did/credentials/revoke', params: ['credentialHash'], isNew: true },
     ],
   },

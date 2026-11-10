@@ -8,41 +8,22 @@
 // 4) 주소를 contracts/deployed.json에 저장한다 (주소만 들어 있고 개인키는 없다)
 const fs = require('node:fs')
 const path = require('node:path')
-const readline = require('node:readline')
 const { JsonRpcProvider, Wallet, formatEther } = require('ethers')
 const { deployAll } = require('./deploy.cjs')
+const { ask, askPrivateKey } = require('./prompt.cjs')
 
 const RPC_URL = process.env.RPC_URL || 'https://block.mustree.kr'
 const OUT = path.join(__dirname, '..', 'deployed.json')
 
-// 입력 창구는 하나만 둔다 (질문마다 새로 만들면 붙여 넣은 다음 줄을 놓칠 수 있다)
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: Boolean(process.stdin.isTTY) })
-const lines = rl[Symbol.asyncIterator]()
-let muted = false
-const write = rl._writeToOutput.bind(rl)
-// 가려야 할 때는 입력한 글자를 화면에 쓰지 않는다
-rl._writeToOutput = (text) => {
-  if (!muted) write(text)
-}
-
-async function ask(question, hidden = false) {
-  process.stdout.write(question)
-  muted = hidden
-  const { value } = await lines.next()
-  muted = false
-  if (hidden) process.stdout.write('\n')
-  return (value ?? '').trim()
-}
-
 async function main() {
   console.log('MUSTSEM 확장 컨트랙트 배포\n')
-  const key = (await ask('개인키를 붙여 넣고 Enter (화면에는 보이지 않습니다): ', true)).replace(/^0x/i, '')
-  if (!/^[0-9a-fA-F]{64}$/.test(key)) {
+  const key = await askPrivateKey()
+  if (!key) {
     console.log('\n개인키 형식이 아닙니다. 64자리(0~9, a~f)여야 합니다. 아무것도 배포하지 않았습니다.')
     process.exit(1)
   }
   const provider = new JsonRpcProvider(RPC_URL)
-  const signer = new Wallet(`0x${key}`, provider)
+  const signer = new Wallet(key, provider)
   let network
   let balance
   try {

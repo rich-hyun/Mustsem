@@ -66,7 +66,21 @@ Remove-Item Env:PRIVATE_KEY                        # 끝나면 지운다
 - `RELAYERS`(쉼표 구분 주소)를 줄 때만 `BridgeGateway`를 배포합니다. 정족수 기본값은 과반입니다.
 - 출력된 주소를 `src/config/contracts.ts`의 `PRICE_ORACLE_CONTRACTS` 등 해당 네트워크 칸에 넣고 사이트를 다시 배포합니다.
 
-배포 뒤 설정(관리자 지갑으로 실행):
+### 첫 데이터 넣기 (오라클 가격, DID)
+
+```
+node scripts/setup-interactive.cjs
+```
+
+관리자 지갑의 개인키를 물어본 뒤(화면에 보이지 않음) 할 일을 보여 주고 확인을 받아 실행합니다. 이미 된 것은 건너뛰므로 여러 번 실행해도 됩니다.
+
+- 오라클: 관리자 지갑을 리포터로 등록, `BTC/USD`·`QQQ/USD` 피드 등록, 최근 일별 종가 기록
+- DID: 회사 DID `did:mst:mustsem` 등록, 시연용 자격증명 1건 발급(`did:mst:mustsem` → `did:mst:example`)
+
+가격은 실행할 때마다 새 종가가 있으면 한 라운드씩 추가됩니다. 갱신 주기(BTC 2일, QQQ 5일)가 지나면 조회 응답에 `stale: true`가 붙으므로,
+계속 최신으로 두려면 주기적으로 다시 실행하거나 리포터 서버를 따로 둡니다.
+
+그 밖의 설정(관리자 지갑으로 실행):
 
 1. `PriceOracle.setReporter(리포터, true)`, `registerFeed("MST/KRW", 2, 3600)` 후 리포터가 `submit`
 2. `ComplianceGuard.setDetector(탐지 서버 지갑, true)`, 필요하면 `setOperator`

@@ -1,6 +1,6 @@
 'use client'
 
-import { CaretDownIcon, UserCircleIcon } from '@phosphor-icons/react/ssr'
+import { CaretDownIcon, UserCircleIcon, UserIcon, UsersThreeIcon } from '@phosphor-icons/react/ssr'
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/Button'
@@ -30,7 +30,7 @@ export function AccountMenu({ open, onToggle, onClose, className }: AccountMenuP
     )
   }
 
-  const display = user.name ?? user.email.split('@')[0] ?? '내 계정'
+  const display = user.name || user.email.split('@')[0] || '내 계정'
   return (
     <div className={cx(styles.navItem, className)}>
       <button
@@ -53,6 +53,22 @@ export function AccountMenu({ open, onToggle, onClose, className }: AccountMenuP
               {user.email}
             </p>
           </div>
+          <nav className={styles.popSection} aria-label="계정 메뉴">
+            <ul role="list" className={styles.popLinks}>
+              <li>
+                <Link href="/account" className={styles.popLink} onClick={onClose}>
+                  <UserIcon size={16} aria-hidden /> 내 정보
+                </Link>
+              </li>
+              {user.role === 'ADMIN' && (
+                <li>
+                  <Link href="/admin/members" className={styles.popLink} onClick={onClose}>
+                    <UsersThreeIcon size={16} aria-hidden /> 회원 관리
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </nav>
           <div className={cx(styles.popSection, styles.popFooter)}>
             <Button
               variant="secondary"

@@ -17,10 +17,10 @@ Node.js 20.9 이상이 필요합니다.
 
 ## 기술 스택
 
-- Next.js 16 (App Router, Turbopack). 페이지는 모두 빌드 때 정적으로 만들어지고, 서버 함수는 `/api/market-data` 하나
+- Next.js 16 (App Router, Turbopack). 페이지는 모두 빌드 때 정적으로 만들어지고, 서버 함수는 `/api/*` Route Handler(시세·에이전트·회원)
 - React 19, TypeScript (strict)
 - ethers v6: 지갑 도구 페이지에서만 로드
-- Supabase Auth: 로그인 흔적이 있거나 계정 페이지를 열 때만 SDK 로드
+- Amazon Cognito(인증) + DynamoDB(회원 프로필·작업 기록): 서버 Route Handler가 AWS SDK v3로 호출, 토큰은 httpOnly 쿠키 (`docs/aws-members.md`)
 - Motion (`motion/react`): 스크롤 위치·포인터 좌표를 모션 값으로만 다루는 효과(헤더, 머리 빛, 자석 버튼, 절차 선)
 - Chart.js: 대시보드 가치 변화 차트에서만, 데이터가 준비된 뒤 로드
 - Phosphor Icons (`@phosphor-icons/react/ssr`)
@@ -41,7 +41,10 @@ Node.js 20.9 이상이 필요합니다.
 | `/dashboard` | 머스트리 코인 가치 변화 차트(MST·BTC·QQQ, 1일/1주/1달) · 운영 지갑 잔액 모니터링 |
 | `/api/market-data` | 차트용 일별 시세 (서버 함수, 30분 CDN 캐시) |
 | `/agent` · `/api/agent` | Biz-Ops AI 에이전트 (회원 전용, 시범 운영 중이라 검색 비노출). 허용 계정은 내부용(고객 관리 포함), 그 밖의 회원은 공개용(고객사 정보 없음, 하루 횟수 제한). 서버 함수가 로그인·허용 목록을 확인하고 에이전트 게이트웨이로 넘긴다 |
-| `/login` · `/signup` · `/confirm` | 계정 (Supabase) |
+| `/login` · `/signup` · `/confirm` · `/forgot-password` | 로그인 · 회원가입 · 이메일 인증 코드 · 비밀번호 재설정 (Cognito) |
+| `/account` | 내 정보 조회·수정, 비밀번호 변경 (로그인 필요) |
+| `/admin/members` | 관리자 회원 관리: 현황, 검색·필터·정렬, 상세, 활성/비활성, 권한 변경, 삭제, 작업 기록 (관리자만) |
+| `/api/auth/*` · `/api/me` · `/api/admin/users` | 회원 API (서버가 요청마다 토큰 검증 + DynamoDB에서 상태·권한 확인) |
 | `/privacy` · `/terms` | 개인정보처리방침 · 이용약관 |
 
 기존 주소(`/network.html`, `/api.html`, `/api-guide.html` 등)는 `next.config.ts`의 `redirects()`에서 새 주소로 영구 이동합니다.
@@ -52,7 +55,8 @@ Node.js 20.9 이상이 필요합니다.
 | --- | --- |
 | 체인 RPC · 체인 ID · 심볼 | `src/config/networks.ts` |
 | 컨트랙트 주소 · ABI | `src/config/contracts.ts` (미배포 네트워크는 `null`) |
-| API 서버 · IPFS 게이트웨이 · Supabase URL/키 | `src/config/site.ts` |
+| API 서버 · IPFS 게이트웨이 · (기존 회원 이전용) Supabase URL/키 | `src/config/site.ts` |
+| Cognito 사용자 풀·앱 클라이언트 ID, 회원 테이블 이름 | `src/config/aws.ts` (리소스: `infra/aws/members-stack.yaml`) |
 | 메뉴 구조 | `src/config/navigation.ts` |
 | 보안 헤더 · 리다이렉트 · `/fx` 프록시 | `next.config.ts` |
 | 차트 시세 원본(Stooq·Yahoo·CoinGecko) | `src/app/api/market-data/route.ts` |
@@ -68,7 +72,8 @@ src/
     marketing/          소개 페이지 블록 (특징·수치·CTA·FAQ·흐름도)
     motion/             모션 런타임(등장·스포트라이트)·수치 애니메이션·포인터 빛·자석 버튼
     wallet/ tx/ tools/  지갑 상태·서명·트랜잭션 상태·도구 레이아웃
-    auth/ legal/        인증 상태·계정 폼·법적 문서
+    auth/ legal/        인증 상태·회원 API 호출·보호 페이지 문지기·계정 폼·법적 문서
+  server/members/       회원 서버 로직 (Cognito·DynamoDB·세션 쿠키·관리자 작업) Route Handler 전용
   config/               네트워크·컨트랙트·사이트·메뉴 설정
   content/              페이지 문구 데이터
   lib/                  형식·금액·오류·지갑(EIP-1193)·코드 생성 도우미
@@ -100,6 +105,14 @@ public/
 화면이 2초마다 `GET /api/agent?job=<번호>`로 조회한다(최대 5분). 조회 때 게이트웨이에 넘기는 회원 식별값은 브라우저가 보낸 값이 아니라 세션 이메일의 해시라,
 다른 회원이 맡긴 번호로는 답을 볼 수 없다. 게이트웨이 쪽 명세는 `bizops_agent/scripts/serve_api.py` 맨 위 설명.
 
+### 회원 시스템 (Cognito + DynamoDB)
+
+설정·배포·첫 관리자 지정·로컬 에뮬레이터 실행은 `docs/aws-members.md`를 보세요. 요약:
+
+1. `infra/aws/members-stack.yaml`을 CloudFormation으로 배포 (사용자 풀·테이블 2개·최소 권한 IAM)
+2. Amplify 앱에 컴퓨트 역할 연결, `src/config/aws.ts`에 사용자 풀·클라이언트 ID 입력
+3. 가입 후 `node scripts/grant-admin.mjs --email <이메일> --user-pool-id <ID>`로 첫 관리자 지정
+
 ## 디자인·코드 규칙
 
 `AGENTS.md`를 참고하세요 (디자인 시스템 규칙, 아이콘·오류 처리 규칙, 검증 방법).
@@ -113,7 +126,7 @@ public/
 - **JKK-TMZ·KukminBank·MDPCD·NABIZAM RPC가 응답하지 않습니다.** 해당 네트워크의 조회는 "조회 실패"/"네트워크 응답 없음"으로 표시됩니다.
 - **네트워크 생성 신청 폼은 서버로 전송하지 않습니다** (기존 사이트와 동일하게 화면 안내만). 접수를 실제로 받으려면 저장처(예: Supabase 테이블)를 정해야 합니다.
 - RWA 업로드 API(`/upload`)는 인증 없이 열려 있습니다 (서버 쪽 조치 필요).
-- 이메일 인증 링크를 쓰게 되면 Supabase의 허용 리다이렉트 URL에 `https://www.mustsem.co.kr/confirm`을 추가하세요 (현재는 자동 확인이라 메일이 가지 않음).
-- 개인정보처리방침은 기존 원문 그대로입니다. 실제 인증 수탁자(Supabase)가 목록에 없고, 꺼져 있는 Google 로그인을 안내하고 있어 검토가 필요합니다.
+- 회원 인증은 Supabase에서 Cognito로 옮겼습니다. 기존 Supabase 회원은 `LEGACY_SUPABASE_MIGRATION=on`일 때 첫 로그인에서 옮겨집니다 (`docs/aws-members.md` 7절).
+- 개인정보처리방침은 기존 원문 그대로입니다. 실제 인증 수탁자(AWS: Cognito·DynamoDB, 이전 기간 동안 Supabase)가 목록에 없고, 꺼져 있는 Google 로그인을 안내하고 있어 검토가 필요합니다.
 - 차트 시세: QQQ의 1순위 원본인 Stooq가 서버 요청에 403을 돌려줘 지금은 Yahoo Finance(2순위)로 받습니다. 기존 대시보드가 먼저 시도하던 자체 API(`api.mustree.kr/api/market-history`)는 404(미구현)라 호출하지 않습니다. 서버에 구현되면 `MarketChart.tsx`의 `loadSeries`에 한 단계 추가하면 됩니다.
 - 브릿지 원본 체인(JKK-TMZ) RPC 주소 `jkk.mst2.site`는 DNS가 풀리지 않아 브라우저 콘솔에 연결 실패가 남습니다(화면은 "조회 실패"로 안내).

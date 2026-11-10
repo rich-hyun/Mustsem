@@ -19,8 +19,8 @@ export const API_BASE = 'https://api.mustree.kr'
 export const IPFS_GATEWAY = 'https://rwa-gw.mustree.kr/ipfs'
 
 /**
- * Supabase 인증 — anon 키는 브라우저 공개용 키다(권한은 Supabase RLS가 통제).
- * 프로젝트를 옮기면 url·anonKey 두 값만 바꾸면 된다.
+ * 기존 Supabase 인증 프로젝트 (회원 인증은 Amazon Cognito로 옮겼다. src/config/aws.ts).
+ * 서버가 기존 회원의 첫 로그인을 Cognito로 옮길 때만 읽는다(LEGACY_SUPABASE_MIGRATION=on). anon 키는 공개용 키다.
  */
 export const SUPABASE = {
   url: 'https://qkqhpzyazsvpggtyhuft.supabase.co',

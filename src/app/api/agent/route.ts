@@ -1,5 +1,5 @@
 /**
- * Biz-Ops AI 에이전트 창구. 로그인한 회원만 쓴다 (header: Authorization: Bearer <Supabase access token>).
+ * Biz-Ops AI 에이전트 창구. 로그인한 회원만 쓴다 (httpOnly 세션 쿠키, src/server/members/session.ts).
  *
  * 답이 30초를 넘기도 해서(도구 10회 이상) 한 요청으로 기다리지 않고 "맡기고 → 조회" 한다.
  * GET  /api/agent                  → { mode: 'internal' | 'public', dailyLimit }  (화면이 어떤 모드인지 알기 위해)
@@ -18,14 +18,13 @@
  * - 같은 사이트 화면만 쓰는 창구라 CORS를 열지 않는다.
  */
 import { createHash } from 'node:crypto'
-import type { NextRequest } from 'next/server'
-import { SUPABASE } from '@/config/site'
+import { NextResponse, type NextRequest } from 'next/server'
+import { authenticate } from '@/server/members/session'
 
 // 맡기기·조회 모두 몇 초 안에 끝난다 (호스팅의 요청 한도 30초 안쪽)
 export const maxDuration = 30
 
 const MAX_QUESTION = 2000
-const AUTH_TIMEOUT_MS = 8000
 const GATEWAY_TIMEOUT_MS = 15_000
 /** 게이트웨이 작업 번호. 주소 경로에 그대로 붙이므로 영숫자·_·- 만 받는다 */
 const JOB_ID = /^[A-Za-z0-9_-]{1,64}$/
@@ -47,22 +46,24 @@ function allowedEmails(): Set<string> {
   )
 }
 
-/** Supabase에 토큰을 물어 로그인한 계정의 이메일을 얻는다 (위조·만료 토큰은 null) */
-async function emailOf(request: NextRequest): Promise<string | null> {
-  const token = request.headers.get('authorization')?.match(/^Bearer\s+(\S+)$/i)?.[1]
-  if (!token) return null
-  try {
-    const response = await fetch(`${SUPABASE.url}/auth/v1/user`, {
-      headers: { apikey: SUPABASE.anonKey, Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
-      cache: 'no-store',
-    })
-    if (!response.ok) return null
-    const user = (await response.json()) as { email?: unknown }
-    return typeof user.email === 'string' && user.email ? user.email.toLowerCase() : null
-  } catch (error) {
-    console.error('[agent] auth check failed:', error instanceof Error ? error.message : error)
-    return null
+/**
+ * 세션 쿠키로 로그인한 회원을 확인한다 (서명·만료 검증, DynamoDB 상태 확인 포함).
+ * 비활성화된 계정·삭제된 계정·위조 토큰은 401. 회원 시스템이 잠깐 응답하지 않은 것은 503으로 구분해,
+ * 조회 중인 화면이 "로그인 만료"로 끝내지 않고 다시 시도하게 한다.
+ * send: 액세스 토큰이 갱신됐으면 새 쿠키를 응답에 붙인다. 붙이지 않으면 만료 뒤 2초마다의 조회가 매번 갱신을 부른다.
+ */
+async function memberOf(
+  request: NextRequest,
+): Promise<{ email: string; send: (body: unknown, status?: number) => Response } | Response> {
+  const outcome = await authenticate(request)
+  if (!outcome.ok) {
+    const { status } = outcome.response
+    return status === 401 || status === 403 ? fail('unauthenticated', 401) : fail('unavailable', 503)
+  }
+  const { profile, finish } = outcome.auth
+  return {
+    email: profile.email.toLowerCase(),
+    send: (body, status = 200) => finish(NextResponse.json(body, { status, headers: NO_STORE })),
   }
 }
 
@@ -85,12 +86,13 @@ function gateway(): { base: string; secret: string } | null {
 const numberOr = (value: unknown) => (typeof value === 'number' ? value : null)
 
 export async function GET(request: NextRequest) {
-  const email = await emailOf(request)
-  if (!email) return fail('unauthenticated', 401)
+  const member = await memberOf(request)
+  if (member instanceof Response) return member
+  const { email, send } = member
   const mode = modeOf(email)
 
   const job = request.nextUrl.searchParams.get('job')
-  if (job === null) return Response.json({ mode, dailyLimit: PUBLIC_DAILY_LIMIT }, { headers: NO_STORE })
+  if (job === null) return send({ mode, dailyLimit: PUBLIC_DAILY_LIMIT })
   if (!JOB_ID.test(job)) return fail('bad_request', 400)
 
   const target = gateway()
@@ -118,22 +120,19 @@ export async function GET(request: NextRequest) {
       remaining?: unknown
     }
     if (data.status === 'running') {
-      return Response.json({ status: 'running', elapsed: numberOr(data.elapsed) }, { headers: NO_STORE })
+      return send({ status: 'running', elapsed: numberOr(data.elapsed) })
     }
     if (data.status === 'done') {
-      return Response.json(
-        {
-          status: 'done',
-          mode,
-          answer: typeof data.answer === 'string' ? data.answer : '',
-          tools: Array.isArray(data.tools) ? data.tools.filter((tool): tool is string => typeof tool === 'string') : [],
-          elapsed: numberOr(data.elapsed),
-          remaining: numberOr(data.remaining),
-        },
-        { headers: NO_STORE },
-      )
+      return send({
+        status: 'done',
+        mode,
+        answer: typeof data.answer === 'string' ? data.answer : '',
+        tools: Array.isArray(data.tools) ? data.tools.filter((tool): tool is string => typeof tool === 'string') : [],
+        elapsed: numberOr(data.elapsed),
+        remaining: numberOr(data.remaining),
+      })
     }
-    if (data.status === 'failed') return Response.json({ status: 'failed', error: 'agent_failed' }, { headers: NO_STORE })
+    if (data.status === 'failed') return send({ status: 'failed', error: 'agent_failed' })
     console.error('[agent] gateway job: unknown status')
     return fail('unavailable', 502)
   } catch (error) {
@@ -143,8 +142,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const email = await emailOf(request)
-  if (!email) return fail('unauthenticated', 401)
+  const member = await memberOf(request)
+  if (member instanceof Response) return member
+  const { email, send } = member
   const mode = modeOf(email)
 
   let question: unknown
@@ -182,10 +182,7 @@ export async function POST(request: NextRequest) {
       console.error('[agent] gateway returned no job id')
       return fail('unavailable', 502)
     }
-    return Response.json(
-      { mode, job, status: 'running', remaining: numberOr(data.remaining) },
-      { status: 202, headers: NO_STORE },
-    )
+    return send({ mode, job, status: 'running', remaining: numberOr(data.remaining) }, 202)
   } catch (error) {
     console.error('[agent] gateway call failed:', error instanceof Error ? error.message : error)
     return fail('unavailable', 502)

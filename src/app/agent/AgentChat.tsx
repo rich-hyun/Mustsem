@@ -195,7 +195,7 @@ function Answer({ text }: { text: string }) {
 }
 
 export function AgentChat() {
-  const { status, getClient } = useAuth()
+  const { status } = useAuth()
   const [info, setInfo] = useState<AgentInfo | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [question, setQuestion] = useState('')
@@ -213,12 +213,6 @@ export function AgentChat() {
     }
   }, [])
 
-  const accessToken = useCallback(async () => {
-    const client = await getClient()
-    const { data } = await client.auth.getSession()
-    return data.session?.access_token ?? null
-  }, [getClient])
-
   /** 맡긴 질문을 POLL_MS 마다 조회해 done 결과를 돌려준다. 화면을 떠나면 null */
   const waitForAnswer = useCallback(
     async (job: string, started: number): Promise<JobOutcome | null> => {
@@ -228,11 +222,9 @@ export function AgentChat() {
         await wait(POLL_MS)
         if (!mounted.current) return null
         try {
-          // 5분 사이 토큰이 갱신될 수 있어 조회마다 새로 받는다
-          const token = await accessToken()
-          if (!token) return { ok: false, error: ERROR_TEXT.unauthenticated ?? UNAVAILABLE }
+          // 세션은 httpOnly 쿠키로 함께 전송된다 (만료가 가까우면 서버가 조회 응답에서 갱신한다)
           const response = await fetch(`/api/agent?job=${encodeURIComponent(job)}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            credentials: 'same-origin',
             cache: 'no-store',
           })
           const body = (await response.json().catch(() => ({}))) as JobBody
@@ -251,7 +243,7 @@ export function AgentChat() {
       }
       return null
     },
-    [accessToken],
+    [],
   )
 
   // 로그인하면 이 계정이 내부용인지 공개용인지 먼저 받아 둔다 (예시 질문·안내가 달라진다)
@@ -261,10 +253,9 @@ export function AgentChat() {
       return
     }
     let cancelled = false
-    accessToken()
-      .then(async (token) => {
-        if (!token) return
-        const response = await fetch('/api/agent', { headers: { Authorization: `Bearer ${token}` } })
+    // 세션은 httpOnly 쿠키로 함께 전송된다
+    fetch('/api/agent', { credentials: 'same-origin', cache: 'no-store' })
+      .then(async (response) => {
         if (!response.ok) return
         const body = (await response.json()) as Partial<AgentInfo>
         if (!cancelled && (body.mode === 'internal' || body.mode === 'public')) {
@@ -275,7 +266,7 @@ export function AgentChat() {
     return () => {
       cancelled = true
     }
-  }, [status, accessToken])
+  }, [status])
 
   if (status === 'unknown') {
     return <Notice tone="neutral">로그인 상태를 확인하고 있습니다.</Notice>
@@ -314,16 +305,12 @@ export function AgentChat() {
     setProgress(null)
     setError(null)
     try {
-      const token = await accessToken()
-      if (!token) {
-        setError(ERROR_TEXT.unauthenticated ?? UNAVAILABLE)
-        return
-      }
       // 답은 30초를 넘기기도 해서 질문을 맡기고(번호를 받고) 끝날 때까지 조회한다
       const started = Date.now()
       const response = await fetch('/api/agent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: trimmed }),
       })
       const body = (await response.json().catch(() => ({}))) as { job?: string; remaining?: number | null; error?: string }

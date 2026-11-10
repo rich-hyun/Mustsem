@@ -334,3 +334,91 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ── 비밀번호 정책 체크리스트 ─────────────────────────────────── */
+.policy {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-top: 8px;
+}
+
+.policyItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-4);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  transition: color 160ms var(--ease);
+}
+
+.policyOk {
+  color: var(--success);
+}
+
+/* ── 보조 링크 줄 (비밀번호 찾기 등) ───────────────────────────── */
+.inlineLinks {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+  font-size: var(--text-xs);
+}
+
+.inlineLinks a,
+.linkButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.inlineLinks a:hover,
+.linkButton:hover:not(:disabled) {
+  color: var(--accent-ink);
+}
+
+.linkButton:disabled {
+  color: var(--ink-4);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* 인증 코드 입력 안내 */
+.codeNote {
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  text-align: center;
+}
+
+.codeNote strong {
+  color: var(--ink);
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.resendRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ink-4);
+  font-size: var(--text-xs);
+}
+
+/* ── 보호 페이지 확인 중 ───────────────────────────────────────── */
+.gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 160px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}

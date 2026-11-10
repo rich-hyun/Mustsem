@@ -1,0 +1,227 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  MUSTSEM member system - Cognito user pool (authentication), DynamoDB tables (member profiles,
+  admin audit log), and a least-privilege IAM policy for the Amplify SSR compute role.
+  Data resources use DeletionPolicy Retain + deletion protection, so deleting this stack never
+  deletes member data.
+
+Parameters:
+  AppName:
+    Type: String
+    Default: mustsem
+    AllowedPattern: '[a-z0-9-]+'
+  UsersTableName:
+    Type: String
+    Default: mustsem-members
+  AuditTableName:
+    Type: String
+    Default: mustsem-member-audit
+  ExistingComputeRoleName:
+    Type: String
+    Default: ''
+    Description: >-
+      If the Amplify app already has an SSR compute role, put its role NAME here and the policy is
+      attached to it (no new role is created). Leave empty to create a new compute role.
+  SesIdentityArn:
+    Type: String
+    Default: ''
+    Description: >-
+      (Optional, recommended for production) Verified SES identity ARN for sending verification
+      mail. Empty = Cognito default sender (about 50 mails/day, for testing only).
+  SesFromAddress:
+    Type: String
+    Default: ''
+    Description: 'Sender shown in mails when SesIdentityArn is set, e.g. MUSTSEM <no-reply@mustsem.co.kr>'
+
+Conditions:
+  CreateRole: !Equals [!Ref ExistingComputeRoleName, '']
+  UseSes: !Not [!Equals [!Ref SesIdentityArn, '']]
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Sub '${AppName}-members'
+      DeletionProtection: ACTIVE
+      UsernameAttributes: [email]
+      UsernameConfiguration:
+        CaseSensitive: false
+      AutoVerifiedAttributes: [email]
+      UserAttributeUpdateSettings:
+        # A changed email only takes effect after the new address is verified
+        AttributesRequireVerificationBeforeUpdate: [email]
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: name
+          AttributeDataType: String
+          Required: false
+          Mutable: true
+      # Keep in sync with src/lib/account.ts (the app additionally requires at least one letter)
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireLowercase: false
+          RequireUppercase: false
+          TemporaryPasswordValidityDays: 7
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_CODE
+        EmailSubject: '[MUSTSEM] 이메일 인증 코드'
+        EmailMessage: 'MUSTSEM 회원가입 인증 코드는 {####} 입니다. 24시간 안에 입력해주세요.'
+      EmailConfiguration: !If
+        - UseSes
+        - EmailSendingAccount: DEVELOPER
+          SourceArn: !Ref SesIdentityArn
+          From: !Ref SesFromAddress
+        - EmailSendingAccount: COGNITO_DEFAULT
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub '${AppName}-web'
+      # Called only from the Next.js server (BFF). No secret = nothing secret to store in Amplify.
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      ReadAttributes: [email, email_verified, name]
+      WriteAttributes: [email, name]
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref UsersTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      DeletionProtectionEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+
+  AuditTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Ref AuditTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: targetUserId
+          AttributeType: S
+        - AttributeName: at
+          AttributeType: S
+      KeySchema:
+        - AttributeName: targetUserId
+          KeyType: HASH
+        - AttributeName: at
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      DeletionProtectionEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+
+  # Least privilege: only the calls the server code makes, only on these three resources.
+  # Public Cognito APIs (SignUp, InitiateAuth, ForgotPassword ...) need no IAM permission.
+  MembersAccessPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${AppName}-members-access'
+      Roles: !If
+        - CreateRole
+        - !Ref AWS::NoValue
+        - [!Ref ExistingComputeRoleName]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: CognitoAdmin
+            Effect: Allow
+            Action:
+              - cognito-idp:AdminGetUser
+              - cognito-idp:AdminCreateUser
+              - cognito-idp:AdminSetUserPassword
+              - cognito-idp:AdminUpdateUserAttributes
+              - cognito-idp:AdminDisableUser
+              - cognito-idp:AdminEnableUser
+              - cognito-idp:AdminDeleteUser
+              - cognito-idp:AdminUserGlobalSignOut
+            Resource: !GetAtt UserPool.Arn
+          - Sid: MemberProfiles
+            Effect: Allow
+            Action:
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+              - dynamodb:Scan
+            Resource: !GetAtt UsersTable.Arn
+          - Sid: AuditLogAppendAndRead
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:Query
+            Resource: !GetAtt AuditTable.Arn
+
+  ComputeRole:
+    Type: AWS::IAM::Role
+    Condition: CreateRole
+    Properties:
+      RoleName: !Sub '${AppName}-amplify-compute'
+      Description: Amplify Hosting SSR compute role for the MUSTSEM Next.js server
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: amplify.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref MembersAccessPolicy
+
+Outputs:
+  UserPoolId:
+    Description: 'src/config/aws.ts userPoolId (or env COGNITO_USER_POOL_ID)'
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Description: 'src/config/aws.ts clientId (or env COGNITO_CLIENT_ID)'
+    Value: !Ref UserPoolClient
+  UsersTable:
+    Value: !Ref UsersTable
+  AuditTable:
+    Value: !Ref AuditTable
+  ComputeRoleArn:
+    Condition: CreateRole
+    Description: 'aws amplify update-app --app-id <id> --compute-role-arn <this>'
+    Value: !GetAtt ComputeRole.Arn
+  MembersAccessPolicyArn:
+    Value: !Ref MembersAccessPolicy

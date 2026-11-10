@@ -10,12 +10,13 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # MUSTSEM 5.5 — 작업 규칙
 
-Next.js 16 App Router 사이트. 페이지는 모두 빌드 때 정적으로 만들어지고, 서버에서 도는 것은 Route Handler `src/app/api/market-data/route.ts`(대시보드 시세) 하나뿐이다. 리다이렉트·보안 헤더·`/fx` 프록시는 `next.config.ts`에 있다(`vercel.json`은 프레임워크 지정만).
+Next.js 16 App Router 사이트. 페이지는 모두 빌드 때 정적으로 만들어지고, 서버에서 도는 것은 `src/app/api/*` Route Handler(대시보드 시세, 에이전트, 회원)뿐이다. 리다이렉트·보안 헤더·`/fx` 프록시는 `next.config.ts`에 있다(`vercel.json`은 프레임워크 지정만).
 
 ## 설정은 한 곳에서
 - 체인 RPC·체인 ID: `src/config/networks.ts`
 - 컨트랙트 주소·ABI: `src/config/contracts.ts` (미배포 네트워크는 `null`)
-- API 서버·IPFS 게이트웨이·Supabase: `src/config/site.ts`
+- API 서버·IPFS 게이트웨이·(기존 회원 이전용) Supabase: `src/config/site.ts`
+- 회원 시스템 Cognito·DynamoDB 식별자: `src/config/aws.ts` (운영 안내 `docs/aws-members.md`)
 - 메뉴 구조: `src/config/navigation.ts`
 
 ## 디자인 시스템 (`src/app/globals.css` 머리 주석이 원본)
@@ -48,6 +49,7 @@ Next.js 16 App Router 사이트. 페이지는 모두 빌드 때 정적으로 만
 - 공용 부품을 먼저 찾는다: `src/components/ui`(Button, Card, Field, Tabs, Dialog, Table…), `marketing/Blocks`, `tools/*`, `wallet/*`, `tx/*`.
 - 지갑 도구: `useSigner()(network)`가 연결→네트워크 전환→서명자를 처리, `useTx()`가 서명 대기→기록 대기→완료/실패 상태를 관리.
 - 오류 노출 금지(CWE-209): 사용자에게는 `describeError()`/`UserFacingError` 고정 문구만. 콘솔은 `logDevError()`(개발 모드 전용). UI에 내부 엔드포인트·설정값을 표시하지 않는다.
+- 회원·권한: 화면 분기는 `useAuth()`/`<RequireAuth role>`로 하되, 권한 판단은 반드시 서버(`authenticate(request, { role })`, 요청마다 DynamoDB 재확인)에서 한다. 역할·상태를 클라이언트 입력에서 읽지 않는다. 회원 API 오류는 코드만 응답하고 문구는 `memberErrorMessage()`.
 - 포맷: 금액은 `formatUnitsExact`(bigint, 부동소수 금지), 입력 검증은 `parseAmount`.
 
 ## 검증

@@ -7,7 +7,9 @@ import { useEffect, useRef, useState, type SubmitEvent } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { AuthCard } from '@/components/auth/AuthCard'
 import { PasswordField } from '@/components/auth/PasswordField'
-import { SERVICE_UNAVAILABLE, looksLikeEmail, signupErrorMessage } from '@/components/auth/authErrors'
+import { PasswordPolicy } from '@/components/auth/PasswordPolicy'
+import { looksLikeEmail, memberErrorMessage } from '@/components/auth/authErrors'
+import { isApiError, memberApi } from '@/components/auth/memberApi'
 import styles from '@/components/auth/Auth.module.css'
 import { MarketingConsent } from '@/components/legal/MarketingConsent'
 import { PrivacyContent } from '@/components/legal/PrivacyContent'
@@ -16,6 +18,7 @@ import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
+import { NAME_MAX, normalizeEmail, passwordProblem } from '@/lib/account'
 import { logDevError } from '@/lib/errors'
 import { STRENGTH_LABELS, passwordStrength } from './passwordStrength'
 
@@ -42,7 +45,7 @@ const DOCS: Record<DocId, { title: string; href?: string }> = {
 
 export function SignupForm() {
   const router = useRouter()
-  const { status, getClient } = useAuth()
+  const { status } = useAuth()
 
   const [lastName, setLastName] = useState('')
   const [firstName, setFirstName] = useState('')
@@ -55,6 +58,7 @@ export function SignupForm() {
   const [message, setMessage] = useState<Message | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [openDoc, setOpenDoc] = useState<DocId | null>(null)
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null)
   const succeeded = useRef(false)
   const agreeAllRef = useRef<HTMLInputElement>(null)
 
@@ -64,10 +68,6 @@ export function SignupForm() {
   useEffect(() => {
     if (status === 'signed-in' && !succeeded.current) router.replace('/')
   }, [status, router])
-
-  useEffect(() => {
-    getClient().catch((error: unknown) => logDevError('signup:preload', error))
-  }, [getClient])
 
   // 일부만 동의한 상태는 '전체 동의'를 중간 상태로 보여 준다
   useEffect(() => {
@@ -87,10 +87,12 @@ export function SignupForm() {
     const next: FieldErrors = {}
     if (!lastName.trim()) next.lastName = '성을 입력해주세요.'
     if (!firstName.trim()) next.firstName = '이름을 입력해주세요.'
+    else if ((lastName.trim() + firstName.trim()).length > NAME_MAX) next.firstName = `성과 이름을 합쳐 ${NAME_MAX}자 이하로 입력해주세요.`
     const trimmedEmail = email.trim()
     if (!trimmedEmail) next.email = '이메일을 입력해주세요.'
     else if (!looksLikeEmail(trimmedEmail)) next.email = '유효하지 않은 이메일 형식입니다.'
-    if (password.length < 8) next.password = '비밀번호는 8자 이상이어야 합니다.'
+    const passwordError = passwordProblem(password)
+    if (passwordError) next.password = passwordError
     if (!passwordConfirm) next.passwordConfirm = '비밀번호를 한 번 더 입력해주세요.'
     else if (password !== passwordConfirm) next.passwordConfirm = '비밀번호가 일치하지 않습니다.'
     if (!agree.terms || !agree.privacy) next.agreements = '필수 약관에 동의해주세요.'
@@ -108,55 +110,31 @@ export function SignupForm() {
       return
     }
 
+    const normalized = normalizeEmail(email)
     setSubmitting(true)
     setMessage(null)
+    setUnverifiedEmail(null)
     try {
-      const client = await getClient().catch((error: unknown) => {
-        logDevError('signup:client', error)
-        return null
-      })
-      if (!client) {
-        setMessage({ tone: 'danger', text: SERVICE_UNAVAILABLE })
-        setSubmitting(false)
-        return
-      }
-
-      const last = lastName.trim()
-      const first = firstName.trim()
-      const { data, error } = await client.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            full_name: last + first,
-            last_name: last,
-            first_name: first,
-            company: company.trim() || null,
-            marketing_agreed: agree.marketing,
-          },
-          emailRedirectTo: `${window.location.origin}/confirm`,
+      await memberApi('/api/auth/signup', {
+        method: 'POST',
+        body: {
+          name: lastName.trim() + firstName.trim(),
+          email: normalized,
+          password,
+          company: company.trim(),
+          marketingAgreed: agree.marketing,
+          agreeTerms: agree.terms && agree.privacy,
         },
       })
-
-      if (error) {
-        logDevError('signup', error)
-        setMessage({ tone: 'danger', text: signupErrorMessage(error) })
-        setSubmitting(false)
-        return
-      }
-
       succeeded.current = true
-      if (data.session) {
-        setMessage({ tone: 'success', text: '가입이 완료되었습니다. 이동합니다…' })
-        window.setTimeout(() => router.replace('/'), 600)
-      } else {
-        setMessage({ tone: 'success', text: '가입이 완료되었습니다. 이메일을 확인해주세요.' })
-        window.setTimeout(() => router.replace('/login'), 1500)
-      }
+      setMessage({ tone: 'success', text: '인증 코드를 이메일로 보냈습니다. 인증 화면으로 이동합니다…' })
+      window.setTimeout(() => router.push(`/confirm?email=${encodeURIComponent(normalized)}`), 900)
     } catch (error) {
       logDevError('signup', error)
-      setMessage({ tone: 'danger', text: SERVICE_UNAVAILABLE })
       setSubmitting(false)
+      if (isApiError(error, 'email_taken')) setUnverifiedEmail(normalized)
+      if (isApiError(error, 'weak_password')) setErrors((current) => ({ ...current, password: memberErrorMessage(error) }))
+      setMessage({ tone: 'danger', text: memberErrorMessage(error, 'signup') })
     }
   }
 
@@ -240,8 +218,8 @@ export function SignupForm() {
             id="signup-password"
             label="비밀번호"
             autoComplete="new-password"
-            placeholder="8자 이상 입력하세요"
-            maxLength={50}
+            placeholder="영문, 숫자, 특수문자 포함 8자 이상"
+            maxLength={64}
             value={password}
             onChange={(event) => {
               setPassword(event.target.value)
@@ -251,6 +229,7 @@ export function SignupForm() {
             hint={
               password ? (
                 <>
+                  <PasswordPolicy password={password} />
                   <span className={styles.strength} data-level={strength} aria-hidden>
                     {[1, 2, 3, 4].map((segment) => (
                       <span key={segment} className={`${styles.segment} ${segment <= strength ? styles.on : ''}`} />
@@ -269,7 +248,7 @@ export function SignupForm() {
             label="비밀번호 확인"
             autoComplete="new-password"
             placeholder="비밀번호를 다시 입력하세요"
-            maxLength={50}
+            maxLength={64}
             value={passwordConfirm}
             onChange={(event) => {
               setPasswordConfirm(event.target.value)
@@ -332,7 +311,24 @@ export function SignupForm() {
           {message &&
             (message.tone === 'danger' ? (
               <div role="alert">
-                <Notice tone="danger">{message.text}</Notice>
+                <Notice
+                  tone="danger"
+                  actions={
+                    unverifiedEmail ? (
+                      <>
+                        <Button href={`/login?email=${encodeURIComponent(unverifiedEmail)}`} size="sm" variant="secondary">
+                          로그인
+                        </Button>
+                        <Button href={`/confirm?email=${encodeURIComponent(unverifiedEmail)}&resend=1`} size="sm" variant="ghost">
+                          인증 코드 다시 받기
+                        </Button>
+                      </>
+                    ) : undefined
+                  }
+                >
+                  {message.text}
+                  {unverifiedEmail && ' 이메일 인증을 마치지 않았다면 인증 코드를 다시 받을 수 있습니다.'}
+                </Notice>
               </div>
             ) : (
               <Notice tone="success" live>

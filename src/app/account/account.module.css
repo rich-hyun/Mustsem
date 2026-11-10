@@ -1,0 +1,88 @@
+/* 내 정보: 왼쪽 정보 면(L1), 오른쪽 입력 면(L2) */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.side,
+.main {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cardTitle {
+  font-size: var(--text-h3);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.main .cardTitle {
+  margin-bottom: 20px;
+}
+
+.form {
+  display: grid;
+  gap: 18px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent-ink);
+}
+
+.help {
+  color: var(--ink-4);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 160px;
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

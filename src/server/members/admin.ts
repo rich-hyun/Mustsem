@@ -2,12 +2,12 @@
  * 관리자 회원 관리 로직. Route Handler는 authenticate(role: 'ADMIN')을 통과한 뒤에만 이 함수를 부른다.
  * 모든 변경은 서버가 DynamoDB에서 다시 읽은 관리자 정보로 판단하고, 작업 기록 테이블에 남긴다.
  */
-import type { MemberProfile, MemberRole, MemberStatus } from '@/lib/account'
+import type { AdminMember, MemberProfile, MemberRole, MemberStatus } from '@/lib/account'
 import { ROLE_LABELS, STATUS_LABELS } from '@/lib/account'
 import { adminDelete, adminDisable, adminEnable, adminGetUser } from './cognito'
 import type { MembersConfig } from './config'
 import { MemberError } from './errors'
-import { deleteProfile, getProfile, scanProfiles, setRole, setStatus, writeAudit, type AuditAction } from './profiles'
+import { changeRoleRecorded, deleteProfile, getProfile, scanProfiles, setStatus, writeAudit, type AuditAction } from './profiles'
 
 const DAY = 24 * 60 * 60 * 1000
 export const RECENT_DAYS = 7
@@ -48,6 +48,15 @@ export function parseListQuery(params: URLSearchParams): ListQuery {
   }
 }
 
+/** 보호 계정(최고 관리자)인지. 서버 설정의 Cognito userId로만 판단한다 (이메일·요청 본문은 보지 않는다) */
+export const isProtected = (config: MembersConfig, userId: string) => config.protectedAdminIds.has(userId)
+
+/** 관리자 화면용: 보호 계정 표시를 붙인다 (화면은 이 값으로 "최고 관리자"를 표시하고 막힌 메뉴를 감춘다) */
+export const forAdmin = (config: MembersConfig, member: MemberProfile): AdminMember => ({
+  ...member,
+  protected: isProtected(config, member.userId),
+})
+
 export interface MemberStats {
   total: number
   active: number
@@ -82,7 +91,7 @@ export async function listMembers(config: MembersConfig, query: ListQuery) {
 
   const pages = Math.max(1, Math.ceil(filtered.length / query.pageSize))
   const page = Math.min(query.page, pages)
-  const items = filtered.slice((page - 1) * query.pageSize, page * query.pageSize)
+  const items = filtered.slice((page - 1) * query.pageSize, page * query.pageSize).map((member) => forAdmin(config, member))
   return { stats, items, total: filtered.length, page, pages, pageSize: query.pageSize }
 }
 
@@ -96,9 +105,15 @@ async function record(config: MembersConfig, actor: MemberProfile, target: Membe
   }
 }
 
-async function loadTarget(config: MembersConfig, actor: MemberProfile, userId: string): Promise<MemberProfile> {
+/**
+ * 대상 회원을 읽는다. weakens: 대상의 권한을 줄이는 작업(권한 회수·비활성화·삭제)인지.
+ * 화면이 버튼을 감추는 것과 별개로 여기서 막는다.
+ */
+async function loadTarget(config: MembersConfig, actor: MemberProfile, userId: string, weakens: boolean): Promise<MemberProfile> {
   // 자기 자신의 비활성화·권한 변경·삭제는 막는다 (마지막 관리자가 스스로 잠기는 일 방지)
   if (userId === actor.userId) throw new MemberError('self_action')
+  // 보호 계정(최고 관리자)은 누구도 권한을 회수하거나 비활성화·삭제할 수 없다
+  if (weakens && isProtected(config, userId)) throw new MemberError('protected_account')
   const target = await getProfile(config, userId)
   if (!target) throw new MemberError('not_found')
   return target
@@ -111,7 +126,7 @@ async function cognitoName(config: MembersConfig, target: MemberProfile): Promis
 }
 
 export async function changeStatus(config: MembersConfig, actor: MemberProfile, userId: string, status: MemberStatus) {
-  const target = await loadTarget(config, actor, userId)
+  const target = await loadTarget(config, actor, userId, status === 'DISABLED')
   if (target.status === status) return target
   const username = await cognitoName(config, target)
 
@@ -143,16 +158,30 @@ export async function changeStatus(config: MembersConfig, actor: MemberProfile, 
 }
 
 export async function changeRole(config: MembersConfig, actor: MemberProfile, userId: string, role: MemberRole) {
-  const target = await loadTarget(config, actor, userId)
+  const target = await loadTarget(config, actor, userId, role === 'USER')
   if (target.role === role) return target
-  const updated = await setRole(config, userId, role)
-  if (!updated) throw new MemberError('not_found')
-  await record(config, actor, target, 'member.role', `${ROLE_LABELS[target.role]} → ${ROLE_LABELS[role]}`)
-  return updated
+  const detail = `${ROLE_LABELS[target.role]} → ${ROLE_LABELS[role]}`
+  const outcome = await changeRoleRecorded(config, userId, target.role, role, {
+    targetUserId: target.userId,
+    targetEmail: target.email,
+    action: 'member.role',
+    actorId: actor.userId,
+    actorEmail: actor.email,
+    detail,
+  })
+  if (outcome.result === 'stale') {
+    // 읽은 뒤 다른 관리자가 먼저 바꿨다. 이미 원하는 권한이면 그대로 두고, 아니면 다시 확인하게 한다
+    const current = await getProfile(config, userId)
+    if (!current) throw new MemberError('not_found')
+    if (current.role === role) return current
+    throw new MemberError('conflict')
+  }
+  if (!outcome.audited) await record(config, actor, target, 'member.role', detail)
+  return outcome.profile
 }
 
 export async function removeMember(config: MembersConfig, actor: MemberProfile, userId: string, confirmEmail: string) {
-  const target = await loadTarget(config, actor, userId)
+  const target = await loadTarget(config, actor, userId, true)
   // 화면의 확인 절차와 별도로, 서버도 대상 이메일을 정확히 받아야 삭제한다
   if (confirmEmail.trim().toLowerCase() !== target.email) throw new MemberError('bad_request')
   const username = await cognitoName(config, target)

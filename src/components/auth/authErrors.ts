@@ -45,6 +45,9 @@ const SCOPED: Record<'login' | 'signup' | 'confirm' | 'reset' | 'password' | 'ad
   },
   admin: {
     self_action: '내 계정의 상태·권한은 여기서 바꿀 수 없습니다.',
+    protected_account: '최고 관리자 계정은 권한 회수, 비활성화, 삭제를 할 수 없습니다.',
+    conflict: '다른 관리자가 먼저 변경했습니다. 목록을 새로 고친 뒤 다시 확인해주세요.',
+    forbidden: '관리자 권한이 없어 이 작업을 할 수 없습니다.',
     partial_failure: '일부만 반영되었습니다. 같은 작업을 한 번 더 실행해주세요.',
     bad_request: '요청 내용을 다시 확인해주세요.',
   },

@@ -129,6 +129,95 @@
   white-space: nowrap;
 }
 
+/* ── 회원별 관리 메뉴 (popover: 맨 위 레이어라 표 스크롤 영역에 잘리지 않는다) ── */
+.menu {
+  position: fixed;
+  inset: auto;
+  top: var(--menu-top, 0);
+  right: var(--menu-right, 0);
+  width: 208px;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  box-shadow: var(--shadow-overlay);
+  color: var(--ink);
+}
+
+/* 앵커 위치 지정을 아는 브라우저: 누른 버튼에 붙어 스크롤해도 따라가고, 아래가 좁으면 위로 뒤집힌다 */
+@supports (anchor-name: --member-menu) {
+  .menu {
+    position-anchor: --member-menu;
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: 6px;
+    position-try-fallbacks: flip-block;
+  }
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 160ms var(--ease);
+}
+
+.menuItem:hover,
+.menuItem:focus-visible {
+  background: var(--surface-tint);
+}
+
+.menuDanger {
+  color: var(--danger);
+}
+
+.menuNote {
+  margin-top: 4px;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+/* ── 작업 확인 창 ──────────────────────────────────────────────── */
+.confirm {
+  display: grid;
+  gap: 16px;
+}
+
+.confirmWho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+}
+
+.confirmName {
+  color: var(--ink);
+  font-size: var(--text-md);
+  font-weight: 650;
+}
+
+.confirmText {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
 /* ── 빈 화면·불러오는 중 ───────────────────────────────────────── */
 .placeholder {
   display: flex;

@@ -6,15 +6,16 @@
  */
 import { useEffect, useState } from 'react'
 import { memberErrorMessage } from '@/components/auth/authErrors'
-import { memberApi } from '@/components/auth/memberApi'
+import { isApiError, memberApi } from '@/components/auth/memberApi'
 import { Badge, KeyValueList, Spinner } from '@/components/ui/DataDisplay'
 import { Button } from '@/components/ui/Button'
 import { Dialog } from '@/components/ui/Dialog'
 import { TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
-import { ROLE_LABELS, STATUS_LABELS, normalizeEmail, type MemberProfile } from '@/lib/account'
+import { STATUS_LABELS, normalizeEmail, roleLabel, type AdminMember } from '@/lib/account'
 import { logDevError } from '@/lib/errors'
 import { formatDate, formatDateTime } from '@/lib/format'
+import { ACTION_TEXT, DELETE_LABEL, actionBody, allowedActions, restrictionNote, type MemberAction } from './actions'
 import styles from './admin.module.css'
 import { roleTone, statusTone } from './tones'
 
@@ -26,12 +27,10 @@ interface AuditEntry {
 }
 
 interface Detail {
-  profile: MemberProfile
+  profile: AdminMember
   account: { confirmed: boolean; enabled: boolean } | null
   audit: AuditEntry[]
 }
-
-type Pending = 'disable' | 'enable' | 'promote' | 'demote' | 'delete'
 
 const ACTION_LABELS: Record<string, string> = {
   'member.disable': '비활성화',
@@ -41,32 +40,21 @@ const ACTION_LABELS: Record<string, string> = {
   'member.migrate': '기존 회원 이전',
 }
 
-const CONFIRM_TEXT: Record<Exclude<Pending, 'delete'>, { title: string; body: string; button: string }> = {
-  disable: {
-    title: '이 회원을 비활성화할까요?',
-    body: '로그인이 막히고, 이미 로그인한 기기의 세션도 다음 요청부터 차단됩니다. 언제든 다시 활성화할 수 있습니다.',
-    button: '비활성화',
-  },
-  enable: { title: '이 회원을 다시 활성화할까요?', body: '회원이 다시 로그인할 수 있게 됩니다.', button: '활성화' },
-  promote: {
-    title: '관리자 권한을 줄까요?',
-    body: '이 회원이 모든 회원 정보를 보고 상태·권한을 바꾸거나 삭제할 수 있게 됩니다.',
-    button: '관리자로 변경',
-  },
-  demote: { title: '일반 회원으로 바꿀까요?', body: '회원 관리 화면과 관리자 API를 더는 쓸 수 없게 됩니다.', button: '일반 회원으로 변경' },
-}
-
 interface MemberDetailProps {
   userId: string | null
+  /** 목록 메뉴의 "회원 삭제"로 열었을 때: 불러온 뒤 바로 삭제 확인 단계를 보인다 */
+  startWithDelete?: boolean
   meId: string
   onClose: () => void
   onChanged: (message: string) => void
+  /** 서버가 권한 없음(403)으로 답했다: 내 권한이 회수된 것이므로 세션을 다시 확인한다 */
+  onForbidden: () => void
 }
 
-export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailProps) {
+export function MemberDetail({ userId, startWithDelete = false, meId, onClose, onChanged, onForbidden }: MemberDetailProps) {
   const [detail, setDetail] = useState<Detail | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [pending, setPending] = useState<Pending | null>(null)
+  const [pending, setPending] = useState<MemberAction | null>(null)
   const [confirmEmail, setConfirmEmail] = useState('')
   const [working, setWorking] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -81,19 +69,27 @@ export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailP
     let cancelled = false
     memberApi<Detail>(`/api/admin/users/${encodeURIComponent(userId)}`)
       .then((loaded) => {
-        if (!cancelled) setDetail(loaded)
+        if (cancelled) return
+        setDetail(loaded)
+        // 서버가 막을 작업이면 확인 단계를 열지 않는다 (최고 관리자·내 계정)
+        if (startWithDelete && allowedActions(loaded.profile, meId).includes('delete')) setPending('delete')
       })
       .catch((error: unknown) => {
         logDevError('admin:detail', error)
-        if (!cancelled) setLoadError(memberErrorMessage(error, 'admin'))
+        if (cancelled) return
+        setLoadError(memberErrorMessage(error, 'admin'))
+        if (isApiError(error, 'forbidden')) onForbidden()
       })
     return () => {
       cancelled = true
     }
-  }, [userId])
+    // 열 때의 대상만 본다 (meId·콜백은 같은 화면에서 바뀌지 않는다)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, startWithDelete])
 
   const profile = detail?.profile
-  const isSelf = profile?.userId === meId
+  const actions = profile ? allowedActions(profile, meId) : []
+  const note = profile ? restrictionNote(profile, meId) : null
 
   const run = async () => {
     if (!profile || !pending || working) return
@@ -107,16 +103,15 @@ export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailP
         onClose()
         return
       }
-      const body =
-        pending === 'disable' ? { status: 'DISABLED' } : pending === 'enable' ? { status: 'ACTIVE' } : { role: pending === 'promote' ? 'ADMIN' : 'USER' }
-      await memberApi<{ profile: MemberProfile }>(path, { method: 'PATCH', body })
+      await memberApi<{ profile: AdminMember }>(path, { method: 'PATCH', body: actionBody(pending) })
       const refreshed = await memberApi<Detail>(path)
       setDetail(refreshed)
       setPending(null)
-      onChanged(`${profile.name} 회원: ${CONFIRM_TEXT[pending].button} 완료`)
+      onChanged(`${profile.name} 회원: ${ACTION_TEXT[pending].done}`)
     } catch (error) {
       logDevError('admin:action', error)
       setActionError(memberErrorMessage(error, 'admin'))
+      if (isApiError(error, 'forbidden')) onForbidden()
     } finally {
       setWorking(false)
     }
@@ -138,26 +133,25 @@ export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailP
           disabled={pending === 'delete' && !deleteReady}
           onClick={() => void run()}
         >
-          {pending === 'delete' ? '영구 삭제' : CONFIRM_TEXT[pending].button}
+          {pending === 'delete' ? '영구 삭제' : ACTION_TEXT[pending].button}
         </Button>
       </>
     )
-  } else if (profile && !isSelf) {
+  } else if (profile && actions.length > 0) {
     footer = (
       <>
-        <Button variant="danger" size="sm" onClick={() => setPending('delete')} className={styles.footStart}>
-          회원 삭제
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => setPending(profile.role === 'ADMIN' ? 'demote' : 'promote')}>
-          {profile.role === 'ADMIN' ? '일반 회원으로' : '관리자로 지정'}
-        </Button>
-        <Button
-          variant={profile.status === 'ACTIVE' ? 'secondary' : 'primary'}
-          size="sm"
-          onClick={() => setPending(profile.status === 'ACTIVE' ? 'disable' : 'enable')}
-        >
-          {profile.status === 'ACTIVE' ? '비활성화' : '활성화'}
-        </Button>
+        {actions.includes('delete') && (
+          <Button variant="danger" size="sm" onClick={() => setPending('delete')} className={styles.footStart}>
+            {DELETE_LABEL}
+          </Button>
+        )}
+        {actions
+          .filter((action) => action !== 'delete')
+          .map((action) => (
+            <Button key={action} variant={action === 'enable' ? 'primary' : 'secondary'} size="sm" onClick={() => setPending(action)}>
+              {ACTION_TEXT[action].label}
+            </Button>
+          ))}
       </>
     )
   }
@@ -183,15 +177,15 @@ export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailP
               <Badge tone={statusTone(profile.status)} pill>
                 {STATUS_LABELS[profile.status]}
               </Badge>
-              <Badge tone={roleTone(profile.role)} pill>
-                {ROLE_LABELS[profile.role]}
+              <Badge tone={roleTone(profile)} pill>
+                {roleLabel(profile)}
               </Badge>
             </div>
           </div>
 
           {pending && pending !== 'delete' && (
-            <Notice tone={pending === 'disable' ? 'warning' : 'info'} title={CONFIRM_TEXT[pending].title}>
-              {CONFIRM_TEXT[pending].body}
+            <Notice tone={pending === 'disable' ? 'warning' : 'info'} title={ACTION_TEXT[pending].title}>
+              {ACTION_TEXT[pending].body}
             </Notice>
           )}
           {pending === 'delete' && (
@@ -217,7 +211,7 @@ export function MemberDetail({ userId, meId, onClose, onChanged }: MemberDetailP
               <Notice tone="danger">{actionError}</Notice>
             </div>
           )}
-          {isSelf && <Notice tone="neutral">내 계정입니다. 내 계정의 상태·권한 변경과 삭제는 다른 관리자가 해야 합니다.</Notice>}
+          {note && <Notice tone="neutral">{note}</Notice>}
 
           <KeyValueList
             items={[

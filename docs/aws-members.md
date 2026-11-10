@@ -187,7 +187,27 @@ aws amplify update-app --app-id <Amplify 앱 ID> --compute-role-arn <출력 Comp
 3. 그 계정으로 로그인하면(이미 로그인 중이면 새로 고침) 헤더 계정 메뉴에 **회원 관리**가 보입니다(`/admin/members`).
    두 번째 관리자부터는 회원 관리 화면의 "관리자로 지정"으로 줄 수 있습니다.
 
+### 관리자 권한 부여·회수와 최고 관리자
+
+권한은 `USER`/`ADMIN` 두 단계 그대로다. 회원 관리 화면의 행마다 있는 **관리** 메뉴(또는 상세 창)에서 관리자가 다른 회원에게
+관리자 권한을 주거나 회수한다. 서버 규칙(`src/server/members/admin.ts`, 화면이 메뉴를 감추는 것과 별개로 요청마다 확인):
+
+- 요청자는 세션 쿠키 검증 뒤 DynamoDB에서 다시 읽은 권한이 `ADMIN`, 상태가 `ACTIVE`여야 한다. 권한이 회수되면 다음 요청부터 403.
+- 자기 자신의 권한 회수·비활성화·삭제는 할 수 없다(`self_action`).
+- **최고 관리자(보호 계정)** 는 누구도 권한 회수·비활성화·삭제할 수 없다(`protected_account`). 화면에는 "최고 관리자"로 보인다.
+  보호 계정은 이메일이 아니라 Cognito userId로 가리며, `src/server/members/config.ts`의 `PROTECTED_ADMIN_IDS`(서버 전용)에 적혀 있다.
+  더 보호할 계정은 환경변수 `MEMBERS_PROTECTED_ADMIN_IDS`(쉼표 구분 userId)로 더한다. 환경변수는 더하기만 하고, 비워도 코드에 적힌 계정의 보호는 풀리지 않는다.
+  보호 계정의 권한 값 자체는 `ADMIN`이다. 보호를 풀려면 코드의 목록을 고쳐 배포해야 한다.
+- 권한 변경은 "지금 권한이 읽은 값과 같을 때만" 반영되는 조건부 업데이트이고, 작업 기록과 한 트랜잭션(`TransactWriteItems`)으로 저장한다.
+  그 사이 다른 관리자가 반대로 바꿨으면 `conflict`(409). 트랜잭션은 별도 IAM 권한 없이 기존 `dynamodb:UpdateItem`(회원 테이블)·
+  `dynamodb:PutItem`(작업 기록 테이블)을 쓴다. 역할 정책이 달라 트랜잭션이 거절되면 조건부 업데이트 뒤 기록을 따로 쓰고,
+  서버 로그에 `[members:role] transaction unavailable`이 남는다(이 로그가 보이면 컴퓨트 역할 정책을 확인).
+
 ## 6. 배포 후 확인 (실제 AWS에서 아직 미검증인 항목)
+
+- [ ] 회원 관리에서 테스트 계정에 관리자 권한 부여 → 그 계정으로 `/admin/members` 접근 → 권한 회수 → 접근 차단, 상세 창의 작업 기록 2건
+- [ ] 위 작업 뒤 CloudWatch에 `[members:role] transaction unavailable`이 없는지 (있으면 트랜잭션이 IAM에서 거절된 것)
+- [ ] 최고 관리자 행에 "최고 관리자" 표시, 관리 메뉴에 권한 회수·비활성화·삭제가 없는지
 
 - [ ] 회원가입 → 인증 메일 수신 → 코드 입력 → 로그인 (메일 발송은 에뮬레이터로 확인할 수 없었음)
 - [ ] 인증 화면의 "코드 다시 받기" (`ResendConfirmationCode`는 에뮬레이터 미지원)

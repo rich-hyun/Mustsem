@@ -19,6 +19,8 @@ export type MemberErrorCode =
   | 'rate_limited'
   | 'delivery_failed'
   | 'self_action'
+  | 'protected_account'
+  | 'conflict'
   | 'partial_failure'
   | 'unavailable'
 
@@ -40,6 +42,8 @@ const STATUS: Record<MemberErrorCode, number> = {
   rate_limited: 429,
   delivery_failed: 502,
   self_action: 409,
+  protected_account: 403,
+  conflict: 409,
   partial_failure: 502,
   unavailable: 503,
 }

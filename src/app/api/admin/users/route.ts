@@ -1,7 +1,7 @@
 /**
  * GET /api/admin/users?q=&status=ALL|ACTIVE|DISABLED&role=ALL|USER|ADMIN&from=YYYY-MM-DD&to=YYYY-MM-DD
  *                     &sort=newest|oldest&page=1&pageSize=10|20|50
- *   → { stats: { total, active, disabled, recent, admins }, items: MemberProfile[], total, page, pages, pageSize }
+ *   → { stats: { total, active, disabled, recent, admins }, items: AdminMember[], total, page, pages, pageSize }
  *
  * 관리자만 (서버가 요청마다 DynamoDB의 역할을 다시 확인한다). 일반 회원은 403 forbidden.
  */

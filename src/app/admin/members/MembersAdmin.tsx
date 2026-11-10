@@ -3,13 +3,15 @@
 /**
  * 관리자 회원 관리. 화면은 관리자에게만 열리지만(RequireAuth), 실제 권한 확인은 /api/admin/* 가 요청마다 한다.
  *
- * 현황(L1 수치) · 검색·필터 도구(L2) · 회원 표(L1) · 페이지 이동 · 상세 대화상자(상태·권한 변경, 삭제, 작업 기록)
+ * 현황(L1 수치) · 검색·필터 도구(L2) · 회원 표(L1, 행마다 관리 메뉴) · 페이지 이동
+ * · 확인 창(권한 부여·회수, 활성화·비활성화) · 상세 대화상자(같은 작업 + 삭제, 작업 기록)
  */
 import { ArrowClockwiseIcon, CaretLeftIcon, CaretRightIcon, MagnifyingGlassIcon, UsersThreeIcon } from '@phosphor-icons/react/ssr'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import { memberErrorMessage } from '@/components/auth/authErrors'
-import { memberApi } from '@/components/auth/memberApi'
+import { isApiError, memberApi } from '@/components/auth/memberApi'
 import { AnimatedValue } from '@/components/motion/AnimatedValue'
 import { Badge, Spinner } from '@/components/ui/DataDisplay'
 import { Button } from '@/components/ui/Button'
@@ -17,10 +19,12 @@ import { Card } from '@/components/ui/Card'
 import { SelectField, TextField } from '@/components/ui/Field'
 import { Notice } from '@/components/ui/Notice'
 import { Table, cell } from '@/components/ui/Table'
-import { ROLE_LABELS, STATUS_LABELS, type MemberProfile, type MemberRole, type MemberStatus, type SessionUser } from '@/lib/account'
+import { STATUS_LABELS, roleLabel, type AdminMember, type MemberRole, type MemberStatus, type SessionUser } from '@/lib/account'
 import { logDevError } from '@/lib/errors'
 import { formatDate, formatDateTime } from '@/lib/format'
+import { ActionConfirm, type PendingAction } from './ActionConfirm'
 import { MemberDetail } from './MemberDetail'
+import { RowMenu, RowMenuButton } from './RowMenu'
 import { roleTone, statusTone } from './tones'
 import styles from './admin.module.css'
 
@@ -34,7 +38,7 @@ interface Stats {
 
 interface ListResponse {
   stats: Stats
-  items: MemberProfile[]
+  items: AdminMember[]
   total: number
   page: number
   pages: number
@@ -75,7 +79,10 @@ function MembersBoard({ me }: { me: SessionUser }) {
   const [data, setData] = useState<ListResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selected, setSelected] = useState<string | null>(null)
+  const { refresh } = useAuth()
+  /** 상세 대화상자 대상. remove: 삭제 확인 단계로 바로 연다 */
+  const [selected, setSelected] = useState<{ userId: string; remove: boolean } | null>(null)
+  const [pending, setPending] = useState<PendingAction | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const requestId = useRef(0)
 
@@ -110,14 +117,22 @@ function MembersBoard({ me }: { me: SessionUser }) {
     } catch (caught) {
       logDevError('admin:list', caught)
       if (id === requestId.current) setError(memberErrorMessage(caught, 'admin'))
+      // 내 관리자 권한이 회수됐다: 세션을 다시 읽어 화면과 메뉴를 일반 회원 상태로 바꾼다
+      if (isApiError(caught, 'forbidden')) void refresh()
     } finally {
       if (id === requestId.current) setLoading(false)
     }
-  }, [query, page])
+  }, [query, page, refresh])
 
   useEffect(() => {
     void load()
   }, [load])
+
+  /** 변경이 반영된 뒤: 안내를 띄우고 목록·현황을 다시 읽는다 */
+  const changed = (message: string) => {
+    setFlash(message)
+    void load()
+  }
 
   const update = <K extends keyof Filters>(key: K, value: Filters[K]) => {
     setFilters((current) => ({ ...current, [key]: value }))
@@ -242,74 +257,84 @@ function MembersBoard({ me }: { me: SessionUser }) {
           </p>
         </Card>
       ) : data ? (
-        <div className={styles.tableWrap} aria-busy={loading}>
-          <Table caption="회원 목록" stackOnMobile>
-            <thead>
-              <tr>
-                <th scope="col">회원</th>
-                <th scope="col">회원 ID</th>
-                <th scope="col">가입일</th>
-                <th scope="col">최근 로그인</th>
-                <th scope="col">상태</th>
-                <th scope="col">권한</th>
-                <th scope="col">
-                  <span className="sr-only">관리</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((member) => (
-                <tr key={member.userId}>
-                  <td data-label="회원">
-                    <span className={styles.who}>
-                      <span className={cell.strong}>
-                        {member.name}
-                        {member.userId === me.userId && <span className={styles.meTag}>나</span>}
-                      </span>
-                      <span className={styles.email} data-break="anywhere">
-                        {member.email}
-                      </span>
-                    </span>
-                  </td>
-                  <td data-label="회원 ID" className={cell.mono} title={member.userId}>
-                    {member.userId.slice(0, 8)}
-                  </td>
-                  <td data-label="가입일" className={cell.nowrap}>
-                    {formatDate(member.createdAt)}
-                  </td>
-                  <td data-label="최근 로그인" className={cell.nowrap}>
-                    {member.lastLoginAt ? formatDateTime(member.lastLoginAt) : '-'}
-                  </td>
-                  <td data-label="상태">
-                    <Badge tone={statusTone(member.status)} pill>
-                      {STATUS_LABELS[member.status]}
-                    </Badge>
-                    {!member.emailVerified && (
-                      <Badge tone="warning" pill className={styles.badgeGap}>
-                        인증 대기
-                      </Badge>
-                    )}
-                  </td>
-                  <td data-label="권한">
-                    <Badge tone={roleTone(member.role)} pill>
-                      {ROLE_LABELS[member.role]}
-                    </Badge>
-                  </td>
-                  <td data-label="관리" className={styles.actionCell}>
-                    <Button size="sm" variant="secondary" onClick={() => setSelected(member.userId)} aria-label={`${member.name} 회원 상세`}>
-                      상세
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          {loading && (
-            <div className={styles.overlay} aria-hidden>
-              <Spinner size={22} />
+        <RowMenu
+          meId={me.userId}
+          onDetail={(member) => setSelected({ userId: member.userId, remove: false })}
+          onAction={(member, action) => {
+            setFlash(null)
+            if (action === 'delete') setSelected({ userId: member.userId, remove: true })
+            else setPending({ member, action })
+          }}
+        >
+          {(menu) => (
+            <div className={styles.tableWrap} aria-busy={loading}>
+              <Table caption="회원 목록" stackOnMobile>
+                <thead>
+                  <tr>
+                    <th scope="col">회원</th>
+                    <th scope="col">회원 ID</th>
+                    <th scope="col">가입일</th>
+                    <th scope="col">최근 로그인</th>
+                    <th scope="col">상태</th>
+                    <th scope="col">권한</th>
+                    <th scope="col" className={styles.actionCell}>
+                      관리
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.items.map((member) => (
+                    <tr key={member.userId}>
+                      <td data-label="회원">
+                        <span className={styles.who}>
+                          <span className={cell.strong}>
+                            {member.name}
+                            {member.userId === me.userId && <span className={styles.meTag}>나</span>}
+                          </span>
+                          <span className={styles.email} data-break="anywhere">
+                            {member.email}
+                          </span>
+                        </span>
+                      </td>
+                      <td data-label="회원 ID" className={cell.mono} title={member.userId}>
+                        {member.userId.slice(0, 8)}
+                      </td>
+                      <td data-label="가입일" className={cell.nowrap}>
+                        {formatDate(member.createdAt)}
+                      </td>
+                      <td data-label="최근 로그인" className={cell.nowrap}>
+                        {member.lastLoginAt ? formatDateTime(member.lastLoginAt) : '-'}
+                      </td>
+                      <td data-label="상태">
+                        <Badge tone={statusTone(member.status)} pill>
+                          {STATUS_LABELS[member.status]}
+                        </Badge>
+                        {!member.emailVerified && (
+                          <Badge tone="warning" pill className={styles.badgeGap}>
+                            인증 대기
+                          </Badge>
+                        )}
+                      </td>
+                      <td data-label="권한">
+                        <Badge tone={roleTone(member)} pill>
+                          {roleLabel(member)}
+                        </Badge>
+                      </td>
+                      <td data-label="관리" className={styles.actionCell}>
+                        <RowMenuButton control={menu} member={member} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+              {loading && (
+                <div className={styles.overlay} aria-hidden>
+                  <Spinner size={22} />
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </RowMenu>
       ) : null}
 
       {/* 페이지 이동 */}
@@ -355,14 +380,14 @@ function MembersBoard({ me }: { me: SessionUser }) {
         </nav>
       )}
 
+      <ActionConfirm pending={pending} onClose={() => setPending(null)} onDone={changed} onForbidden={() => void refresh()} />
       <MemberDetail
-        userId={selected}
+        userId={selected?.userId ?? null}
+        startWithDelete={selected?.remove ?? false}
         meId={me.userId}
         onClose={() => setSelected(null)}
-        onChanged={(text) => {
-          setFlash(text)
-          void load()
-        }}
+        onChanged={changed}
+        onForbidden={() => void refresh()}
       />
     </div>
   )

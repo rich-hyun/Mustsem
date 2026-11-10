@@ -1,13 +1,14 @@
 /**
- * GET    /api/admin/users/:id                        → { profile, account: { confirmed, enabled } | null, audit }
- * PATCH  /api/admin/users/:id  { status } | { role }  → { profile }
+ * GET    /api/admin/users/:id                        → { profile(+protected), account: { confirmed, enabled } | null, audit }
+ * PATCH  /api/admin/users/:id  { status } | { role }  → { profile(+protected) }
  * DELETE /api/admin/users/:id  { confirmEmail }       → { ok: true }
  *
- * 관리자만. 변경 요청은 같은 사이트 출처만 받고, 자기 자신은 대상이 될 수 없다(self_action).
- * 모든 변경은 작업 기록 테이블에 남는다.
+ * 관리자만 (요청마다 DynamoDB에서 요청자의 권한·상태를 다시 읽는다). 변경 요청은 같은 사이트 출처만 받는다.
+ * 자기 자신은 대상이 될 수 없고(self_action), 보호 계정(최고 관리자)은 권한 회수·비활성화·삭제할 수 없다(protected_account).
+ * 권한 변경은 조건부 업데이트라 그 사이 다른 관리자가 먼저 바꿨으면 conflict. 모든 변경은 작업 기록 테이블에 남는다.
  */
 import type { NextRequest } from 'next/server'
-import { changeRole, changeStatus, removeMember } from '@/server/members/admin'
+import { changeRole, changeStatus, forAdmin, removeMember } from '@/server/members/admin'
 import { adminGetUser } from '@/server/members/cognito'
 import { MemberError } from '@/server/members/errors'
 import { handle, ok, readBody, text } from '@/server/members/http'
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest, ctx: { params: Promise<{ id: str
       }),
     ])
     const account = user && user.sub === profile.userId ? { confirmed: user.confirmed, enabled: user.enabled } : null
-    return finish(ok({ profile, account, audit }))
+    return finish(ok({ profile: forAdmin(config, profile), account, audit }))
   })
 }
 
@@ -47,10 +48,10 @@ export async function PATCH(request: NextRequest, ctx: { params: Promise<{ id: s
     const body = await readBody(request)
     if (body.status !== undefined && body.role !== undefined) throw new MemberError('bad_request')
     if (body.status === 'ACTIVE' || body.status === 'DISABLED') {
-      return finish(ok({ profile: await changeStatus(config, actor, id, body.status) }))
+      return finish(ok({ profile: forAdmin(config, await changeStatus(config, actor, id, body.status)) }))
     }
     if (body.role === 'USER' || body.role === 'ADMIN') {
-      return finish(ok({ profile: await changeRole(config, actor, id, body.role) }))
+      return finish(ok({ profile: forAdmin(config, await changeRole(config, actor, id, body.role)) }))
     }
     throw new MemberError('bad_request')
   })

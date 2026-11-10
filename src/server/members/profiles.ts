@@ -12,7 +12,7 @@
  */
 import { randomBytes } from 'node:crypto'
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb'
-import { DeleteCommand, GetCommand, PutCommand, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
+import { DeleteCommand, GetCommand, PutCommand, QueryCommand, ScanCommand, TransactWriteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 import type { MemberProfile, MemberRole, MemberStatus } from '@/lib/account'
 import { dynamo } from './clients'
 import type { MembersConfig } from './config'
@@ -143,8 +143,6 @@ export const updateOwnProfile = (config: MembersConfig, userId: string, fields: 
 
 export const setStatus = (config: MembersConfig, userId: string, status: MemberStatus) => update(config, userId, { status })
 
-export const setRole = (config: MembersConfig, userId: string, role: MemberRole) => update(config, userId, { role })
-
 export async function deleteProfile(config: MembersConfig, userId: string): Promise<void> {
   await dynamo(config).send(new DeleteCommand({ TableName: config.usersTable, Key: { userId } }))
 }
@@ -188,9 +186,73 @@ export interface AuditEntry {
   detail: string
 }
 
+const auditKey = () => `${new Date().toISOString()}#${randomBytes(4).toString('hex')}`
+
 export async function writeAudit(config: MembersConfig, entry: Omit<AuditEntry, 'at'>): Promise<void> {
-  const at = `${new Date().toISOString()}#${randomBytes(4).toString('hex')}`
-  await dynamo(config).send(new PutCommand({ TableName: config.auditTable, Item: { ...entry, at } }))
+  await dynamo(config).send(new PutCommand({ TableName: config.auditTable, Item: { ...entry, at: auditKey() } }))
+}
+
+const errorName = (error: unknown) => (error && typeof error === 'object' && 'name' in error ? String(error.name) : '')
+
+/**
+ * 권한 변경 결과.
+ * - changed: 바뀌었다. audited가 false면 작업 기록은 아직 없으니 부른 쪽이 따로 남긴다.
+ * - stale:   읽은 뒤 그 사이에 다른 요청이 권한을 바꿨거나 회원이 지워졌다 (아무것도 바꾸지 않았다).
+ */
+export type RoleChange = { result: 'changed'; profile: MemberProfile; audited: boolean } | { result: 'stale' }
+
+/**
+ * 권한을 from → to 로 바꾸고 작업 기록을 남긴다.
+ *
+ * 조건부 업데이트: 지금 권한이 from 일 때만 바꾼다. 두 관리자가 동시에 누르거나 오래된 화면에서 눌러도
+ * 한 번만 반영되고 기록도 한 줄만 남는다.
+ * 한 트랜잭션: 권한 변경과 작업 기록을 함께 쓴다 (둘 다 되거나 둘 다 안 된다). 트랜잭션은 따로 IAM 권한이 없고
+ * 안에 든 UpdateItem(회원 테이블)·PutItem(작업 기록 테이블) 권한을 쓴다. 그래도 역할 정책이 달라 거절되면
+ * 조건부 업데이트만 하고 audited: false 로 돌려준다 (권한 변경이 통째로 막히는 것보다 낫다).
+ */
+export async function changeRoleRecorded(
+  config: MembersConfig,
+  userId: string,
+  from: MemberRole,
+  to: MemberRole,
+  audit: Omit<AuditEntry, 'at'>,
+): Promise<RoleChange> {
+  const change = {
+    TableName: config.usersTable,
+    Key: { userId },
+    UpdateExpression: 'SET #role = :to, #updatedAt = :now',
+    // 권한 속성이 없는 오래된 항목은 일반 회원으로 읽으므로(toProfile) 같은 뜻으로 다룬다
+    ConditionExpression: `attribute_exists(userId) AND (#role = :from${from === 'USER' ? ' OR attribute_not_exists(#role)' : ''})`,
+    ExpressionAttributeNames: { '#role': 'role', '#updatedAt': 'updatedAt' },
+    ExpressionAttributeValues: { ':to': to, ':from': from, ':now': new Date().toISOString() },
+  }
+  try {
+    await dynamo(config).send(
+      new TransactWriteCommand({
+        TransactItems: [{ Update: change }, { Put: { TableName: config.auditTable, Item: { ...audit, at: auditKey() } } }],
+      }),
+    )
+    const profile = await getProfile(config, userId)
+    return profile ? { result: 'changed', profile, audited: true } : { result: 'stale' }
+  } catch (error) {
+    const name = errorName(error)
+    if (name === 'TransactionCanceledException') {
+      const reasons = (error as { CancellationReasons?: Array<{ Code?: string }> }).CancellationReasons ?? []
+      if (reasons[0]?.Code === 'ConditionalCheckFailed') return { result: 'stale' }
+      throw error
+    }
+    // UnknownOperationException: 로컬 에뮬레이터(dynalite)는 트랜잭션을 모른다
+    if (name !== 'AccessDeniedException' && name !== 'UnknownOperationException') throw error
+    console.error(`[members:role] transaction unavailable (${name}), falling back to conditional update`)
+  }
+  try {
+    const { Attributes } = await dynamo(config).send(new UpdateCommand({ ...change, ReturnValues: 'ALL_NEW' }))
+    const profile = toProfile(Attributes)
+    return profile ? { result: 'changed', profile, audited: false } : { result: 'stale' }
+  } catch (error) {
+    if (error instanceof ConditionalCheckFailedException) return { result: 'stale' }
+    throw error
+  }
 }
 
 export async function listAudit(config: MembersConfig, targetUserId: string, limit = 20): Promise<AuditEntry[]> {

@@ -22,6 +22,11 @@ export interface MemberProfile {
   lastLoginAt: string | null
 }
 
+/** 관리자 화면이 받는 회원 정보. protected: 보호 계정(최고 관리자)이라 권한 회수·비활성화·삭제가 막혀 있다 (서버가 판단) */
+export interface AdminMember extends MemberProfile {
+  protected: boolean
+}
+
 /** 로그인한 본인에게 내려 주는 최소 정보 (헤더·권한 분기용) */
 export interface SessionUser {
   userId: string
@@ -94,4 +99,8 @@ export function safeNextPath(value: string | null | undefined, fallback = '/'): 
 }
 
 export const ROLE_LABELS: Record<MemberRole, string> = { USER: '일반 회원', ADMIN: '관리자' }
+export const PROTECTED_ROLE_LABEL = '최고 관리자'
+/** 화면에 보일 권한 이름 (보호 계정은 권한 값이 ADMIN이어도 최고 관리자로 보인다) */
+export const roleLabel = (member: { role: MemberRole; protected?: boolean }) =>
+  member.protected && member.role === 'ADMIN' ? PROTECTED_ROLE_LABEL : ROLE_LABELS[member.role]
 export const STATUS_LABELS: Record<MemberStatus, string> = { ACTIVE: '활성', DISABLED: '비활성' }

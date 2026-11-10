@@ -113,6 +113,21 @@ public/
 2. Amplify 앱에 컴퓨트 역할 연결, `src/config/aws.ts`에 사용자 풀·클라이언트 ID 입력
 3. 가입 후 `node scripts/grant-admin.mjs --email <이메일> --user-pool-id <ID>`로 첫 관리자 지정
 
+### 올인원 시스템: 스마트 컨트랙트 API 50종, 조회 API, 확장 컨트랙트
+
+'머스트셈 웹 기반 올인원 시스템'은 구축(Build) · 운영(Operate) · 보호(Protect)를 한 사이트에서 잇는다. 홈의 올인원 구획과 제품 메뉴가 같은 묶음이다.
+
+- **API 카탈로그 50종** (`/developers`, 원본 `src/content/api-catalog.ts`): 기존 6개 분야 33종에 오라클 가격 피드 4, 크로스체인 브릿지 4,
+  DID 신원인증 5, RWA 수익 분배·지분 조회 2, 복합 컨트랙트 2를 더했다(신규 17종).
+- **조회 API** (`/api/v1/...`, 처리 코드 `src/server/gateway/`): 카탈로그의 조회 API 12종과 이상거래 조회는 이 사이트 서버가 체인을 직접 읽어 응답하고,
+  카탈로그 화면의 "호출해 보기"로 바로 확인할 수 있다. 환경변수와 서명 키가 필요 없다(읽기 전용).
+  발행·전송 같은 쓰기 API는 이 서버에서 실행하지 않는다(명세만 제공).
+- **확장 컨트랙트** (`contracts/`): `PriceOracle`, `DIDRegistry`, `BridgeGateway`, `RWAVault`, `CompositeExecutor`, `ComplianceGuard`.
+  컴파일과 테스트는 끝났고 **아직 배포하지 않았다.** 배포 주소를 `src/config/contracts.ts`의 `*_CONTRACTS`에 넣기 전까지
+  해당 조회 API는 `contract_not_deployed`로 응답하고, 오라클 가격은 외부 시세(참고용)임을 응답에 밝힌다. 배포 방법은 `contracts/README.md`.
+- **이상거래 탐지** (`/network#anomaly`): 기본 화면은 Mustsem 메인넷의 실제 거래(코인 전송, 토큰 Transfer 이벤트)에 탐지 규칙을 적용한 결과다.
+  지갑 동결·블랙리스트는 권고로만 표시한다. 온체인 자동 대응은 `ComplianceGuard` 배포와 탐지 서버 지갑 권한이 있어야 한다.
+
 ## 디자인·코드 규칙
 
 `AGENTS.md`를 참고하세요 (디자인 시스템 규칙, 아이콘·오류 처리 규칙, 검증 방법).

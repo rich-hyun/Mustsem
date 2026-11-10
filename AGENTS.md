@@ -10,14 +10,23 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # MUSTSEM 5.5 — 작업 규칙
 
-Next.js 16 App Router 사이트. 페이지는 모두 빌드 때 정적으로 만들어지고, 서버에서 도는 것은 `src/app/api/*` Route Handler(대시보드 시세, 에이전트, 회원)뿐이다. 리다이렉트·보안 헤더·`/fx` 프록시는 `next.config.ts`에 있다(`vercel.json`은 프레임워크 지정만).
+Next.js 16 App Router 사이트. 페이지는 모두 빌드 때 정적으로 만들어지고, 서버에서 도는 것은 `src/app/api/*` Route Handler(대시보드 시세, 에이전트, 회원, 스마트 컨트랙트 조회 API `/api/v1`)뿐이다. 리다이렉트·보안 헤더·`/fx` 프록시는 `next.config.ts`에 있다(`vercel.json`은 프레임워크 지정만).
 
 ## 설정은 한 곳에서
 - 체인 RPC·체인 ID: `src/config/networks.ts`
 - 컨트랙트 주소·ABI: `src/config/contracts.ts` (미배포 네트워크는 `null`)
 - API 서버·IPFS 게이트웨이·(기존 회원 이전용) Supabase: `src/config/site.ts`
 - 회원 시스템 Cognito·DynamoDB 식별자: `src/config/aws.ts` (운영 안내 `docs/aws-members.md`)
-- 메뉴 구조: `src/config/navigation.ts`
+- 메뉴 구조: `src/config/navigation.ts` (제품 메뉴는 올인원 묶음: 구축 Build · 운영 Operate · 보호 Protect. 홈의 올인원 구획 `src/content/home.ts` `PILLARS`와 같은 묶음으로 유지한다)
+
+## 올인원 시스템 (구축 · 운영 · 보호)
+- API 카탈로그: `src/content/api-catalog.ts`가 원본(10개 분야 50종, `isNew`는 2026년 확장 17종). 수량을 바꾸면 `CATALOG_STATS`와 홈 문구도 맞춘다.
+- 조회 API(`/api/v1/...`): 경로별 처리기는 `src/server/gateway/handlers.ts`의 `GET_HANDLERS`, 카탈로그의 `tryIt`(호출해 보기)과 짝을 이룬다. 한쪽만 바꾸지 않는다.
+  - 체인을 읽기만 한다. 서버에 서명 키를 두지 않으며 발행·전송 같은 쓰기 API는 여기서 실행하지 않는다(카탈로그에 명세만).
+  - 응답은 `{ ok, data }` 또는 `{ ok: false, error: 코드 }`. RPC 주소·오류 원문을 싣지 않는다.
+  - 입력 검증을 체인 조회보다 먼저 한다. RPC 호출은 `rpcBatch`로 묶고 `cached`로 짧게 보관한다.
+- 확장 컨트랙트: 소스·테스트·배포 스크립트는 `contracts/`(사이트 빌드와 별개인 하위 프로젝트, `contracts/README.md`). 배포 주소는 `src/config/contracts.ts`의 `*_CONTRACTS`에 넣는다. null이면 해당 조회 API는 `contract_not_deployed`로 답한다. 배포하지 않은 것을 배포된 것처럼 표시하지 않는다.
+- 이상거래 탐지: 규칙은 `src/lib/anomaly.ts` 한 곳(화면 시연과 서버의 실제 체인 조회 `src/server/gateway/anomaly.ts`가 함께 쓴다). 실제 체인 화면에서 지갑 동결·블랙리스트는 "권고"로만 표시한다. 가상 거래 시연에는 실제 데이터가 아님을 항상 표시한다.
 
 ## 디자인 시스템 (`src/app/globals.css` 머리 주석이 원본)
 - 라이트 테마, 틸→시안 로고. 틸은 포인트로만. 밝은 면의 주 버튼은 네이비(`variant="primary"`), 틸 채움(`accent`)은 어두운 면 전용.

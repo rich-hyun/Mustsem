@@ -15,7 +15,7 @@ import { Magnetic } from '@/components/motion/Magnetic'
 import { Button } from '@/components/ui/Button'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { SITE } from '@/config/site'
-import { HOME_FAQ, PROCESS, SERVICES, SPECS, START_PATHS } from '@/content/home'
+import { HOME_FAQ, PILLARS, PROCESS, SERVICES, SPECS, START_PATHS } from '@/content/home'
 import { HeroVideo } from './_home/HeroVideo'
 import { NetworkDiagram } from './_home/NetworkDiagram'
 import { PlatformLinker } from './_home/PlatformLinker'
@@ -87,7 +87,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Section id="services" tone="white" labelledBy="services-title">
+      <Section id="allinone" tone="white" labelledBy="allinone-title">
+        <SectionHeading
+          id="allinone-title"
+          title="구축, 운영, 보호를 한 곳에서."
+          lead={
+            <>
+              Web3 플랫폼을 만들고(Build), 운영하고(Operate), 지키는(Protect) 기능을{' '}
+              <br />
+              하나의 웹 서비스에서 이어서 쓸 수 있습니다.
+            </>
+          }
+        />
+        <ul className={styles.pillars} data-reveal-group="">
+          {PILLARS.map((pillar) => (
+            <li key={pillar.id}>
+              <article className={styles.pillar} data-spotlight="" aria-labelledby={`pillar-${pillar.id}`}>
+                <header className={styles.pillarHead}>
+                  <h3 id={`pillar-${pillar.id}`} className={styles.pillarName}>
+                    {pillar.name}
+                    <span className={styles.pillarEnglish}>{pillar.english}</span>
+                  </h3>
+                  <p className={styles.pillarText}>{pillar.text}</p>
+                </header>
+                <ul className={styles.pillarLinks}>
+                  {pillar.links.map((link) => (
+                    <li key={link.href}>
+                      <Link href={link.href} className={styles.pillarLink}>
+                        <IconTile className={styles.pillarIcon}>
+                          <NavIcon icon={link.icon} size={18} />
+                        </IconTile>
+                        <span className={styles.serviceText}>
+                          <span className={styles.pillarLabel}>{link.label}</span>
+                          <span className={styles.pillarDesc}>{link.text}</span>
+                        </span>
+                        <ArrowRightIcon className={styles.pillarArrow} size={16} weight="bold" aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section id="services" tone="tint" labelledBy="services-title">
         <SectionHeading
           id="services-title"
           title="필요한 서비스부터 연결하세요."
@@ -124,7 +169,7 @@ export default function HomePage() {
         </div>
       </Section>
 
-      <Section id="platform" tone="tint" labelledBy="platform-title">
+      <Section id="platform" tone="white" labelledBy="platform-title">
         <SectionHeading
           id="platform-title"
           title={

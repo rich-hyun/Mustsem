@@ -4,8 +4,11 @@ import { PauseIcon, PlayIcon } from '@phosphor-icons/react/ssr'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Metric } from '@/components/ui/DataDisplay'
+import { Notice } from '@/components/ui/Notice'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { cx } from '@/lib/cx'
-import { createDetector, type Detector, type RiskLevel, type RiskResult, type Tx } from './provisioning'
+import { createDetector, type Detector, type RiskLevel, type RiskResult, type Tx } from '@/lib/anomaly'
+import { AnomalyLive } from './AnomalyLive'
 import styles from './network.module.css'
 
 interface FeedItem {
@@ -23,11 +26,39 @@ const CHART_MAX = 40
 const randomAddress = () => `0x${Math.floor(Math.random() * 0xfff).toString(16).padStart(3, '0').toUpperCase()}`
 const fmt = (n: number) => Math.round(n).toLocaleString('ko-KR')
 
+type Mode = 'live' | 'demo'
+
+const MODES: Array<{ id: Mode; label: string }> = [
+  { id: 'live', label: '실제 체인' },
+  { id: 'demo', label: '시연 (가상 거래)' },
+]
+
 /**
- * 온체인 이상거래 탐지 시연. 위험도를 초록(정상) · 주황(경고) · 빨강(고위험) 구간으로 시각화한다.
- * 거래는 화면 안에서 만든 가상 데이터이며 실제 체인 데이터가 아니다.
+ * 온체인 이상거래 탐지. 기본은 실제 체인의 최근 거래를 읽은 결과이고,
+ * 체인에 거래가 드물 때도 규칙과 자동 대응 흐름을 확인할 수 있게 가상 거래 시연을 함께 둔다.
  */
 export function AnomalyMonitor() {
+  const [mode, setMode] = useState<Mode>('live')
+  return (
+    <div className={styles.monitorWrap}>
+      <SegmentedControl options={MODES} value={mode} onChange={setMode} label="이상거래 탐지 보기" />
+      {mode === 'live' ? (
+        <AnomalyLive />
+      ) : (
+        <>
+          <Notice tone="warning">가상 거래로 규칙과 자동 대응 흐름을 보여 주는 시연입니다. 실제 체인 데이터가 아닙니다.</Notice>
+          <AnomalyDemo />
+        </>
+      )}
+    </div>
+  )
+}
+
+/**
+ * 시연. 위험도를 초록(정상) · 주황(경고) · 빨강(고위험) 구간으로 시각화한다.
+ * 거래는 화면 안에서 만든 가상 데이터이며 실제 체인 데이터가 아니다.
+ */
+function AnomalyDemo() {
   const detector = useRef<Detector | null>(null)
   const idRef = useRef(0)
   const burstRef = useRef(0)
@@ -83,6 +114,20 @@ export function AnomalyMonitor() {
     for (let i = 0; i < 6; i++) push({ from, to: randomAddress(), amount: 120, ts: Date.now() }, '반복 전송')
   }
   const injectBlacklist = () => push({ from: randomAddress(), to: '0xBAD0', amount: 300, ts: Date.now() }, '블랙리스트')
+  const injectFanOut = () => {
+    const from = `0xFA${burstRef.current++ % 10}`
+    for (let i = 0; i < 5; i++) push({ from, to: `0xD${i}${Math.floor(Math.random() * 0xff).toString(16).toUpperCase()}`, amount: 110, ts: Date.now() + i * 3000 }, '분산 송금')
+  }
+  const injectRoundTrip = () => {
+    const a = `0xA0${burstRef.current++ % 10}`
+    const b = randomAddress()
+    const now = Date.now()
+    // 같은 금액이 몇 차례 오가면 위험도가 쌓인다
+    for (let i = 0; i < 3; i++) {
+      push({ from: a, to: b, amount: 140, ts: now + i * 4000 }, '왕복 거래')
+      push({ from: b, to: a, amount: 140, ts: now + i * 4000 + 2000 }, '왕복 거래')
+    }
+  }
 
   return (
     <div className={styles.monitor}>
@@ -126,6 +171,12 @@ export function AnomalyMonitor() {
         </Button>
         <Button type="button" variant="secondary" size="sm" onClick={injectBlacklist}>
           블랙리스트 거래 주입
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={injectFanOut}>
+          분산 송금 주입
+        </Button>
+        <Button type="button" variant="secondary" size="sm" onClick={injectRoundTrip}>
+          왕복 거래 주입
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={() => setRunning((r) => !r)}>
           {running ? <PauseIcon size={16} aria-hidden /> : <PlayIcon size={16} aria-hidden />}

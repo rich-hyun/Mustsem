@@ -19,13 +19,13 @@ import { HeroBadges, HeroLinks } from '@/components/marketing/HeroMeta'
 import { Button } from '@/components/ui/Button'
 import { PageHero } from '@/components/ui/PageHero'
 import { Section, SectionHeading } from '@/components/ui/Section'
-import { CATALOG_STATS, INDUSTRIES, type IndustryId } from '@/content/api-catalog'
+import { API_TOTAL, CATALOG_STATS, INDUSTRIES, type IndustryId } from '@/content/api-catalog'
 import { ApiExplorer } from './ApiExplorer'
 import styles from './developers.module.css'
 
 export const metadata: Metadata = {
   title: 'API 카탈로그',
-  description: 'NFT·SBT·RWA·토큰 정책·거버넌스·노드 운영까지, 머스트셈이 제공하는 전체 API 카탈로그입니다.',
+  description: 'NFT·SBT·RWA·토큰 정책·거버넌스·노드 운영에 오라클·크로스체인 브릿지·DID·복합 컨트랙트까지, 머스트셈이 제공하는 API 50종의 카탈로그입니다.',
   alternates: { canonical: '/developers' },
 }
 
@@ -125,7 +125,7 @@ export default function DevelopersPage() {
         <SectionHeading
           id="api-catalog-title"
           title="제공 가능한 API"
-          lead="NFT, SBT, RWA, 토큰 정책, 브릿지, 거버넌스, 노드 관리 등 엔터프라이즈 Web3 전반을 아우르는 API"
+          lead={`NFT, SBT, RWA, 토큰 정책, 거버넌스, 체인 운영에 오라클, 크로스체인 브릿지, DID, 복합 컨트랙트를 더한 ${API_TOTAL}종. 조회 API는 이 화면에서 바로 호출해 볼 수 있습니다.`}
         />
         <ApiExplorer />
       </Section>

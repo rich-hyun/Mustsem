@@ -7,8 +7,10 @@ import {
   GaugeIcon,
   GraphIcon,
   ImageSquareIcon,
+  RobotIcon,
   SealCheckIcon,
   ShieldCheckIcon,
+  ShieldWarningIcon,
 } from '@phosphor-icons/react/ssr'
 import type { IconProps } from '@phosphor-icons/react'
 import type { NavIconKey } from '@/config/navigation'
@@ -21,6 +23,8 @@ const ICONS = {
   sbt: SealCheckIcon,
   rwa: BuildingsIcon,
   ipfs: ShieldCheckIcon,
+  agent: RobotIcon,
+  anomaly: ShieldWarningIcon,
   catalog: BracketsCurlyIcon,
   guide: BookOpenTextIcon,
   dashboard: GaugeIcon,

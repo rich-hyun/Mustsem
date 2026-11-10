@@ -528,3 +528,62 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ── 이상거래 탐지: 실제 체인 보기 ──────────────────────────────── */
+.monitorWrap {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.monitorWrap > * {
+  width: 100%;
+}
+
+.monitorWrap > :first-child {
+  width: auto;
+}
+
+.liveBar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+}
+
+.liveSource {
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.liveSource strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.liveActions {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.liveWindow {
+  width: 170px;
+}
+
+.liveScope {
+  color: var(--ink-3);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.liveEmpty {
+  padding: 28px 16px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-card);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
+  text-align: center;
+}

@@ -1,5 +1,5 @@
 /**
- * Biz-Ops AI 에이전트 창구. 로그인한 회원만 쓴다 (header: Authorization: Bearer <Supabase access token>).
+ * Biz-Ops AI 에이전트 창구. 로그인한 회원만 쓴다 (httpOnly 세션 쿠키, src/server/members/session.ts).
  *
  * GET  /api/agent                  → { mode: 'internal' | 'public', dailyLimit }  (화면이 어떤 모드인지 알기 위해)
  * POST /api/agent  { question }    → { mode, answer, tools: string[], elapsed, remaining }
@@ -13,13 +13,12 @@
  */
 import { createHash } from 'node:crypto'
 import type { NextRequest } from 'next/server'
-import { SUPABASE } from '@/config/site'
+import { authenticate } from '@/server/members/session'
 
 // 에이전트가 도구를 여러 번 부르면 1분을 넘기도 한다 (게이트웨이는 280초에 먼저 끊는다)
 export const maxDuration = 300
 
 const MAX_QUESTION = 2000
-const AUTH_TIMEOUT_MS = 8000
 const AGENT_TIMEOUT_MS = 290_000
 /** 화면 안내용. 실제 한도는 게이트웨이의 BIZOPS_PUBLIC_DAILY_LIMIT 가 정한다 (0이면 무제한) */
 const PUBLIC_DAILY_LIMIT = Number(process.env.BIZOPS_PUBLIC_DAILY_LIMIT ?? 5) || 0
@@ -39,23 +38,13 @@ function allowedEmails(): Set<string> {
   )
 }
 
-/** Supabase에 토큰을 물어 로그인한 계정의 이메일을 얻는다 (위조·만료 토큰은 null) */
+/**
+ * 세션 쿠키로 로그인한 회원의 이메일을 얻는다 (서명·만료 검증, DynamoDB 상태 확인 포함).
+ * 비활성화된 계정·삭제된 계정·위조 토큰은 null.
+ */
 async function emailOf(request: NextRequest): Promise<string | null> {
-  const token = request.headers.get('authorization')?.match(/^Bearer\s+(\S+)$/i)?.[1]
-  if (!token) return null
-  try {
-    const response = await fetch(`${SUPABASE.url}/auth/v1/user`, {
-      headers: { apikey: SUPABASE.anonKey, Authorization: `Bearer ${token}` },
-      signal: AbortSignal.timeout(AUTH_TIMEOUT_MS),
-      cache: 'no-store',
-    })
-    if (!response.ok) return null
-    const user = (await response.json()) as { email?: unknown }
-    return typeof user.email === 'string' && user.email ? user.email.toLowerCase() : null
-  } catch (error) {
-    console.error('[agent] auth check failed:', error instanceof Error ? error.message : error)
-    return null
-  }
+  const outcome = await authenticate(request)
+  return outcome.ok ? outcome.auth.profile.email.toLowerCase() : null
 }
 
 const modeOf = (email: string): Mode => (allowedEmails().has(email) ? 'internal' : 'public')

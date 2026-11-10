@@ -1,82 +1,90 @@
 'use client'
 
 /**
- * 로그인 상태. 저장된 세션이 있을 때만 Supabase SDK를 불러와 확인하고,
- * 로그인·회원가입·인증 페이지가 SDK를 쓰는 순간 구독을 시작해 헤더에 즉시 반영한다.
+ * 로그인 상태. 세션 토큰은 httpOnly 쿠키라 스크립트가 읽지 못하고, 서버(/api/auth/session)에 물어 복구한다.
+ * 로그인 흔적(ms_auth 쿠키)이 없는 방문자는 서버에 묻지 않는다.
+ * 어떤 회원 API든 401/403(disabled)을 받으면 즉시 로그아웃 상태로 바꾸고 이유를 남긴다.
  */
-import type { Session, SupabaseClient } from '@supabase/supabase-js'
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { SessionUser } from '@/lib/account'
 import { logDevError } from '@/lib/errors'
-import { hasStoredSession, loadSupabase } from '@/lib/supabase'
+import { MemberApiError, memberApi, setUnauthenticatedHandler } from './memberApi'
 
 export type AuthStatus = 'unknown' | 'signed-out' | 'signed-in'
-
-export interface AuthUser {
-  email: string
-  name: string | null
-}
+export type AuthUser = SessionUser
+/** 로그아웃 상태가 된 이유 (화면 안내용) */
+export type SignedOutReason = 'expired' | 'disabled' | null
 
 interface AuthContextValue {
   status: AuthStatus
   user: AuthUser | null
-  /** SDK를 불러오고(최초 1회) 세션 변화를 구독한 클라이언트 */
-  getClient: () => Promise<SupabaseClient>
+  reason: SignedOutReason
+  /** 서버에 세션을 다시 묻는다 (권한 변경 반영 등) */
+  refresh: () => Promise<AuthUser | null>
+  /** 로그인 API가 성공한 직후 */
+  signedIn: (user: AuthUser) => void
   signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function toUser(session: Session | null): AuthUser | null {
-  const user = session?.user
-  if (!user) return null
-  const fullName = user.user_metadata?.full_name
-  return { email: user.email ?? '', name: typeof fullName === 'string' && fullName ? fullName : null }
+function hasSessionHint(): boolean {
+  try {
+    return document.cookie.split(';').some((part) => part.trim() === 'ms_auth=1')
+  } catch {
+    return false
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('unknown')
   const [user, setUser] = useState<AuthUser | null>(null)
-  const subscribed = useRef(false)
+  const [reason, setReason] = useState<SignedOutReason>(null)
 
-  const apply = useCallback((session: Session | null) => {
-    const next = toUser(session)
+  const apply = useCallback((next: AuthUser | null) => {
     setUser(next)
     setStatus(next ? 'signed-in' : 'signed-out')
+    if (next) setReason(null)
   }, [])
 
-  const getClient = useCallback(async () => {
-    const client = await loadSupabase()
-    if (!subscribed.current) {
-      subscribed.current = true
-      client.auth.onAuthStateChange((_event, session) => apply(session))
-      const { data } = await client.auth.getSession()
-      apply(data.session)
+  const refresh = useCallback(async () => {
+    try {
+      const { user: next } = await memberApi<{ user: AuthUser }>('/api/auth/session')
+      apply(next)
+      return next
+    } catch (error) {
+      if (!(error instanceof MemberApiError && (error.code === 'unauthenticated' || error.code === 'disabled'))) {
+        logDevError('auth:restore', error)
+      }
+      apply(null)
+      return null
     }
-    return client
   }, [apply])
 
   useEffect(() => {
-    if (!hasStoredSession()) {
-      setStatus('signed-out')
-      return
-    }
-    getClient().catch((error: unknown) => {
-      logDevError('auth:restore', error)
-      setStatus('signed-out')
+    setUnauthenticatedHandler((code) => {
+      setReason(code === 'disabled' ? 'disabled' : 'expired')
+      apply(null)
     })
-  }, [getClient])
+    if (hasSessionHint()) void refresh()
+    else setStatus('signed-out')
+    return () => setUnauthenticatedHandler(null)
+  }, [apply, refresh])
 
   const signOut = useCallback(async () => {
     try {
-      const client = await getClient()
-      await client.auth.signOut()
+      await memberApi('/api/auth/logout', { method: 'POST', body: {} })
     } catch (error) {
       logDevError('auth:signOut', error)
     }
+    setReason(null)
     apply(null)
-  }, [getClient, apply])
+  }, [apply])
 
-  const value = useMemo(() => ({ status, user, getClient, signOut }), [status, user, getClient, signOut])
+  const value = useMemo(
+    () => ({ status, user, reason, refresh, signedIn: apply, signOut }),
+    [status, user, reason, refresh, apply, signOut],
+  )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

@@ -1,68 +1,56 @@
 /**
- * Supabase 인증 오류 → 고정 한국어 문구 (CWE-209).
- * 원문 메시지는 화면에 내보내지 않고, 오류 코드·메시지의 키워드로만 분류한다.
+ * 회원 API 오류 코드 → 고정 한국어 문구 (CWE-209).
+ * 서버는 코드만 보내고, 화면은 이 표에 있는 문구만 보여 준다.
  */
+import { MemberApiError } from './memberApi'
 
-interface AuthErrorLike {
-  code?: string
-  message?: string
-  status?: number
-  name?: string
-}
+export { looksLikeEmail } from '@/lib/account'
 
 export const SERVICE_UNAVAILABLE = '서비스에 연결하지 못했습니다. 잠시 후 다시 시도하세요.'
-const RATE_LIMITED = '요청이 너무 많습니다. 잠시 후 다시 시도하세요.'
 
-function classify(error: unknown): { code: string; message: string; status: number | undefined; name: string } {
-  const e = (error && typeof error === 'object' ? error : {}) as AuthErrorLike
-  return {
-    code: typeof e.code === 'string' ? e.code : '',
-    message: typeof e.message === 'string' ? e.message.toLowerCase() : '',
-    status: typeof e.status === 'number' ? e.status : undefined,
-    name: typeof e.name === 'string' ? e.name : '',
-  }
+const COMMON: Record<string, string> = {
+  network: SERVICE_UNAVAILABLE,
+  unavailable: SERVICE_UNAVAILABLE,
+  delivery_failed: '메일을 보내지 못했습니다. 잠시 후 다시 시도하세요.',
+  rate_limited: '요청이 너무 많습니다. 잠시 후 다시 시도하세요.',
+  forbidden_origin: '요청을 처리하지 못했습니다. 페이지를 새로 고친 뒤 다시 시도하세요.',
+  bad_request: '입력값을 다시 확인해주세요.',
+  unauthenticated: '로그인이 만료되었습니다. 다시 로그인해주세요.',
+  disabled: '이용이 중지된 계정입니다. 고객센터로 문의해주세요.',
+  forbidden: '이 작업을 할 권한이 없습니다.',
+  not_found: '대상을 찾지 못했습니다. 목록을 새로 고쳐 주세요.',
+  weak_password: '비밀번호가 보안 기준을 충족하지 않습니다.',
+  code_mismatch: '인증 코드가 올바르지 않습니다.',
+  code_expired: '인증 코드가 만료되었습니다. 코드를 다시 받아주세요.',
 }
 
-function isNetworkFailure({ name, status, message }: ReturnType<typeof classify>): boolean {
-  return name === 'AuthRetryableFetchError' || status === 0 || message.includes('failed to fetch')
+const SCOPED: Record<'login' | 'signup' | 'confirm' | 'reset' | 'password' | 'admin', Record<string, string>> = {
+  login: {
+    invalid_credentials: '이메일 또는 비밀번호가 올바르지 않습니다.',
+    not_confirmed: '이메일 인증이 완료되지 않았습니다.',
+    password_reset_required: '보안 정책이 바뀌어 비밀번호를 새로 정해야 합니다. 비밀번호 찾기에서 재설정해주세요.',
+  },
+  signup: {
+    email_taken: '이미 가입된 이메일입니다.',
+    bad_request: '입력값을 다시 확인해주세요. 필수 약관에 동의해야 합니다.',
+  },
+  confirm: {
+    bad_request: '이메일과 6자리 인증 코드를 확인해주세요.',
+  },
+  reset: {
+    bad_request: '이메일과 6자리 인증 코드를 확인해주세요.',
+  },
+  password: {
+    invalid_credentials: '현재 비밀번호가 올바르지 않습니다.',
+  },
+  admin: {
+    self_action: '내 계정의 상태·권한은 여기서 바꿀 수 없습니다.',
+    partial_failure: '일부만 반영되었습니다. 같은 작업을 한 번 더 실행해주세요.',
+    bad_request: '요청 내용을 다시 확인해주세요.',
+  },
 }
 
-export function loginErrorMessage(error: unknown): string {
-  const info = classify(error)
-  if (isNetworkFailure(info)) return SERVICE_UNAVAILABLE
-  if (info.code === 'invalid_credentials' || info.message.includes('invalid login')) {
-    return '이메일 또는 비밀번호가 올바르지 않습니다.'
-  }
-  if (info.code === 'email_not_confirmed' || info.message.includes('email not confirmed')) {
-    return '이메일 인증이 완료되지 않았습니다.'
-  }
-  if (info.code.startsWith('over_') || info.status === 429) return RATE_LIMITED
-  return '로그인에 실패했습니다.'
-}
-
-export function signupErrorMessage(error: unknown): string {
-  const info = classify(error)
-  if (isNetworkFailure(info)) return SERVICE_UNAVAILABLE
-  if (
-    info.code === 'user_already_exists' ||
-    info.code === 'email_exists' ||
-    info.message.includes('already registered') ||
-    info.message.includes('already been registered')
-  ) {
-    return '이미 가입된 이메일입니다.'
-  }
-  if (info.code === 'weak_password' || info.message.includes('password should')) {
-    return '비밀번호가 보안 기준을 충족하지 않습니다.'
-  }
-  if (info.code === 'email_address_invalid' || (info.message.includes('invalid') && info.message.includes('email'))) {
-    return '유효하지 않은 이메일 형식입니다.'
-  }
-  if (info.code.startsWith('over_') || info.status === 429) return RATE_LIMITED
-  if (info.code === 'signup_disabled') return '현재 회원가입을 받을 수 없습니다. 잠시 후 다시 시도하세요.'
-  return '회원가입에 실패했습니다. 다시 시도해주세요.'
-}
-
-/** 입력 단계의 간단한 이메일 형식 확인 (최종 판정은 서버) */
-export function looksLikeEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+export function memberErrorMessage(error: unknown, scope?: keyof typeof SCOPED): string {
+  const code = error instanceof MemberApiError ? error.code : 'unavailable'
+  return (scope && SCOPED[scope][code]) || COMMON[code] || '요청을 처리하지 못했습니다. 잠시 후 다시 시도하세요.'
 }

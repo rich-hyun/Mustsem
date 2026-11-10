@@ -14,8 +14,11 @@
     "node": ">=20.9.0"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1165.0",
+    "@aws-sdk/client-dynamodb": "^3.1165.0",
+    "@aws-sdk/lib-dynamodb": "^3.1165.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@supabase/supabase-js": "^2.117.2",
+    "aws-jwt-verify": "^5.2.1",
     "chart.js": "^4.5.1",
     "ethers": "^6.17.0",
     "motion": "^13.4.4",

@@ -48,3 +48,11 @@ export function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
   return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
+
+/** 날짜만 (가입일 등). 값이 없으면 '-' */
+export function formatDate(value: Date | number | string | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '-'
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })
+}

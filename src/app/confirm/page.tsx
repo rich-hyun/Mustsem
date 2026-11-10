@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { PageHero } from '@/components/ui/PageHero'
 import { Section } from '@/components/ui/Section'
-import { ConfirmStatus } from './ConfirmStatus'
+import { ConfirmForm } from './ConfirmForm'
 
 export const metadata: Metadata = {
   title: '이메일 인증',
@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 export default function ConfirmPage() {
   return (
     <>
-      <PageHero eyebrow="계정" title="이메일 인증" lead="MUSTSEM 계정 이메일 인증을 진행합니다." />
-      <Section tone="tint" spacing="compact" label="이메일 인증 결과">
-        <ConfirmStatus />
+      <PageHero eyebrow="계정" title="이메일 인증" lead="메일로 받은 인증 코드를 입력하면 가입이 완료됩니다." />
+      <Section tone="tint" spacing="compact" label="이메일 인증">
+        <ConfirmForm />
       </Section>
     </>
   )

@@ -559,3 +559,29 @@
     padding: 0 10px;
   }
 }
+
+/* 계정 메뉴 링크 (내 정보 · 회원 관리) */
+.popLinks {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.popLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  color: var(--ink-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: background-color 160ms var(--ease);
+}
+
+.popLink:hover {
+  background: var(--surface-tint);
+  color: var(--ink);
+}

@@ -171,19 +171,13 @@ function Answer({ text }: { text: string }) {
 }
 
 export function AgentChat() {
-  const { status, getClient } = useAuth()
+  const { status } = useAuth()
   const [info, setInfo] = useState<AgentInfo | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [question, setQuestion] = useState('')
   const [history, setHistory] = useState<Exchange[]>([])
   const [error, setError] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
-
-  const accessToken = useCallback(async () => {
-    const client = await getClient()
-    const { data } = await client.auth.getSession()
-    return data.session?.access_token ?? null
-  }, [getClient])
 
   // 로그인하면 이 계정이 내부용인지 공개용인지 먼저 받아 둔다 (예시 질문·안내가 달라진다)
   useEffect(() => {
@@ -192,10 +186,9 @@ export function AgentChat() {
       return
     }
     let cancelled = false
-    accessToken()
-      .then(async (token) => {
-        if (!token) return
-        const response = await fetch('/api/agent', { headers: { Authorization: `Bearer ${token}` } })
+    // 세션은 httpOnly 쿠키로 함께 전송된다
+    fetch('/api/agent', { credentials: 'same-origin', cache: 'no-store' })
+      .then(async (response) => {
         if (!response.ok) return
         const body = (await response.json()) as Partial<AgentInfo>
         if (!cancelled && (body.mode === 'internal' || body.mode === 'public')) {
@@ -206,7 +199,7 @@ export function AgentChat() {
     return () => {
       cancelled = true
     }
-  }, [status, accessToken])
+  }, [status])
 
   if (status === 'unknown') {
     return <Notice tone="neutral">로그인 상태를 확인하고 있습니다.</Notice>
@@ -244,14 +237,10 @@ export function AgentChat() {
     setAsking(true)
     setError(null)
     try {
-      const token = await accessToken()
-      if (!token) {
-        setError(ERROR_TEXT.unauthenticated ?? UNAVAILABLE)
-        return
-      }
       const response = await fetch('/api/agent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: trimmed }),
       })
       const body = (await response.json().catch(() => ({}))) as Partial<Exchange> & { error?: string; remaining?: number | null }

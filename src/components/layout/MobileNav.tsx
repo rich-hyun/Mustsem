@@ -98,12 +98,23 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
           <h2 className={styles.groupTitle}>회사</h2>
           {renderLinks([{ href: '/security', label: '보안' }])}
         </section>
+        {status === 'signed-in' && user && (
+          <section className={styles.group}>
+            <h2 className={styles.groupTitle}>내 계정</h2>
+            {renderLinks([
+              { href: '/account', label: '내 정보' },
+              ...(user.role === 'ADMIN' ? [{ href: '/admin/members', label: '회원 관리' }] : []),
+            ])}
+          </section>
+        )}
       </nav>
 
       <div className={styles.foot}>
         {status === 'signed-in' && user ? (
           <>
-            <p className={styles.account}>{user.email}</p>
+            <p className={styles.account}>
+              {user.name} · {user.email}
+            </p>
             <Button
               variant="secondary"
               block

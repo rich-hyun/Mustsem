@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pat
   const handler = GET_HANDLERS[path.join('/')]
   if (!handler) return Response.json({ ok: false, error: 'unsupported' }, { status: 404, headers: NO_STORE })
   try {
-    const data = await handler(request.nextUrl.searchParams, { origin: request.nextUrl.origin })
+    const data = await handler(request.nextUrl.searchParams)
     return Response.json({ ok: true, data }, { headers: NO_STORE })
   } catch (error) {
     if (error instanceof GatewayError) return Response.json({ ok: false, error: error.code }, { status: error.status, headers: NO_STORE })

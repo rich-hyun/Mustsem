@@ -59,9 +59,9 @@ interface AgentInfo {
   dailyLimit: number
 }
 
-const INLINE = /\*\*(.+?)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g
+const INLINE = /\*\*(.+?)\*\*|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|`([^`\n]+)`/g
 
-/** 답변의 굵게(**)·링크만 살린다. 나머지 마크다운은 글자 그대로 둔다 (HTML로 해석하지 않는다) */
+/** 답변의 굵게(**)·링크·`코드`만 살린다. 나머지 마크다운은 글자 그대로 둔다 (HTML로 해석하지 않는다) */
 function renderInline(line: string): ReactNode[] {
   const nodes: ReactNode[] = []
   let last = 0
@@ -69,6 +69,7 @@ function renderInline(line: string): ReactNode[] {
     const at = match.index ?? 0
     if (at > last) nodes.push(line.slice(last, at))
     if (match[1] !== undefined) nodes.push(<strong key={at}>{match[1]}</strong>)
+    else if (match[4] !== undefined) nodes.push(<code key={at}>{match[4]}</code>)
     else
       nodes.push(
         <a key={at} href={match[3]} target="_blank" rel="noopener noreferrer">
@@ -81,19 +82,90 @@ function renderInline(line: string): ReactNode[] {
   return nodes
 }
 
-function Answer({ text }: { text: string }) {
+const TABLE_ROW = /^\s*\|.*\|\s*$/
+const TABLE_RULE = /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/
+
+const cellsOf = (row: string) =>
+  row
+    .trim()
+    .replace(/^\|/, '')
+    .replace(/\|$/, '')
+    .split('|')
+    .map((cell) => cell.trim())
+
+type Block = { kind: 'text'; lines: string[] } | { kind: 'table'; head: string[]; rows: string[][] }
+
+/** 머리행 + 구분선(|---|)으로 시작하는 줄 묶음은 표로, 나머지는 글로 나눈다 */
+function toBlocks(text: string): Block[] {
   const lines = text.split('\n')
+  const blocks: Block[] = []
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i] ?? ''
+    const next = lines[i + 1] ?? ''
+    if (TABLE_ROW.test(line) && TABLE_RULE.test(next)) {
+      const head = cellsOf(line)
+      const rows: string[][] = []
+      i += 2
+      while (i < lines.length && TABLE_ROW.test(lines[i] ?? '')) {
+        rows.push(cellsOf(lines[i] ?? ''))
+        i += 1
+      }
+      // 표 앞뒤 빈 줄은 표의 여백이 대신한다
+      const prev = blocks[blocks.length - 1]
+      if (prev?.kind === 'text') while (prev.lines.length && !prev.lines[prev.lines.length - 1]?.trim()) prev.lines.pop()
+      if (!(lines[i] ?? '').trim()) i += 1
+      i -= 1
+      blocks.push({ kind: 'table', head, rows })
+      continue
+    }
+    const last = blocks[blocks.length - 1]
+    if (last?.kind === 'text') last.lines.push(line)
+    else blocks.push({ kind: 'text', lines: [line] })
+  }
+  return blocks
+}
+
+function Answer({ text }: { text: string }) {
   return (
     <div className={styles.answer}>
-      {lines.map((raw, index) => {
-        const heading = raw.match(/^#{1,6}\s+(.*)$/)
-        return (
-          <Fragment key={index}>
-            {heading ? <strong>{renderInline(heading[1] ?? '')}</strong> : renderInline(raw.replace(/\s+$/, ''))}
-            {index < lines.length - 1 && '\n'}
+      {toBlocks(text).map((block, blockIndex) =>
+        block.kind === 'table' ? (
+          <div key={blockIndex} className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  {block.head.map((cell, index) => (
+                    <th key={index} scope="col">
+                      {renderInline(cell)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {block.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {block.head.map((_, index) => (
+                      <td key={index}>{renderInline(row[index] ?? '')}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <Fragment key={blockIndex}>
+            {block.lines.map((raw, index) => {
+              const heading = raw.match(/^#{1,6}\s+(.*)$/)
+              return (
+                <Fragment key={index}>
+                  {heading ? <strong>{renderInline(heading[1] ?? '')}</strong> : renderInline(raw.replace(/\s+$/, ''))}
+                  {index < block.lines.length - 1 && '\n'}
+                </Fragment>
+              )
+            })}
           </Fragment>
-        )
-      })}
+        ),
+      )}
     </div>
   )
 }

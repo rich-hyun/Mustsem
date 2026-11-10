@@ -1,0 +1,12 @@
+{
+  "chainId": 7601,
+  "rpcUrl": "https://block.mustree.kr",
+  "deployer": "0x299e421dEC65933Ed64E38ce16F536FE2271a2Ac",
+  "deployedAt": "2026-11-10T07:42:13.295Z",
+  "contracts": {
+    "PriceOracle": "0x3e8414D7A1768C7809b10B081F7C919e4310B989",
+    "DIDRegistry": "0xD4F7885cf9A4b626f35f53548684e08B8297F92E",
+    "ComplianceGuard": "0x64F55D6369AF3b2741CBb3F37F5a3D39A91cB068",
+    "CompositeExecutor": "0x283F614D2cB22586B1eb772D45b597663DA85e28"
+  }
+}

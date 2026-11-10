@@ -253,28 +253,32 @@ const oraclePrice: Handler = async (params) => {
   if (oracle) {
     await requireCode(network, oracle)
     const [latest] = await readContracts(network, [{ address: oracle, abi: PRICE_ORACLE_ABI, fn: 'latestPrice', args: [pair] }])
-    if (!latest) throw new GatewayError('not_found')
-    return {
-      network: networkInfo(network),
-      pair,
-      source: 'onchain',
-      contract: oracle,
-      roundId: String(latest[0]),
-      price: formatUnits(latest[1] as bigint, Number(latest[2])),
-      decimals: Number(latest[2]),
-      observedAt: iso(latest[3] as bigint),
-      updatedAt: iso(latest[4] as bigint),
-      stale: Boolean(latest[5]),
+    if (latest) {
+      return {
+        network: networkInfo(network),
+        pair,
+        source: 'onchain',
+        contract: oracle,
+        roundId: String(latest[0]),
+        price: formatUnits(latest[1] as bigint, Number(latest[2])),
+        decimals: Number(latest[2]),
+        observedAt: iso(latest[3] as bigint),
+        updatedAt: iso(latest[4] as bigint),
+        stale: Boolean(latest[5]),
+      }
     }
   }
-  // 온체인 오라클이 배포되기 전: 참고 시세를 돌려주고, 온체인 값이 아님을 응답에 밝힌다
+  // 온체인에 이 피드의 가격이 아직 없다: 참고 시세를 돌려주고, 온체인 값이 아님을 응답에 밝힌다
+  if (!REFERENCE_PAIRS[pair]) throw new GatewayError('not_found')
   const reference = await cached(`reference:${pair}`, 300_000, () => referencePrice(pair))
   return {
     network: networkInfo(network),
     pair,
     source: 'reference',
-    contract: null,
-    notice: 'PriceOracle 컨트랙트가 이 네트워크에 배포되기 전입니다. 온체인 값이 아니라 외부 시세의 일별 종가입니다.',
+    contract: oracle,
+    notice: oracle
+      ? '이 피드는 PriceOracle 컨트랙트에 아직 등록되거나 기록되지 않았습니다. 온체인 값이 아니라 외부 시세의 일별 종가입니다.'
+      : 'PriceOracle 컨트랙트가 이 네트워크에 배포되기 전입니다. 온체인 값이 아니라 외부 시세의 일별 종가입니다.',
     price: reference.price,
     observedAt: `${reference.date}T00:00:00.000Z`,
   }

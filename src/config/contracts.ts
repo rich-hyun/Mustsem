@@ -116,21 +116,22 @@ export const STAKING_ABI = [
 ] as const
 
 /* ── 확장 컨트랙트 (소스: contracts/src, 배포용 ABI·바이트코드: contracts/artifacts) ──
- * 아직 어느 네트워크에도 배포하지 않았다. 배포한 뒤 주소를 넣으면 /api/v1의 해당 조회 API가 그 컨트랙트를 읽는다.
- * 주소가 null이면 해당 API는 contract_not_deployed로 응답한다.
+ * Mustsem 메인넷(7601)에 2026-11-10 배포: PriceOracle, DIDRegistry, ComplianceGuard, CompositeExecutor
+ * (배포·관리자 지갑 0x299e421dEC65933Ed64E38ce16F536FE2271a2Ac). BridgeGateway와 RWAVault는 보안 감사 전이라 배포하지 않았다.
+ * 주소가 있으면 /api/v1의 해당 조회 API가 그 컨트랙트를 읽고, null이면 contract_not_deployed로 응답한다.
  */
 const NOT_DEPLOYED: ContractMap = { mustsem: null, 'jkk-tmz': null, kukminbank: null, mdpcd: null, nabizam: null }
 
 /** 오라클 가격 피드 (PriceOracle.sol) */
-export const PRICE_ORACLE_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+export const PRICE_ORACLE_CONTRACTS: ContractMap = { ...NOT_DEPLOYED, mustsem: '0x3e8414D7A1768C7809b10B081F7C919e4310B989' }
 /** DID 신원·자격증명 (DIDRegistry.sol) */
-export const DID_REGISTRY_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+export const DID_REGISTRY_CONTRACTS: ContractMap = { ...NOT_DEPLOYED, mustsem: '0xD4F7885cf9A4b626f35f53548684e08B8297F92E' }
 /** 크로스체인 브릿지 게이트웨이 (BridgeGateway.sol) */
 export const BRIDGE_GATEWAY_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
 /** 복합 컨트랙트 실행기 (CompositeExecutor.sol) */
-export const COMPOSITE_EXECUTOR_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+export const COMPOSITE_EXECUTOR_CONTRACTS: ContractMap = { ...NOT_DEPLOYED, mustsem: '0x283F614D2cB22586B1eb772D45b597663DA85e28' }
 /** 이상거래 대응: 지갑 동결·블랙리스트 (ComplianceGuard.sol) */
-export const COMPLIANCE_GUARD_CONTRACTS: ContractMap = { ...NOT_DEPLOYED }
+export const COMPLIANCE_GUARD_CONTRACTS: ContractMap = { ...NOT_DEPLOYED, mustsem: '0x64F55D6369AF3b2741CBb3F37F5a3D39A91cB068' }
 
 export const PRICE_ORACLE_ABI = [
   'function latestPrice(string pair) view returns (uint80 roundId, int256 answer, uint8 decimals_, uint64 observedAt, uint64 updatedAt, bool stale)',

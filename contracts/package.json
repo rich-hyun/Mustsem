@@ -5,10 +5,11 @@
   "description": "MUSTSEM 확장 스마트 컨트랙트 (오라클, DID, 크로스체인 브릿지, RWA 지분·분배, 복합 실행, 이상거래 대응). 사이트 빌드와 별개인 하위 프로젝트.",
   "license": "UNLICENSED",
   "scripts": {
-    "test": "node test/contracts.test.cjs",
+    "test": "node test/contracts.test.cjs && node test/core.test.cjs",
     "deploy": "node scripts/deploy.cjs"
   },
   "devDependencies": {
+    "@openzeppelin/contracts": "5.0.2",
     "ethers": "^6.17.0",
     "hardhat": "^2.22.17"
   }

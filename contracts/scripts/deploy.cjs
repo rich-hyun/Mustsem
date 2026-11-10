@@ -55,6 +55,36 @@ async function deployAll(signer, options = {}) {
   return deployed
 }
 
+/**
+ * 기본 컨트랙트(NFT, SBT, RWA, wMST, 스테이킹) 배포. 사이트의 발행 도구와 스테이킹 화면이 쓰는 컨트랙트다.
+ * @param options { owner, aprBps(기본 200 = 연 2%), claimIntervalSeconds(기본 7일), log }
+ */
+async function deployCore(signer, options = {}) {
+  const log = options.log ?? (() => undefined)
+  const owner = options.owner ?? (await signer.getAddress())
+  if (!isAddress(owner)) throw new Error('OWNER가 올바른 주소가 아닙니다')
+  const aprBps = options.aprBps ?? 200
+  const claimIntervalSeconds = options.claimIntervalSeconds ?? 7 * 24 * 60 * 60
+  if (!Number.isInteger(aprBps) || aprBps < 1 || aprBps > 10_000) throw new Error('aprBps는 1~10000 사이여야 합니다')
+
+  const deployed = {}
+  let nonce = await signer.getNonce('pending')
+  const put = async (name, args) => {
+    const { abi, bytecode } = artifact(name)
+    const contract = await new ContractFactory(abi, bytecode, signer).deploy(...args, { nonce: nonce++ })
+    await contract.waitForDeployment()
+    deployed[name] = await contract.getAddress()
+    log(`${name}: ${deployed[name]}`)
+  }
+  await put('NFTVault', [])
+  await put('SBTVault', [])
+  await put('RWAToken', [])
+  await put('WrappedMST', [])
+  // 스테이킹은 방금 배포한 wMST를 예치 토큰으로 쓴다
+  await put('MSTStaking', [owner, deployed.WrappedMST, aprBps, claimIntervalSeconds])
+  return deployed
+}
+
 async function main() {
   const { RPC_URL, PRIVATE_KEY, OWNER, RELAYERS, THRESHOLD, FREEZE_SCORE, BLACKLIST_SCORE, DRY_RUN } = process.env
   if (!RPC_URL || !PRIVATE_KEY) {
@@ -84,7 +114,7 @@ async function main() {
   console.log(JSON.stringify(deployed, null, 2))
 }
 
-module.exports = { deployAll }
+module.exports = { deployAll, deployCore }
 
 if (require.main === module) {
   main().catch((error) => {

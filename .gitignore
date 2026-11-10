@@ -32,4 +32,5 @@ image.png
 
 # 배포 결과(주소)는 확인 후 src/config/contracts.ts에 옮긴다
 /contracts/deployed.json
+/contracts/deployed-core.json
 /contracts/package-lock.json

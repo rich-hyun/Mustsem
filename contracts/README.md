@@ -14,6 +14,22 @@ API 카탈로그 확장분(33종 → 50종)의 온체인 부분입니다. 사이
 
 `src/mocks/`는 테스트 전용이며 배포하지 않습니다.
 
+### 기본 컨트랙트 (`src/core/`)
+
+사이트의 NFT·SBT·RWA 발행 도구와 스테이킹 화면이 쓰는 컨트랙트입니다. Mustsem 메인넷에는 이 컨트랙트들이 없어서(2026-11-10 확인)
+원래 소스 없이 사이트가 호출하는 함수 규격(`src/config/contracts.ts`의 ABI)에 맞춰 새로 작성했습니다. 테스트가 그 규격과의 일치를 확인합니다.
+
+| 컨트랙트 | 역할 |
+| --- | --- |
+| `NFTVault.sol` | NFT 발행(누구나), 이름표·메타데이터 조회. 일반 ERC-721 |
+| `SBTVault.sol` | SBT 발급. `unlockTime` 0이면 영구 귀속, 가디언만 폐기 가능 |
+| `RWAToken.sol` | RWA 발행. `tokenURI`는 발행 때 넣은 CID 그대로 |
+| `WrappedMST.sol` | wMST. MST를 1:1로 감싼 ERC-20(WETH 방식), 관리자 없음 |
+| `MSTStaking.sol` | wMST 예치, 연 2% 단리의 MST 보상, 수령 간격 7일. 원금(wMST)과 보상 재원(MST)을 분리 |
+
+배포: `node scripts/deploy-core-interactive.cjs` (개인키를 화면에 보이지 않게 입력받고 확인 뒤 배포, 주소는 `deployed-core.json`).
+스테이킹 보상은 관리자가 스테이킹 컨트랙트 주소로 MST를 보내 재원을 채워야 지급됩니다. 재원이 비어 있어도 원금 인출은 됩니다.
+
 ## 현재 상태
 
 - 컴파일(solc 0.8.24, optimizer 200, evmVersion london)과 테스트 통과.
@@ -35,7 +51,7 @@ API 카탈로그 확장분(33종 → 50종)의 온체인 부분입니다. 사이
 ```bash
 cd contracts
 npm install        # hardhat, ethers (이 하위 프로젝트 전용. 사이트의 package.json은 바꾸지 않는다)
-npm test           # Hardhat 내장 체인에서 24개 항목, 끝나면 artifacts/*.json을 다시 쓴다
+npm test           # Hardhat 내장 체인에서 확장 24개 + 기본 15개 항목, 끝나면 artifacts/*.json을 다시 쓴다
 ```
 
 테스트가 확인하는 것: 권한(관리자·리포터·운영자·탐지기·컨트롤러), 중복·역순·만료 처리, 서명 정족수와 재사용 방지,

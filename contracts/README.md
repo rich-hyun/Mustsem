@@ -39,6 +39,19 @@ RPC_URL=https://block.mustree.kr PRIVATE_KEY=0x... DRY_RUN=1 node scripts/deploy
 RPC_URL=https://block.mustree.kr PRIVATE_KEY=0x... node scripts/deploy.cjs
 ```
 
+위는 bash(Git Bash, macOS, Linux) 문법입니다. Windows PowerShell에서는 환경변수를 먼저 정한 뒤 실행합니다.
+
+```powershell
+cd contracts
+$env:RPC_URL = "https://block.mustree.kr"
+# 개인키를 화면과 명령 기록에 남기지 않고 입력받는다
+$secure = Read-Host "PRIVATE_KEY" -AsSecureString
+$env:PRIVATE_KEY = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
+$env:DRY_RUN = "1"; node scripts/deploy.cjs        # 계획만 확인
+Remove-Item Env:DRY_RUN; node scripts/deploy.cjs   # 실제 배포
+Remove-Item Env:PRIVATE_KEY                        # 끝나면 지운다
+```
+
 - 개인키는 환경변수로만 넘기고 저장소·문서에 남기지 않습니다. `OWNER`를 주면 관리자 권한은 그 주소(멀티시그 권장)로 갑니다.
 - `RELAYERS`(쉼표 구분 주소)를 줄 때만 `BridgeGateway`를 배포합니다. 정족수 기본값은 과반입니다.
 - 출력된 주소를 `src/config/contracts.ts`의 `PRICE_ORACLE_CONTRACTS` 등 해당 네트워크 칸에 넣고 사이트를 다시 배포합니다.

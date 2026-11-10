@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, useCallback, useEffect, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode, type SubmitEvent } from 'react'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -45,6 +45,16 @@ const ERROR_TEXT: Record<string, string> = {
   busy: '다른 질문을 처리하고 있습니다. 잠시 후 다시 시도하세요.',
 }
 const UNAVAILABLE = '에이전트가 응답하지 않습니다. 잠시 후 다시 시도하세요.'
+const NOT_FOUND = '답변을 찾지 못했습니다. 다시 질문해 주세요.'
+const FAILED = '답변을 만들지 못했습니다. 다시 질문해 주세요.'
+const TOO_LONG = '답변이 5분 안에 오지 않았습니다. 잠시 후 다시 질문해 주세요.'
+
+/** 질문을 맡긴 뒤 이 간격으로 결과를 조회한다 */
+const POLL_MS = 2000
+/** 이만큼 지나도 끝나지 않으면 조회를 멈춘다 */
+const POLL_LIMIT_MS = 5 * 60_000
+/** 조회가 이 횟수만큼 잇달아 실패하면(네트워크·게이트웨이 순간 장애) 멈춘다 */
+const POLL_RETRIES = 3
 
 interface Exchange {
   id: number
@@ -53,6 +63,20 @@ interface Exchange {
   tools: string[]
   elapsed: number | null
 }
+
+/** GET /api/agent?job= 응답 */
+interface JobBody {
+  status?: 'running' | 'done' | 'failed'
+  answer?: string
+  tools?: string[]
+  elapsed?: number | null
+  remaining?: number | null
+  error?: string
+}
+
+type JobOutcome = { ok: true; body: JobBody } | { ok: false; error: string }
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 interface AgentInfo {
   mode: Mode
@@ -178,12 +202,57 @@ export function AgentChat() {
   const [history, setHistory] = useState<Exchange[]>([])
   const [error, setError] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
+  /** 맡긴 질문이 게이트웨이에서 돈 시간(초). 첫 조회 전에는 null */
+  const [progress, setProgress] = useState<number | null>(null)
+  // 화면을 떠나면 조회를 멈춘다
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
 
   const accessToken = useCallback(async () => {
     const client = await getClient()
     const { data } = await client.auth.getSession()
     return data.session?.access_token ?? null
   }, [getClient])
+
+  /** 맡긴 질문을 POLL_MS 마다 조회해 done 결과를 돌려준다. 화면을 떠나면 null */
+  const waitForAnswer = useCallback(
+    async (job: string, started: number): Promise<JobOutcome | null> => {
+      let failures = 0
+      while (mounted.current) {
+        if (Date.now() - started > POLL_LIMIT_MS) return { ok: false, error: TOO_LONG }
+        await wait(POLL_MS)
+        if (!mounted.current) return null
+        try {
+          // 5분 사이 토큰이 갱신될 수 있어 조회마다 새로 받는다
+          const token = await accessToken()
+          if (!token) return { ok: false, error: ERROR_TEXT.unauthenticated ?? UNAVAILABLE }
+          const response = await fetch(`/api/agent?job=${encodeURIComponent(job)}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          })
+          const body = (await response.json().catch(() => ({}))) as JobBody
+          if (response.status === 404) return { ok: false, error: NOT_FOUND }
+          if (response.status === 401) return { ok: false, error: ERROR_TEXT.unauthenticated ?? UNAVAILABLE }
+          if (!response.ok) throw new Error(`agent job status ${response.status}`)
+          failures = 0
+          if (body.status === 'done') return { ok: true, body }
+          if (body.status === 'failed') return { ok: false, error: FAILED }
+          if (typeof body.elapsed === 'number' && mounted.current) setProgress(body.elapsed)
+        } catch (caught) {
+          logDevError('agent:poll', caught)
+          failures += 1
+          if (failures >= POLL_RETRIES) return { ok: false, error: UNAVAILABLE }
+        }
+      }
+      return null
+    },
+    [accessToken],
+  )
 
   // 로그인하면 이 계정이 내부용인지 공개용인지 먼저 받아 둔다 (예시 질문·안내가 달라진다)
   useEffect(() => {
@@ -242,6 +311,7 @@ export function AgentChat() {
       return
     }
     setAsking(true)
+    setProgress(null)
     setError(null)
     try {
       const token = await accessToken()
@@ -249,20 +319,37 @@ export function AgentChat() {
         setError(ERROR_TEXT.unauthenticated ?? UNAVAILABLE)
         return
       }
+      // 답은 30초를 넘기기도 해서 질문을 맡기고(번호를 받고) 끝날 때까지 조회한다
+      const started = Date.now()
       const response = await fetch('/api/agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ question: trimmed }),
       })
-      const body = (await response.json().catch(() => ({}))) as Partial<Exchange> & { error?: string; remaining?: number | null }
-      if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { job?: string; remaining?: number | null; error?: string }
+      if (!response.ok || typeof body.job !== 'string') {
         if (body.error === 'limit') setRemaining(0)
         setError((body.error && ERROR_TEXT[body.error]) || UNAVAILABLE)
         return
       }
       if (typeof body.remaining === 'number') setRemaining(body.remaining)
+
+      const outcome = await waitForAnswer(body.job, started)
+      if (!outcome || !mounted.current) return
+      if (!outcome.ok) {
+        setError(outcome.error)
+        return
+      }
+      const done = outcome.body
+      if (typeof done.remaining === 'number') setRemaining(done.remaining)
       setHistory((current) => [
-        { id: Date.now(), question: trimmed, answer: body.answer ?? '', tools: body.tools ?? [], elapsed: body.elapsed ?? null },
+        {
+          id: Date.now(),
+          question: trimmed,
+          answer: done.answer ?? '',
+          tools: Array.isArray(done.tools) ? done.tools : [],
+          elapsed: typeof done.elapsed === 'number' ? done.elapsed : null,
+        },
         ...current,
       ])
       setQuestion('')
@@ -270,7 +357,10 @@ export function AgentChat() {
       logDevError('agent:ask', caught)
       setError(UNAVAILABLE)
     } finally {
-      setAsking(false)
+      if (mounted.current) {
+        setAsking(false)
+        setProgress(null)
+      }
     }
   }
 
@@ -330,7 +420,7 @@ export function AgentChat() {
           <div className={styles.actions}>
             {quota && <p className={styles.quota}>{quota}</p>}
             <Button type="submit" loading={asking} disabled={!question.trim() || outOfQuota}>
-              {asking ? '답변을 만드는 중' : '질문하기'}
+              {asking ? `답변 작성 중…${progress !== null ? ` (${Math.round(progress)}초)` : ''}` : '질문하기'}
             </Button>
           </div>
         </form>

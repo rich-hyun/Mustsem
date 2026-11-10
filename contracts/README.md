@@ -16,9 +16,19 @@ API 카탈로그 확장분(33종 → 50종)의 온체인 부분입니다. 사이
 
 ## 현재 상태
 
-- 컴파일(solc 0.8.24, optimizer 200, evmVersion london)과 테스트 통과. **어느 네트워크에도 아직 배포하지 않았습니다.**
-- 외부 보안 감사는 받지 않았습니다. 실제 자산을 다루는 `BridgeGateway`와 `RWAVault`는 운영 배포 전에 감사를 권합니다.
-- 배포 주소가 `src/config/contracts.ts`에 들어가기 전까지 사이트의 해당 조회 API는 `contract_not_deployed`로 응답합니다.
+- 컴파일(solc 0.8.24, optimizer 200, evmVersion london)과 테스트 통과.
+- **Mustsem 메인넷(체인 ID 7601)에 2026-11-10 배포** (배포·관리자 지갑 `0x299e421dEC65933Ed64E38ce16F536FE2271a2Ac`, 체인의 코드가 컴파일 결과와 일치함을 확인):
+
+  | 컨트랙트 | 주소 |
+  | --- | --- |
+  | `PriceOracle` | `0x3e8414D7A1768C7809b10B081F7C919e4310B989` |
+  | `DIDRegistry` | `0xD4F7885cf9A4b626f35f53548684e08B8297F92E` |
+  | `ComplianceGuard` | `0x64F55D6369AF3b2741CBb3F37F5a3D39A91cB068` (자동 동결 80점, 블랙리스트 95점) |
+  | `CompositeExecutor` | `0x283F614D2cB22586B1eb772D45b597663DA85e28` |
+
+  배포 직후 상태라 오라클 피드, 리포터, 탐지기, 운영자, 허용 대상은 아직 설정하지 않았습니다(아래 "배포 뒤 설정").
+- `BridgeGateway`와 `RWAVault`는 배포하지 않았습니다. 실제 자산을 다루므로 외부 보안 감사 뒤에 배포하길 권합니다. 배포한 4종도 외부 감사는 받지 않았습니다.
+- 주소가 `src/config/contracts.ts`에 없는 컨트랙트의 조회 API는 `contract_not_deployed`로 응답합니다.
 
 ## 테스트
 

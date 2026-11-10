@@ -123,10 +123,11 @@ public/
   카탈로그 화면의 "호출해 보기"로 바로 확인할 수 있다. 환경변수와 서명 키가 필요 없다(읽기 전용).
   발행·전송 같은 쓰기 API는 이 서버에서 실행하지 않는다(명세만 제공).
 - **확장 컨트랙트** (`contracts/`): `PriceOracle`, `DIDRegistry`, `BridgeGateway`, `RWAVault`, `CompositeExecutor`, `ComplianceGuard`.
-  컴파일과 테스트는 끝났고 **아직 배포하지 않았다.** 배포 주소를 `src/config/contracts.ts`의 `*_CONTRACTS`에 넣기 전까지
-  해당 조회 API는 `contract_not_deployed`로 응답하고, 오라클 가격은 외부 시세(참고용)임을 응답에 밝힌다. 배포 방법은 `contracts/README.md`.
+  `PriceOracle`, `DIDRegistry`, `ComplianceGuard`, `CompositeExecutor`는 Mustsem 메인넷에 배포했다(주소는 `contracts/README.md`, `src/config/contracts.ts`).
+  `BridgeGateway`, `RWAVault`는 보안 감사 전이라 배포하지 않았고, 해당 조회 API는 `contract_not_deployed`로 응답한다.
+  오라클은 피드가 온체인에 기록되기 전까지 외부 시세(참고용)임을 응답에 밝힌다.
 - **이상거래 탐지** (`/network#anomaly`): 기본 화면은 Mustsem 메인넷의 실제 거래(코인 전송, 토큰 Transfer 이벤트)에 탐지 규칙을 적용한 결과다.
-  지갑 동결·블랙리스트는 권고로만 표시한다. 온체인 자동 대응은 `ComplianceGuard` 배포와 탐지 서버 지갑 권한이 있어야 한다.
+  지갑 동결·블랙리스트는 권고로만 표시한다. 온체인 자동 대응은 배포된 `ComplianceGuard`에 탐지 서버 지갑을 탐지기로 등록해야 동작한다(아직 미등록).
 
 ## 디자인·코드 규칙
 

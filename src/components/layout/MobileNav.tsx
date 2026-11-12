@@ -4,7 +4,7 @@ import { XIcon } from '@phosphor-icons/react/ssr'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef } from 'react'
-import { DEVELOPER_LINKS, PRODUCT_GROUPS, isActivePath, type NavLink } from '@/config/navigation'
+import { DEVELOPER_LINKS, PRODUCT_GROUPS, externalLinkProps, isActivePath, type NavLink } from '@/config/navigation'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { Button } from '@/components/ui/Button'
 import { LogoMark } from './Logo'
@@ -44,7 +44,13 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
         const current = isActivePath(pathname, link.href)
         return (
           <li key={link.href}>
-            <Link href={link.href} className={styles.link} aria-current={current ? 'page' : undefined} onClick={onClose}>
+            <Link
+              href={link.href}
+              className={styles.link}
+              aria-current={current ? 'page' : undefined}
+              onClick={onClose}
+              {...externalLinkProps(link.href)}
+            >
               {link.icon && (
                 <span className={styles.icon}>
                   <NavIcon icon={link.icon} size={18} />

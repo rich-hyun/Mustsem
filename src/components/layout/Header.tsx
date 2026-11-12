@@ -13,7 +13,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react'
-import { DEVELOPER_LINKS, PRODUCT_GROUPS, isActivePath, type NavLink } from '@/config/navigation'
+import { DEVELOPER_LINKS, PRODUCT_GROUPS, externalLinkProps, isActivePath, type NavLink } from '@/config/navigation'
 import { cx } from '@/lib/cx'
 import { AccountMenu } from './AccountMenu'
 import { LogoMark } from './Logo'
@@ -288,7 +288,13 @@ function MenuLinks({ links, pathname, onNavigate }: { links: NavLink[]; pathname
         const current = isActivePath(pathname, link.href)
         return (
           <li key={link.href}>
-            <Link href={link.href} className={styles.menuLink} aria-current={current ? 'page' : undefined} onClick={onNavigate}>
+            <Link
+              href={link.href}
+              className={styles.menuLink}
+              aria-current={current ? 'page' : undefined}
+              onClick={onNavigate}
+              {...externalLinkProps(link.href)}
+            >
               <span className={styles.menuIcon}>
                 <NavIcon icon={link.icon} size={18} />
               </span>

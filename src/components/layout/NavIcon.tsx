@@ -7,6 +7,7 @@ import {
   GaugeIcon,
   GraphIcon,
   ImageSquareIcon,
+  MagnifyingGlassIcon,
   RobotIcon,
   SealCheckIcon,
   ShieldCheckIcon,
@@ -28,6 +29,7 @@ const ICONS = {
   catalog: BracketsCurlyIcon,
   guide: BookOpenTextIcon,
   dashboard: GaugeIcon,
+  explorer: MagnifyingGlassIcon,
 } satisfies Record<NavIconKey, unknown>
 
 export function NavIcon({ icon, ...props }: { icon: NavIconKey } & IconProps) {

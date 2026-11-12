@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FOOTER_GROUPS } from '@/config/navigation'
+import { FOOTER_GROUPS, externalLinkProps } from '@/config/navigation'
 import { SITE } from '@/config/site'
 import { CurrentYear } from './CurrentYear'
 import { LogoMark } from './Logo'
@@ -24,7 +24,9 @@ export function Footer() {
                 <ul role="list" className={styles.links}>
                   {group.links.map((link) => (
                     <li key={link.href}>
-                      <Link href={link.href}>{link.label}</Link>
+                      <Link href={link.href} {...externalLinkProps(link.href)}>
+                        {link.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>

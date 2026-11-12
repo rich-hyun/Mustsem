@@ -16,6 +16,7 @@ export type NavIconKey =
   | 'catalog'
   | 'guide'
   | 'dashboard'
+  | 'explorer'
 
 export interface NavLink {
   href: string
@@ -48,6 +49,7 @@ export const PRODUCT_GROUPS: NavGroup[] = [
       { href: '/agent', label: 'Biz-Ops 에이전트', description: '지원사업 준비와 운영 질의응답 AI', icon: 'agent' },
       { href: '/bridge', label: '브릿지', description: '네트워크 간 자산 이동과 래핑', icon: 'bridge' },
       { href: '/staking', label: '스테이킹', description: 'wMST 예치와 MST 보상', icon: 'staking' },
+      { href: 'https://mustsem-explorer.mustree.kr/', label: '익스플로러', description: '블록과 거래, 주소 조회', icon: 'explorer' },
     ],
   },
   {
@@ -90,6 +92,15 @@ export const FOOTER_GROUPS: { title: string; links: { href: string; label: strin
  * /developers와 /developers/guide처럼 형제 메뉴가 있으므로 하위 경로는 활성으로 보지 않는다.
  * 페이지 안 구획(#)을 가리키는 링크는 활성으로 보지 않는다 (같은 페이지의 메뉴 둘이 함께 켜지지 않게).
  */
+export function isExternalHref(href: string): boolean {
+  return /^https?:\/\//.test(href)
+}
+
+/** 외부 사이트 링크는 새 탭으로 연다 */
+export function externalLinkProps(href: string) {
+  return isExternalHref(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+}
+
 export function isActivePath(pathname: string, href: string): boolean {
   if (href.includes('#')) return false
   const normalize = (value: string) => (value.length > 1 ? value.replace(/\/+$/, '') : value)
